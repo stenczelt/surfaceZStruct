@@ -1,7 +1,7 @@
 // Mina Jafari
 // 12-04-2015
 
-// atom assignment
+// atom assignment: first layer
 //
 //  ---(N-1)-----(N)
 //       |        |
