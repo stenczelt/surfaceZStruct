@@ -4,6 +4,10 @@
 #include "fcc100.h"
 #include "fcc110.h"
 #include "fcc111.h"
+#include "bcc100.h"
+#include "bcc110.h"
+#include "bcc111.h"
+#include "hcp0001.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -14,7 +18,11 @@ static struct option long_options[] =
 {
     {"fcc100", required_argument, nullptr, 'a'},
     {"fcc110", required_argument, nullptr, 'b'},
-    {"fcc111", required_argument, nullptr, 'c'}, // TODO short arguments
+    {"fcc111", required_argument, nullptr, 'c'},
+    {"bcc100", required_argument, nullptr, 'd'},
+    {"bcc110", required_argument, nullptr, 'e'},
+    {"bcc111", required_argument, nullptr, 'f'},
+    {"hcp0001", required_argument, nullptr, 'g'},
     {"help", no_argument, nullptr, 'h'},
     {nullptr, 0, nullptr, 0} // what is this??
 };
@@ -72,6 +80,74 @@ int main(int argc, char* argv[])
             case 'c': // fcc111
                 {
                     fcc111 aSlab;
+                    std::ifstream inFile (optarg);
+                    std::string newLine;
+                    while (std::getline(inFile, newLine))
+                    {
+                        xyzFile.push_back(newLine);
+                    }
+                    aSlab.setAtoms(xyzFile);
+                    aSlab.findAtop();
+                    aSlab.findBridge();
+                    aSlab.findFcc();
+                    aSlab.findHcp();
+                    break;
+                }
+
+            case 'd': // bcc100
+                {
+                    bcc100 aSlab;
+                    std::ifstream inFile (optarg);
+                    std::string newLine;
+                    while (std::getline(inFile, newLine))
+                    {
+                        xyzFile.push_back(newLine);
+                    }
+                    aSlab.setAtoms(xyzFile);
+                    aSlab.findHollow();
+                    aSlab.findAtop();
+                    aSlab.findBridge();
+                    break;
+                }
+
+            case 'e': // bcc110
+                {
+                    bcc110 aSlab;
+                    std::ifstream inFile (optarg);
+                    std::string newLine;
+                    while (std::getline(inFile, newLine))
+                    {
+                        xyzFile.push_back(newLine);
+                    }
+                    aSlab.setAtoms(xyzFile);
+                    aSlab.findHollow();
+                    aSlab.findAtop();
+                    aSlab.findLongBridge();
+                    aSlab.findShortBridge();
+                    break;
+                }
+
+            case 'f': // bcc111
+                {
+                    bcc111 aSlab;
+                    std::ifstream inFile (optarg);
+                    std::string newLine;
+                    while (std::getline(inFile, newLine))
+                    {
+                        xyzFile.push_back(newLine);
+                    }
+                    aSlab.setAtoms(xyzFile);
+                    aSlab.findAtop();
+                    aSlab.findFcc();
+                    aSlab.findHcp();
+//                    aSlab.findLongBridge();
+//                    aSlab.findShortBridge();
+                    break;
+                }
+
+            case 'g': // hcp0001
+                {
+                    hcp0001 aSlab;
                     std::ifstream inFile (optarg);
                     std::string newLine;
                     while (std::getline(inFile, newLine))

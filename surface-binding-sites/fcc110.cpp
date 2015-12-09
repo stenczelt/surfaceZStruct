@@ -34,7 +34,7 @@ bool fcc110::setAtoms(const std::vector<std::string> &xyzFile)
 
     mDistance = mDeltaX / std::sqrt(2);
 
-    // setting mStarAtom
+    // setting mStarAtom & mStarMinusOneAtom
     // n-1 to n vector intersects w/ Y axis
     if (std::abs(mDeltaX) > std::abs(mDeltaY))
     {   
@@ -46,13 +46,7 @@ bool fcc110::setAtoms(const std::vector<std::string> &xyzFile)
             std::cout << "ERROR: setting StarAtom failed\n";
             isSet = false;
         }
-    }
-    else { std::cout << "ERROR: not ASE generated input file"; }
-
-    // setting mStarMinusOneAtom
-    // n-1 to n vector intersects w/ Y axis
-    if (std::abs(mDeltaX) > std::abs(mDeltaY))
-    {   
+    
         mStarMinusOneAtom[0] = mNthMinusOneAtom[0]; // x component
         mStarMinusOneAtom[1] = mNthMinusOneAtom[1] - mDistance; // y component
         mStarMinusOneAtom[2] = mNthMinusOneAtom[2]; // z component
@@ -70,28 +64,20 @@ bool fcc110::setAtoms(const std::vector<std::string> &xyzFile)
 bool fcc110::isFound(const double &inX, const double &inY, const double &inZ) // check if the calculated (N-1)* exists
 {
     const double tolerance = 0.15;
-//    bool isFound = false;
-//    bool keepLooping = true;
-//    while (keepLooping)
-//    {
-        for (int j=(mVector.size()-1); j>1; j--)
+    for (int j=(mVector.size()-1); j>1; j--)
+    {
+        double temp [3];
+        std::string unwanted;
+        std::istringstream iss(mVector[j]);
+        iss >> unwanted >> temp[0] >> temp[1] >> temp[2] >> unwanted;
+        if (  ((temp[0] <= (inX + tolerance)) && (temp[0] >= (inX - tolerance)) ) &&
+                ((temp[1] <= (inY + tolerance)) && (temp[1] >= (inY - tolerance)) ) &&   
+                ((temp[2] <= (inZ + tolerance)) && (temp[2] >= (inZ - tolerance)) )  )   
         {
-            double temp [3];
-            std::string unwanted;
-            std::istringstream iss(mVector[j]);
-            iss >> unwanted >> temp[0] >> temp[1] >> temp[2] >> unwanted;
-            if (  ((temp[0] <= (inX + tolerance)) && (temp[0] >= (inX - tolerance)) ) &&
-                  ((temp[1] <= (inY + tolerance)) && (temp[1] >= (inY - tolerance)) ) &&   
-                  ((temp[2] <= (inZ + tolerance)) && (temp[2] >= (inZ - tolerance)) )  )   
-            {
-//                keepLooping = false;
-//                isFound = true;
-                return (true);
-            }
+            return (true);
         }
-        return (false);
-//    }
-//    return (isFound);
+    }
+    return (false);
 }
 
 void fcc110::findHollow()
@@ -107,7 +93,6 @@ void fcc110::findHollow()
 
     std::ofstream ofs;
     ofs.open ("fcc110-hollow.xyz", std::ofstream::out);
-
     ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
     ofs << "\n";
     for (auto i = mVector.begin()+2; i != mVector.end(); ++i)

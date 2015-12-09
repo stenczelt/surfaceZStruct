@@ -1,7 +1,7 @@
 // Mina Jafari
-// 12-03-2015
+// 12-08-2015
 
-#include "fcc100.h"
+#include "bcc100.h"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -12,9 +12,9 @@
 #include <cmath>
 #include <iomanip>
 
-double fcc100::m_DELTA_Z = 2.5;
+double bcc100::m_DELTA_Z = 2.5;
 
-bool fcc100::setAtoms(const std::vector<std::string> &xyzFile)
+bool bcc100::setAtoms(const std::vector<std::string> &xyzFile)
 {
     bool isSet = false;
     mVector = xyzFile;
@@ -46,10 +46,10 @@ bool fcc100::setAtoms(const std::vector<std::string> &xyzFile)
     return (isSet);
 }
 
-void fcc100::findHollow()
+void bcc100::findHollow()
 {
-    double hollowX = mNthAtom[0] - ( std::abs(mStarAtom[0] - mNthMinusOneAtom[0]) / 2 );
-    double hollowY = mNthAtom[1] - ( std::abs(mStarAtom[1] - mNthMinusOneAtom[1]) / 2 );
+    double hollowX = mNthAtom[0] - (mDeltaX/2);
+    double hollowY = mNthAtom[1] - (mDeltaX/2);
     double hollowZ = mNthAtom[2] + m_DELTA_Z;
 
     std::string val1 = std::to_string(hollowX);
@@ -58,7 +58,7 @@ void fcc100::findHollow()
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;
-    ofs.open ("fcc100-hollow.xyz", std::ofstream::out);
+    ofs.open ("bcc100-hollow.xyz", std::ofstream::out);
 
     ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
     ofs << "\n";
@@ -70,7 +70,7 @@ void fcc100::findHollow()
     ofs.close();
 }  //findHollow
 
-void fcc100::findAtop()
+void bcc100::findAtop()
 {
     std::string val1 = std::to_string(mStarMinusOneAtom[0]);
     std::string val2 = std::to_string(mStarMinusOneAtom[1]);
@@ -79,7 +79,7 @@ void fcc100::findAtop()
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;
-    ofs.open ("fcc100-atop.xyz", std::ofstream::out);
+    ofs.open ("bcc100-atop.xyz", std::ofstream::out);
     ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
     ofs << "\n";
     for (auto i = mVector.begin()+2; i != mVector.end(); ++i)
@@ -90,10 +90,11 @@ void fcc100::findAtop()
     ofs.close();
 } //findAtop
 
-void fcc100::findBridge()
+void bcc100::findBridge()
 {
     double brgX = mNthMinusOneAtom[0];
-    double brgY = mNthMinusOneAtom[1] - ( std::abs(mStarMinusOneAtom[1] - mNthMinusOneAtom[1]) / 2 );
+//    double brgY = mNthMinusOneAtom[1] - ( std::abs(mStarMinusOneAtom[1] - mNthMinusOneAtom[1]) / 2 );
+    double brgY = mNthMinusOneAtom[1] - (mDeltaX/2);
     double brgZ = mNthAtom[2] + m_DELTA_Z;
 
     std::string val1 = std::to_string(brgX);
@@ -103,7 +104,7 @@ void fcc100::findBridge()
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;
-    ofs.open ("fcc100-brg.xyz", std::ofstream::out);
+    ofs.open ("bcc100-brg.xyz", std::ofstream::out);
     ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
     ofs << "\n";
     for (auto i = mVector.begin()+2; i != mVector.end(); ++i)

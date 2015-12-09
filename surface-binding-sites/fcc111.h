@@ -32,7 +32,6 @@ class fcc111
     public:
         bool setAtoms(const std::vector<std::string> &xyzFile);
         bool isFound(const double &inX, const double &inY, const double &inZ);
-//        bool setZ();
         void findAtop();
         void findBridge();
         void findFcc();

@@ -1,7 +1,7 @@
 // Mina Jafari
 // 12-08-2015
 
-#include "fcc111.h"
+#include "hcp0001.h"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -13,9 +13,9 @@
 #include <iomanip>
 #include <cmath>
 
-double fcc111::m_DELTA_Z = 2.5;
+double hcp0001::m_DELTA_Z = 2.5;
 
-bool fcc111::setAtoms(const std::vector<std::string> &xyzFile)
+bool hcp0001::setAtoms(const std::vector<std::string> &xyzFile)
 {
     bool isSet = true;
     mVector = xyzFile;
@@ -55,7 +55,7 @@ bool fcc111::setAtoms(const std::vector<std::string> &xyzFile)
             isSet = false;
         }
     }
-    else { std::cout << "ERROR: not ASE generated input file"; }
+    else { std::cout << "ERROR: not an ASE generated input file"; }
 
     const double tolerance = 0.20;
     for (int j=(mVector.size()-1); j>1; j--)
@@ -86,7 +86,7 @@ bool fcc111::setAtoms(const std::vector<std::string> &xyzFile)
     return (isSet);
 }
 
-bool fcc111::isFound(const double &inX, const double &inY, const double &inZ) // check if the calculated * atoms exist
+bool hcp0001::isFound(const double &inX, const double &inY, const double &inZ) // check if the calculated * atoms exist
 {
     const double tolerance = 0.15;
     for (int j=(mVector.size()-1); j>1; j--)
@@ -105,16 +105,15 @@ bool fcc111::isFound(const double &inX, const double &inY, const double &inZ) //
     return (false);
 }
 
-void fcc111::findAtop()
+void hcp0001::findAtop()
 {
     std::string val1 = std::to_string(mStarMinusOneAtom[0]);
     std::string val2 = std::to_string(mStarMinusOneAtom[1]);
     std::string val3 = std::to_string(mStarMinusOneAtom[2] + m_DELTA_Z);
-
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;
-    ofs.open ("fcc111-atop.xyz", std::ofstream::out);
+    ofs.open ("hcp0001-atop.xyz", std::ofstream::out);
     ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
     ofs << "\n";
     for (auto i = mVector.begin()+2; i != mVector.end(); ++i)
@@ -125,7 +124,7 @@ void fcc111::findAtop()
     ofs.close();
 } //findAtop
 
-void fcc111::findBridge()
+void hcp0001::findBridge()
 {
     double brgX = mStarAtom[0] - std::abs((mStarAtom[0] - mNthMinusOneAtom[0])/2);
     double brgY = mNthMinusOneAtom[1] - std::abs((mNthMinusOneAtom[1] - mStarAtom[1])/2);
@@ -134,11 +133,10 @@ void fcc111::findBridge()
     std::string val1 = std::to_string(brgX);
     std::string val2 = std::to_string(brgY);
     std::string val3 = std::to_string(brgZ);
-
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;
-    ofs.open ("fcc111-brg.xyz", std::ofstream::out);
+    ofs.open ("hcp0001-brg.xyz", std::ofstream::out);
     ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
     ofs << "\n";
     for (auto i = mVector.begin()+2; i != mVector.end(); ++i)
@@ -149,7 +147,7 @@ void fcc111::findBridge()
     ofs.close();
 } //findBridge
 
-void fcc111::findFcc()
+void hcp0001::findFcc()
 {
     double fccX = mNthAtom[0] - (mDeltaX/2);
     double fccY = mNthAtom[1] - (mDistance/3); // equilateral triangle
@@ -160,11 +158,10 @@ void fcc111::findFcc()
         std::string val1 = std::to_string(fccX);
         std::string val2 = std::to_string(fccY);
         std::string val3 = std::to_string(fccZ);
-
         std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
         std::ofstream ofs;
-        ofs.open ("fcc111-fcc.xyz", std::ofstream::out);
+        ofs.open ("hcp0001-fcc.xyz", std::ofstream::out);
         ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
         ofs << "\n";
         for (auto i = mVector.begin()+2; i != mVector.end(); ++i)
@@ -181,7 +178,7 @@ void fcc111::findFcc()
     }
 } //findFcc
 
-void fcc111::findHcp()
+void hcp0001::findHcp()
 {
     double hcpX = mStarAtom[0] - (mDeltaX/2);
     double hcpY = mNthMinusOneAtom[1] - (2*mDistance/3); // equilateral triangle, third layer
@@ -192,11 +189,10 @@ void fcc111::findHcp()
         std::string val1 = std::to_string(hcpX);
         std::string val2 = std::to_string(hcpY);
         std::string val3 = std::to_string(hcpZ);
-
         std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
         std::ofstream ofs;
-        ofs.open ("fcc111-hcp.xyz", std::ofstream::out);
+        ofs.open ("hcp0001-hcp.xyz", std::ofstream::out);
         ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
         ofs << "\n";
         for (auto i = mVector.begin()+2; i != mVector.end(); ++i)
@@ -211,11 +207,10 @@ void fcc111::findHcp()
         std::string val1 = std::to_string(hcpX);
         std::string val2 = std::to_string(hcpY);
         std::string val3 = std::to_string(hcpZ);
-
         std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
         std::ofstream ofs;
-        ofs.open ("fcc111-hcp.xyz", std::ofstream::out);
+        ofs.open ("hcp0001-hcp.xyz", std::ofstream::out);
         ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
         ofs << "\n";
         for (auto i = mVector.begin()+2; i != mVector.end(); ++i)

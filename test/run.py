@@ -5,11 +5,11 @@ from ase import Atoms
 from ase.calculators.vasp import Vasp
 from ase.constraints import FixAtoms
 from ase.optimize import QuasiNewton
-from ase.lattice.surface import fcc111,add_adsorbate, fcc110
+from ase.lattice.surface import fcc111,add_adsorbate, fcc110, bcc100, bcc110, hcp0001, bcc111
 from ase.io import write
 
 
-slab = fcc111('Au', size=(3,2,2), vacuum=10)
+slab = bcc111('W', size=(3,3,4), vacuum=10)
 #add_adsorbate(slab, 'Au', 2.5, 'fcc')
 
 #mask = [atom.tag > 2 for atom in slab]
@@ -20,4 +20,4 @@ slab = fcc111('Au', size=(3,2,2), vacuum=10)
 #dyn = QuasiNewton(slab, trajectory='PtAu-fcc.traj')
 #dyn.run(fmax=0.05)
 
-write('test-fcc111-2.xyz', slab)
+write('test-bcc111-2.xyz', slab)

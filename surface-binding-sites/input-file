@@ -1,0 +1,11 @@
+# surface site search input file
+
+# Atomic coordinates
+
+
+# parameters
+surface-type    fcc100
+binding-sites   atop,hollow
+new-atoms       H, O
+deltaZ          2.5
+separation      2
