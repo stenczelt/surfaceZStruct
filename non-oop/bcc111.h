@@ -9,12 +9,12 @@
 //  -(N-1)*----(N)*
 //    /        /
 
-#ifndef _BCC110_H_
-#define _BCC110_H_
+#ifndef _BCC111_H_
+#define _BCC111_H_
 #include <vector>
 #include <string>
 
-class bcc110
+class bcc111
 {
     private:
         static double m_DELTA_Z;
@@ -26,15 +26,16 @@ class bcc110
         double mDeltaX;
         double mDeltaY;
         double mDistance;
-//        double mSecLayerZ = 0.0;
-//        double mThirLayerZ = 0.0;
+        double mSecLayerZ = 0.0;
+        double mThirLayerZ = 0.0;
 
     public:
         bool setAtoms(const std::vector<std::string> &xyzFile);
         bool isFound(const double &inX, const double &inY, const double &inZ);
-        void findHollow(const unsigned int offsetX, const unsigned int offsetY);
-        void findAtop(const unsigned int offsetX, const unsigned int offsetY);
-        void findLongBridge(const unsigned int offsetX, const unsigned int offsetY);
-        void findShortBridge(const unsigned int offsetX, const unsigned int offsetY);
+        void findAtop();
+        void findShallowBridge();
+        void findDeepBridge();
+        void findFcc();
+        void findHcp();
 };
 #endif

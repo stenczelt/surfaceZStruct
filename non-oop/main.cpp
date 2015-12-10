@@ -1,12 +1,14 @@
 // Mina Jafari
 // 12-07-2015
 
-#include "Termination100.h"
-#include "Termination111.h"
+#include "fcc100.h"
 #include "fcc110.h"
+#include "fcc111.h"
+#include "bcc100.h"
 #include "bcc110.h"
 #include "bcc111.h"
-//#include "diamond100.h"
+#include "hcp0001.h"
+#include "diamond100.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -22,7 +24,7 @@ static struct option long_options[] =
     {"bcc110", required_argument, nullptr, 'e'},
     {"bcc111", required_argument, nullptr, 'f'},
     {"hcp0001", required_argument, nullptr, 'g'},
-//    {"diamond100", required_argument, nullptr, 'i'},
+    {"diamond100", required_argument, nullptr, 'i'},
     {"help", no_argument, nullptr, 'h'},
     {nullptr, 0, nullptr, 0} // what is this??
 };
@@ -45,9 +47,8 @@ int main(int argc, char* argv[])
         switch (c)
         {
             case 'a': // fcc100
-            case 'd': // bcc100
                 {
-                    Termination100 aSlab;
+                    fcc100 aSlab;
                     std::ifstream inFile (optarg);
                     std::string newLine;
                     while (std::getline(inFile, newLine))
@@ -55,9 +56,9 @@ int main(int argc, char* argv[])
                         xyzFile.push_back(newLine);
                     }
                     aSlab.setAtoms(xyzFile);
-                    aSlab.findHollow(1, 1);
-                    aSlab.findAtop(1, 1);
-                    aSlab.findBridge(1, 1);
+                    aSlab.findHollow();
+                    aSlab.findAtop();
+                    aSlab.findBridge();
                     break;
                 }
 
@@ -71,17 +72,16 @@ int main(int argc, char* argv[])
                         xyzFile.push_back(newLine);
                     }
                     aSlab.setAtoms(xyzFile);
-                    aSlab.findHollow(1, 1);
-                    aSlab.findAtop(1, 1);
-                    aSlab.findLongBridge(1, 1);
-                    aSlab.findShortBridge(1, 1);
+                    aSlab.findHollow();
+                    aSlab.findAtop();
+                    aSlab.findLongBridge();
+                    aSlab.findShortBridge();
                     break;
                 }
 
             case 'c': // fcc111
-            case 'g': // hcp0001
                 {
-                    Termination111 aSlab;
+                    fcc111 aSlab;
                     std::ifstream inFile (optarg);
                     std::string newLine;
                     while (std::getline(inFile, newLine))
@@ -89,10 +89,26 @@ int main(int argc, char* argv[])
                         xyzFile.push_back(newLine);
                     }
                     aSlab.setAtoms(xyzFile);
-                    aSlab.findAtop(1, 1);
-                    aSlab.findBridge(1, 1);
-                    aSlab.findFcc(1, 1);
-                    aSlab.findHcp(1, 1);
+                    aSlab.findAtop();
+                    aSlab.findBridge();
+                    aSlab.findFcc();
+                    aSlab.findHcp();
+                    break;
+                }
+
+            case 'd': // bcc100
+                {
+                    bcc100 aSlab;
+                    std::ifstream inFile (optarg);
+                    std::string newLine;
+                    while (std::getline(inFile, newLine))
+                    {
+                        xyzFile.push_back(newLine);
+                    }
+                    aSlab.setAtoms(xyzFile);
+                    aSlab.findHollow();
+                    aSlab.findAtop();
+                    aSlab.findBridge();
                     break;
                 }
 
@@ -106,10 +122,10 @@ int main(int argc, char* argv[])
                         xyzFile.push_back(newLine);
                     }
                     aSlab.setAtoms(xyzFile);
-                    aSlab.findHollow(1, 1);
-                    aSlab.findAtop(1, 1);
-                    aSlab.findLongBridge(1, 1);
-                    aSlab.findShortBridge(1, 1);
+                    aSlab.findHollow();
+                    aSlab.findAtop();
+                    aSlab.findLongBridge();
+                    aSlab.findShortBridge();
                     break;
                 }
 
@@ -123,15 +139,32 @@ int main(int argc, char* argv[])
                         xyzFile.push_back(newLine);
                     }
                     aSlab.setAtoms(xyzFile);
-                    aSlab.findAtop(1, 1);
-                    aSlab.findFcc(1, 1);
-                    aSlab.findHcp(1, 1);
-                    aSlab.findShallowBridge(1, 1);
-                    aSlab.findDeepBridge(1, 1);
+                    aSlab.findAtop();
+                    aSlab.findFcc();
+                    aSlab.findHcp();
+                    aSlab.findShallowBridge();
+                    aSlab.findDeepBridge();
                     break;
                 }
 
-/*            case 'i': // diamond100
+            case 'g': // hcp0001
+                {
+                    hcp0001 aSlab;
+                    std::ifstream inFile (optarg);
+                    std::string newLine;
+                    while (std::getline(inFile, newLine))
+                    {
+                        xyzFile.push_back(newLine);
+                    }
+                    aSlab.setAtoms(xyzFile);
+                    aSlab.findAtop();
+                    aSlab.findBridge();
+                    aSlab.findFcc();
+                    aSlab.findHcp();
+                    break;
+                }
+
+            case 'i': // diamond100
                 {
                     diamond100 aSlab;
                     std::ifstream inFile (optarg);
@@ -147,7 +180,7 @@ int main(int argc, char* argv[])
                     aSlab.findThirdBridge();
                     break;
                 }
-*/
+
             case 'h':
                 {
                     std::cout << "Usage: " << argv[0] << " <--surface type>  <input file> " << std::endl;

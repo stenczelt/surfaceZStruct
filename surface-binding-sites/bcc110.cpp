@@ -106,11 +106,25 @@ bool bcc110::isFound(const double &inX, const double &inY, const double &inZ) //
     return (false);
 }
 
-void bcc110::findHollow()
+void bcc110::findHollow(const unsigned int offsetX, const unsigned int offsetY)
 {
-    double hollowX = mNthAtom[0] - (mDeltaX/2);
-    double hollowY = mNthAtom[1] - (mDistance/2);
+    double offX = 0;
+    if (offsetY == 0)
+    {
+        offX = offsetX*mDeltaX + mDeltaX/2;
+    }
+    else if (offsetY > 0)
+    {
+        offX = (offsetX+offsetY) * mDeltaX;
+    }
+    double offY = offsetY*mDistance + mDistance/2;
+    double hollowX = mNthAtom[0] - offX;
+    double hollowY = mNthAtom[1] - offY;
     double hollowZ = mNthAtom[2] + m_DELTA_Z;
+    if (hollowX < 0 || hollowY < 0)
+    {
+        std::cout << "ERROR: hollow offset out of the slab boundry" << std::endl;
+    }
 
     std::string val1 = std::to_string(hollowX);
     std::string val2 = std::to_string(hollowY);
@@ -129,11 +143,29 @@ void bcc110::findHollow()
     ofs.close();
 } //findHollow
 
-void bcc110::findAtop()
+void bcc110::findAtop(const unsigned int offsetX, const unsigned int offsetY)
 {
-    std::string val1 = std::to_string(mStarMinusOneAtom[0]);
-    std::string val2 = std::to_string(mStarMinusOneAtom[1]);
-    std::string val3 = std::to_string(mStarMinusOneAtom[2] + m_DELTA_Z);
+    double offX = 0;
+    if (offsetY == 0)
+    {
+        offX = offsetX*mDeltaX;
+    }
+    else if (offsetY > 0)
+    {
+        offX = offsetX*mDeltaX + offsetY*mDeltaX/2;
+    }
+    double offY = offsetY*mDistance;
+    double atopX = mNthAtom[0] - offX;
+    double atopY = mNthAtom[1] - offY;
+    double atopZ = mNthAtom[2] + m_DELTA_Z;
+    if (atopX < 0 || atopY < 0)
+    {
+        std::cout << "ERROR: atop offset out of the slab boundry" << std::endl;
+    }
+
+    std::string val1 = std::to_string(atopX);
+    std::string val2 = std::to_string(atopY);
+    std::string val3 = std::to_string(atopZ);
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;
@@ -148,11 +180,29 @@ void bcc110::findAtop()
     ofs.close();
 } //findAtop
 
-void bcc110::findLongBridge()
+void bcc110::findLongBridge(const unsigned int offsetX, const unsigned int offsetY)
 {
-    std::string val1 = std::to_string(mNthMinusOneAtom[0]);
-    std::string val2 = std::to_string(mStarAtom[1]);
-    std::string val3 = std::to_string(mStarAtom[2] + m_DELTA_Z);
+    double offX = 0;
+    if (offsetY == 0)
+    {
+        offX = offsetX*mDeltaX + mDeltaX/2;
+    }
+    else if (offsetY > 0)
+    {
+        offX = (offsetX+offsetY) * mDeltaX;
+    }
+    double offY = offsetY*mDistance;
+    double LbrgX = mNthAtom[0] - offX;
+    double LbrgY = mNthAtom[1] - offY;
+    double LbrgZ = mNthAtom[2] + m_DELTA_Z;
+    if (LbrgX < 0 || LbrgY < 0)
+    {
+         std::cout << "ERROR: long bridge offset out of the slab boundry" << std::endl;
+    }
+
+    std::string val1 = std::to_string(LbrgX);
+    std::string val2 = std::to_string(LbrgY);
+    std::string val3 = std::to_string(LbrgZ);
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;
@@ -167,11 +217,25 @@ void bcc110::findLongBridge()
     ofs.close();
 } //findLongBridge
 
-void bcc110::findShortBridge()
+void bcc110::findShortBridge(const unsigned int offsetX, const unsigned int offsetY)
 {
-    double SbrgX = mStarAtom[0] - ( std::abs(mStarAtom[0] - mNthMinusOneAtom[0]) / 2 );
-    double SbrgY = mNthMinusOneAtom[1] - ( std::abs(mNthMinusOneAtom[1] - mStarAtom[1]) / 2 );
+    double offX = 0;
+    if (offsetY == 0)
+    {
+        offX = offsetX*mDeltaX + mDeltaX/4;
+    }
+    else if (offsetY > 0)
+    {
+        offX = offsetX*mDeltaX + (offsetY*3*mDeltaX/4);
+    }
+    double offY = offsetY*mDistance + mDistance/2;
+    double SbrgX = mNthAtom[0] - offX;
+    double SbrgY = mNthAtom[1] - offY;
     double SbrgZ = mNthAtom[2] + m_DELTA_Z;
+    if (SbrgX < 0 || SbrgY < 0)
+    {
+        std::cout << "ERROR: short bridge offset out of the slab boundry" << std::endl;
+    }
 
     std::string val1 = std::to_string(SbrgX);
     std::string val2 = std::to_string(SbrgY);

@@ -30,9 +30,9 @@ class fcc110
     public:
         bool setAtoms(const std::vector<std::string> &xyzFile);
         bool isFound(const double &inX, const double &inY, const double &inZ);
-        void findHollow(const unsigned int offsetX, const unsigned int offsetY);
-        void findAtop(const unsigned int offsetX, const unsigned int offsetY);
-        void findLongBridge(const unsigned int offsetX, const unsigned int offsetY);
-        void findShortBridge(const unsigned int offsetX, const unsigned int offsetY);
+        void findHollow();
+        void findAtop();
+        void findLongBridge();
+        void findShortBridge();
 };
 #endif

@@ -80,17 +80,11 @@ bool fcc110::isFound(const double &inX, const double &inY, const double &inZ) //
     return (false);
 }
 
-void fcc110::findHollow(const unsigned int offsetX, const unsigned int offsetY)
+void fcc110::findHollow()
 {
-    double offX = offsetX*mDeltaX + mDeltaX/2;
-    double offY = offsetY*mDistance + mDistance/2;
-    double hollowX = mNthAtom[0] - offX;
-    double hollowY = mNthAtom[1] - offY;
+    double hollowX = mNthAtom[0] - ( std::abs(mNthAtom[0] - mNthMinusOneAtom[0]) / 2 );
+    double hollowY = mNthAtom[1] - ( std::abs(mNthAtom[1] - mStarAtom[1]) / 2 );
     double hollowZ = mNthAtom[2] + m_DELTA_Z;
-    if (hollowX < 0 || hollowY < 0)
-    {
-        std::cout << "ERROR: hollow offset out of the slab boundry" << std::endl;
-    }
 
     std::string val1 = std::to_string(hollowX);
     std::string val2 = std::to_string(hollowY);
@@ -109,21 +103,12 @@ void fcc110::findHollow(const unsigned int offsetX, const unsigned int offsetY)
     ofs.close();
 }  //findHollow
 
-void fcc110::findAtop(const unsigned int offsetX, const unsigned int offsetY)
+void fcc110::findAtop()
 {
-    double offX = offsetX*mDeltaX;
-    double offY = offsetY*mDistance;
-    double atopX = mNthAtom[0] - offX;
-    double atopY = mNthAtom[1] - offY;
-    double atopZ = mNthAtom[2] + m_DELTA_Z;
-    if (atopX < 0 || atopY < 0)
-    {
-        std::cout << "ERROR: atop offset out of the slab boundry" << std::endl;
-    }
+    std::string val1 = std::to_string(mStarAtom[0]);
+    std::string val2 = std::to_string(mStarAtom[1]);
+    std::string val3 = std::to_string(mStarAtom[2] + m_DELTA_Z);
 
-    std::string val1 = std::to_string(atopX);
-    std::string val2 = std::to_string(atopY);
-    std::string val3 = std::to_string(atopZ);
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;
@@ -138,21 +123,16 @@ void fcc110::findAtop(const unsigned int offsetX, const unsigned int offsetY)
     ofs.close();
 } //findAtop
 
-void fcc110::findLongBridge(const unsigned int offsetX, const unsigned int offsetY)
+void fcc110::findLongBridge()
 {
-    double offX = offsetX*mDeltaX + mDeltaX/2;
-    double offY = offsetY*mDistance;
-    double LbrgX = mNthAtom[0] - offX;
-    double LbrgY = mNthAtom[1] - offY;
+    double LbrgX = mNthAtom[0] - ( std::abs(mNthAtom[0] - mNthMinusOneAtom[0]) / 2 );
+    double LbrgY = mNthAtom[1];
     double LbrgZ = mNthAtom[2] + m_DELTA_Z;
-    if (LbrgX < 0 || LbrgY < 0)
-    {
-        std::cout << "ERROR: long bridge offset out of the slab boundry" << std::endl;
-    }
 
     std::string val1 = std::to_string(LbrgX);
     std::string val2 = std::to_string(LbrgY);
     std::string val3 = std::to_string(LbrgZ);
+
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;
@@ -167,21 +147,16 @@ void fcc110::findLongBridge(const unsigned int offsetX, const unsigned int offse
     ofs.close();
 } //findLongBridge
 
-void fcc110::findShortBridge(const unsigned int offsetX, const unsigned int offsetY)
+void fcc110::findShortBridge()
 {
-    double offX = offsetX*mDeltaX;
-    double offY = offsetY*mDistance+mDistance/2;
-    double SbrgX = mNthAtom[0] - offX;
-    double SbrgY = mNthAtom[1] - offY;
+    double SbrgX = mNthAtom[0];// - ( std::abs(mNthAtom[0] - mNthMinusOneAtom[0]) / 2 ) ;
+    double SbrgY = mNthAtom[1] - ( std::abs(mNthAtom[1] - mStarAtom[1]) / 2 );
     double SbrgZ = mNthAtom[2] + m_DELTA_Z;
-    if (SbrgX < 0 || SbrgY < 0)
-    {
-        std::cout << "ERROR: short bridge offset out of the slab boundry" << std::endl;
-    }
 
     std::string val1 = std::to_string(SbrgX);
     std::string val2 = std::to_string(SbrgY);
     std::string val3 = std::to_string(SbrgZ);
+
     std::string newElem = "C          " + val1 + "       " + val2 + "      " + val3;
 
     std::ofstream ofs;

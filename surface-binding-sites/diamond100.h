@@ -1,5 +1,5 @@
 // Mina Jafari
-// 12-04-2015
+// 12-09-2015
 
 // atom assignment: first layer
 //
@@ -9,12 +9,12 @@
 //  ---(N-1)*----(N)*
 //       |        |
 
-#ifndef _FCC110_H_
-#define _FCC110_H_
+#ifndef _DIAMOND100_H_
+#define _DIAMOND100_H_
 #include <vector>
 #include <string>
 
-class fcc110
+class diamond100
 {
     private:
         static double m_DELTA_Z;
@@ -23,16 +23,17 @@ class fcc110
         double mNthMinusOneAtom [3];
         double mStarAtom [3];
         double mStarMinusOneAtom [3];
-        double mDistance;
         double mDeltaX;
         double mDeltaY;
+        double mSecLayerZ = 0.0;
+        double mThirLayerZ = 0.0;
 
     public:
         bool setAtoms(const std::vector<std::string> &xyzFile);
         bool isFound(const double &inX, const double &inY, const double &inZ);
-        void findHollow(const unsigned int offsetX, const unsigned int offsetY);
-        void findAtop(const unsigned int offsetX, const unsigned int offsetY);
-        void findLongBridge(const unsigned int offsetX, const unsigned int offsetY);
-        void findShortBridge(const unsigned int offsetX, const unsigned int offsetY);
+        void findAtop();
+        void findFirstBridge();
+        void findSecondBridge();
+        void findThirdBridge();
 };
 #endif
