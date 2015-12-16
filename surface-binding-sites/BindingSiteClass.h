@@ -3,7 +3,6 @@
 
 #ifndef _BINDINGSITECLASS_H_
 #define _BINDINGSITECLASS_H_
-//#include <iostream>
 #include <string>
 
 class BindingSiteClass
@@ -22,7 +21,5 @@ class BindingSiteClass
         double getZ() const;
         void setType(std::string inType);
         void setCoordinates(double inX, double inY, double inZ);
-        //overload insersion << operator to print the binding site vector
-
 };
 #endif

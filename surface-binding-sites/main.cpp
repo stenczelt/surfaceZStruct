@@ -37,7 +37,7 @@ int main(int argc , char* argv[])
 
     parseVector(xyzFile, xyz, numOfAtoms, atomicSymbols);
     SurfaceClass aSurface;
-    std::string outFName = "BindingSites.xyz";
+    std::string outFName = "bindingSites.xyz";
     if (aSurface.setSurfaceType(argv[1]))
     {
         aSurface.setAtoms(numOfAtoms, xyz, atomicSymbols);
@@ -45,6 +45,7 @@ int main(int argc , char* argv[])
         aSurface.writeToFile(outFName);
     }
     delete [] xyz;
+    delete [] atomicSymbols;
     return (0);
 }
 

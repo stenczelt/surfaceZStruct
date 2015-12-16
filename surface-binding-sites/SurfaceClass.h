@@ -36,10 +36,9 @@ class SurfaceClass
         int getSurfaceWidth() const;
         int getSurfaceLength() const;
         int getSurfaceHeight() const;
-        BindingSiteClass getBindingSite(unsigned int element) const;
+        const BindingSiteClass* getBindingSite(unsigned int element) const;
         bool setSurfaceType(std::string inSurface);
         bool setAtoms(int numOfAtoms, double* coordinates, std::string* atomicSymbols);
-        //void setSlabSize(const std::vector< std::vector<double> > &coordinates);
         void setSlabSize();
         bool isFound(const double &inX, const double &inY, const double &inZ);
         bool writeToFile();

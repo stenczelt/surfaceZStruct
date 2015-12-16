@@ -30,7 +30,7 @@ double BindingSiteClass::getZ() const
     return (mCoordinate[2]);
 }
 
-void BindingSiteClass::setType (std::string inType) //TODO if out of range, error
+void BindingSiteClass::setType (std::string inType)
 {
     mType = inType;
 }

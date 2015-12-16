@@ -2,7 +2,7 @@
 // 12-14-2015
 
 #include "SurfaceClass.h"
-#include <iostream> //TODO for testing
+#include <iostream>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
@@ -34,15 +34,16 @@ int SurfaceClass::getSurfaceHeight() const
     return (mSlabSize[2]);
 }
 
-BindingSiteClass SurfaceClass::getBindingSite(unsigned int element) const
+const BindingSiteClass* SurfaceClass::getBindingSite(unsigned int element) const
 {
     if (element <= mBindingSites.size())
     {
-        return (mBindingSites[element-1]); // TODO correct??
+        return (&(mBindingSites[element-1])); // TODO correct??
     }
     else
     {
         std::cout << "out of range" << std::endl;
+        return (NULL);
     }
 }
 
@@ -217,18 +218,6 @@ void SurfaceClass::findHollow()
                 mBindingSites.push_back(aSite);
             }
         }
-//        std::ofstream ofs;
-//        ofs.open ("Termination100-hollow.xyz", std::ofstream::out);
-
-//        ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
-//        ofs << "\n";
-//        for (auto i = mVector.begin()+2; i != mVector.end(); ++i)
-//        {   
-//            ofs << *i << "\n";
-//        }   
-//        ofs << newElem;
-//        ofs << "\n";
-//        ofs.close();
     }
     else
     {
@@ -272,17 +261,6 @@ void SurfaceClass::findHcp()
                     std::string newElem = "X          " + val1 + "       " + val2 + "      " + val3;
                     BindingSiteClass aSite("hcp", hcpX, hcpY, hcpZ);
                     mBindingSites.push_back(aSite);
-
-/*                    std::ofstream ofs;
-                    ofs.open ("Termination111-hcp.xyz", std::ofstream::out);
-                    ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
-                    ofs << "\n";
-                    for (auto i = mVector.begin()+2; i != mVector.end(); ++i)
-                    {   
-                    ofs << *i << "\n";
-                    }   
-                    ofs << newElem;
-                    ofs.close(); */
                 }
                 else
                 {   
@@ -303,7 +281,7 @@ void SurfaceClass::findFcc()
     {
         for (int i=0; i<mSlabSize[0]; ++i) // i is the X offset
         {
-            for (int j=0; j<mSlabSize[1]-1; ++j) // subtract 1 bc of # of defined sites
+            for (int j=0; j<mSlabSize[1]-1; ++j) // subtract 1 bc of the num of defined sites
             {
                 double offX = 0;
                 if (j == 0)
@@ -330,17 +308,6 @@ void SurfaceClass::findFcc()
                     std::string newElem = "X          " + val1 + "       " + val2 + "      " + val3;
                     BindingSiteClass aSite("fcc", fccX, fccY, fccZ);
                     mBindingSites.push_back(aSite);
-
-/*                    std::ofstream ofs;
-                    ofs.open ("Termination111-fcc.xyz", std::ofstream::out);
-                    ofs << std::to_string( atoi(mVector[0].c_str()) + 1 ) << "\n";
-                    ofs << "\n";
-                    for (auto i = mVector.begin()+2; i != mVector.end(); ++i)
-                    {   
-                    ofs << *i << "\n";
-                    }   
-                    ofs << newElem;
-                    ofs.close(); */
                 }
                 else
                 {   
@@ -425,16 +392,16 @@ bool SurfaceClass::writeToFile(std::string &outFile) // HERE
     ofs << std::to_string(mNumOfAtoms+mSelectedBindingSites.size()) << "\n";
     ofs << "\n";
     ofs << std::fixed << std::setprecision(15);
-    for (int i=0; i<mCoordinates.size(); ++i)
+    for (unsigned int i=0; i<mCoordinates.size(); ++i)
     {   
         ofs << mAtomicSymbols[i] << "            " << mCoordinates[i][0]
             << "            " << mCoordinates[i][1]
             << "            " << mCoordinates[i][2] << "\n";
     }
-    for (int j=0; j<mSelectedBindingSites.size(); ++j)
+    for (unsigned int j=0; j<mSelectedBindingSites.size(); ++j)
     {
         ofs << "x             ";
-        ofs << mSelectedBindingSites[j].getX() << "            "; // returnin double or int?
+        ofs << mSelectedBindingSites[j].getX() << "            ";
         ofs << mSelectedBindingSites[j].getY() << "            ";
         ofs << mSelectedBindingSites[j].getZ() << "\n";
     }
