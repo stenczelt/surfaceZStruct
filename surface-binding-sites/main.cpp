@@ -6,8 +6,10 @@
 #include <vector>
 #include <stdlib.h>
 #include <cstring>
+#include <string>
 
-bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms);
+bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
+                 std::string* inSymbols);
 
 int main(int argc , char* argv[])
 {
@@ -31,18 +33,23 @@ int main(int argc , char* argv[])
 
     int size = 3*numOfAtoms;
     double* xyz = new double[size];
+    std::string* atomicSymbols = new std::string[numOfAtoms];
 
-    parseVector(xyzFile, xyz, numOfAtoms);
+    parseVector(xyzFile, xyz, numOfAtoms, atomicSymbols);
     SurfaceClass aSurface;
+    std::string outFName = "BindingSites.xyz";
     if (aSurface.setSurfaceType(argv[1]))
     {
-        aSurface.setAtoms(numOfAtoms, xyz);
+        aSurface.setAtoms(numOfAtoms, xyz, atomicSymbols);
+        aSurface.findNearbySites(36, 6, "hollow");
+        aSurface.writeToFile(outFName);
     }
     delete [] xyz;
     return (0);
 }
 
-bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms)
+bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,
+                 std::string* inSymbols)
 {
     bool success = true;
     int k = 0;
@@ -57,6 +64,16 @@ bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms)
             inArr[3*k+j] = temp[j];
         }
         ++k;
+    }
+    int m =0;
+    for (auto l=inVec.begin()+2; l != inVec.end(); ++l)
+    {
+        std::string unwanted = "";
+        std::string symbol;
+        std::istringstream iss(*l);
+        iss >> symbol >> unwanted >> unwanted >> unwanted >> unwanted;
+        inSymbols[m] = symbol;
+        ++m;
     }
     return (success);
 }

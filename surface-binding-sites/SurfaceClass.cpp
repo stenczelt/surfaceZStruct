@@ -4,6 +4,8 @@
 #include "SurfaceClass.h"
 #include <iostream> //TODO for testing
 #include <cmath>
+#include <fstream>
+#include <iomanip>
 
 double SurfaceClass::m_DELTA_Z = 2.5;
 
@@ -50,7 +52,7 @@ bool SurfaceClass::setSurfaceType(std::string inSurface)
     return (true);
 }
 
-bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates)
+bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicSymbols)
 {
     bool isSet = true;
     mNumOfAtoms = numOfAtoms;
@@ -62,9 +64,11 @@ bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates)
         temp.push_back(coordinates[3*k+1]);
         temp.push_back(coordinates[3*k+2]);
         mCoordinates.push_back(temp);
+        mAtomicSymbols.push_back(atomicSymbols[k]);
         ++k;
     }
-    this->setSlabSize();
+    
+    setSlabSize();
 
     // setting mNthAtom & mNumOfAtoms
     mNthAtom[0] = mCoordinates[mNumOfAtoms-1][0];
@@ -363,7 +367,7 @@ void SurfaceClass::findBridge()
 {
 }
 
-void SurfaceClass::findNearbySites(int atomIndex, double range)
+void SurfaceClass::findNearbySites(int atomIndex, double radius, std::string siteType)
 {
     if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
     {
@@ -389,25 +393,52 @@ void SurfaceClass::findNearbySites(int atomIndex, double range)
     {
         std::cout << "ERROR: not a supported surface type" << std::endl;
     }
-    // here we have the mBindingSites vector with all the binding sites
+    // here, we have the mBindingSites vector with all the binding sites
+    int numOfSites = mBindingSites.size();
+    for (int i=0; i<numOfSites; ++i)
+    {
+        if (mBindingSites[i].getType() == siteType)
+        {
+            if (mBindingSites[i].getX() <= mCoordinates[atomIndex-1][0]+radius &&
+                mBindingSites[i].getX() >= mCoordinates[atomIndex-1][0]-radius &&
+                mBindingSites[i].getY() <= mCoordinates[atomIndex-1][1]+radius &&
+                mBindingSites[i].getY() >= mCoordinates[atomIndex-1][1]-radius)
+            {
+                // the site is in the range
+                mSelectedBindingSites.push_back(mBindingSites[i]);
+            }
+            else
+            {
+                std::cout << "ERROR: no site found within the specified radius/type" << std::endl;
+            }
+        }
+    }
 
 }
 
+bool SurfaceClass::writeToFile(std::string &outFile) // HERE
+{
+    bool success = false;
+    std::ofstream ofs;
+    ofs.open(outFile.c_str());
 
-
-
-//writeToFile uses the mBindingSites vector to print out the info
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    ofs << std::to_string(mNumOfAtoms+mSelectedBindingSites.size()) << "\n";
+    ofs << "\n";
+    ofs << std::fixed << std::setprecision(15);
+    for (int i=0; i<mCoordinates.size(); ++i)
+    {   
+        ofs << mAtomicSymbols[i] << "            " << mCoordinates[i][0]
+            << "            " << mCoordinates[i][1]
+            << "            " << mCoordinates[i][2] << "\n";
+    }
+    for (int j=0; j<mSelectedBindingSites.size(); ++j)
+    {
+        ofs << "x             ";
+        ofs << mSelectedBindingSites[j].getX() << "            "; // returnin double or int?
+        ofs << mSelectedBindingSites[j].getY() << "            ";
+        ofs << mSelectedBindingSites[j].getZ() << "\n";
+    }
+    ofs.close();
+    success = true;
+    return (success);
+}

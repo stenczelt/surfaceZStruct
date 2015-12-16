@@ -15,17 +15,17 @@ std::string BindingSiteClass::getType() const
     return (mType);
 }
 
-int BindingSiteClass::getX() const
+double BindingSiteClass::getX() const
 {
     return (mCoordinate[0]);
 }
 
-int BindingSiteClass::getY() const
+double BindingSiteClass::getY() const
 {
     return (mCoordinate[1]);
 }
 
-int BindingSiteClass::getZ() const
+double BindingSiteClass::getZ() const
 {
     return (mCoordinate[2]);
 }
@@ -35,7 +35,7 @@ void BindingSiteClass::setType (std::string inType) //TODO if out of range, erro
     mType = inType;
 }
 
-void BindingSiteClass::setCoordinates(int inX, int inY, int inZ)
+void BindingSiteClass::setCoordinates(double inX, double inY, double inZ)
 {
     mCoordinate[0] = inX;
     mCoordinate[1] = inY;

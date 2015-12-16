@@ -11,17 +11,17 @@ class BindingSiteClass
     private:
         // hollow, hcp, fcc, atop, long bridge, short bridge, bridge
         std::string mType = "";
-        int mCoordinate[3] = {0, 0 , 0};
+        double mCoordinate[3] = {0.0, 0.0 , 0.0};
 
     public:
         BindingSiteClass();
         BindingSiteClass(std::string inType, double inX, double inY, double ins);
         std::string getType() const;
-        int getX() const;
-        int getY() const;
-        int getZ() const;
+        double getX() const;
+        double getY() const;
+        double getZ() const;
         void setType(std::string inType);
-        void setCoordinates(int inX, int inY, int inZ);
+        void setCoordinates(double inX, double inY, double inZ);
         //overload insersion << operator to print the binding site vector
 
 };

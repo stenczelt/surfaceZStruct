@@ -16,6 +16,8 @@ class SurfaceClass
         int mNumOfAtoms = 0;
         int mSlabSize[3] = {0, 0, 0}; // x * y * z
         std::vector<BindingSiteClass> mBindingSites; 
+        std::vector<BindingSiteClass> mSelectedBindingSites; 
+        std::vector<std::string> mAtomicSymbols;
         // a 2D vector to store atomic coordinates
         std::vector< std::vector<double> > mCoordinates;
         double mDeltaX = 0.0;
@@ -36,7 +38,7 @@ class SurfaceClass
         int getSurfaceHeight() const;
         BindingSiteClass getBindingSite(unsigned int element) const;
         bool setSurfaceType(std::string inSurface);
-        bool setAtoms(int numOfAtoms, double* coordinates);
+        bool setAtoms(int numOfAtoms, double* coordinates, std::string* atomicSymbols);
         //void setSlabSize(const std::vector< std::vector<double> > &coordinates);
         void setSlabSize();
         bool isFound(const double &inX, const double &inY, const double &inZ);
@@ -48,6 +50,7 @@ class SurfaceClass
         void findLongBridge();
         void findShortBridge();
         void findBridge(); //TODO shallow and deep bridge(bcc111)
-        void findNearbySites(int atomIndex, double range);
+        void findNearbySites(int atomIndex, double range, std::string siteType);
+        bool writeToFile(std::string &outFile);
 };
 #endif
