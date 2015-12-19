@@ -41,7 +41,25 @@ int main(int argc , char* argv[])
     if (aSurface.setSurfaceType(argv[1]))
     {
         aSurface.setAtoms(numOfAtoms, xyz, atomicSymbols);
-        aSurface.findNearbySites(36, 6, "hollow");
+
+        int numOfAtomsInLayer = aSurface.getSurfaceWidth() * aSurface.getSurfaceLength(); 
+        int index = 0;
+        while (index > aSurface.getNumOfAtoms() || 
+               index < aSurface.getNumOfAtoms() - (numOfAtomsInLayer-1))
+        {
+            std::cout << "Enter the atom number between " << 
+                aSurface.getNumOfAtoms() - (numOfAtomsInLayer-1) << " and "
+                << aSurface.getNumOfAtoms() << std::endl;
+            std::cin >> index;
+        }
+        double radius = 0.0;
+        std::cout << "Enter the radius: " << std::endl;
+        std::cin >> radius;
+        std::string type = " ";
+        std::cout << "Enter the binding site type: " << std::endl;
+        std::cin >> type;
+
+        aSurface.findNearbySites(index, radius, type);
         aSurface.writeToFile(outFName);
     }
     delete [] xyz;

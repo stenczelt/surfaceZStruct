@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
                     }
                     aSlab.setAtoms(xyzFile);
                     aSlab.findAtop(1, 1);
-                    aSlab.findBridge(1, 1);
+                    aSlab.findBridge(1, 2);
                     aSlab.findFcc(1, 1);
                     aSlab.findHcp(1, 1);
                     break;
