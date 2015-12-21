@@ -4,6 +4,14 @@
 // its size and finds all the binsing sites on that surface. The binding sites within
 // radius can be found usind the findNearbySites() function. To use this class, make
 // an object of type SurfaceClass and call setAtoms, setSurfaceType functions on it.
+//
+// atom assignment: first layer
+//
+//  ---(N-1)-----(N)
+//       |        |
+//       |        |
+//  ---(N-1)*----(N)*
+//       |        |
 
 #ifndef _SURFACECLASS_H_
 #define _SURFACECLASS_H_
@@ -54,7 +62,7 @@ class SurfaceClass
         //setter functions
         bool setSurfaceType(std::string inSurface);
         bool setAtoms(int numOfAtoms, double* coordinates, std::string* atomicSymbols);
-        void setSlabSize();
+        bool setSlabSize();
         // other member functions
         bool isFound(const double &inX, const double &inY, const double &inZ);
         bool writeToFile();
