@@ -22,10 +22,8 @@
 class SurfaceClass
 {
     private:
-        // displacement from surface top
-        static double m_DELTA_Z;
         // fcc100, 110, 111, bcc100, 110, 111, hcp0001
-        std::string mSurfaceType = "";
+        std::string mSurfaceType;
         // number of surface atoms
         int mNumOfAtoms = 0;
         // number of atoms in x, y, and z direction in slab
@@ -43,13 +41,14 @@ class SurfaceClass
         double mDeltaY = 0.0;
         double mDistance = 0.0;
         // x, y, z of some important atoms used to find binding sites
-        double mNthAtom[3] = {0, 0, 0};
-        double mNthMinusOneAtom [3] = {0, 0, 0};
-        double mStarAtom [3] = {0, 0, 0};
-        double mStarMinusOneAtom [3] = {0, 0, 0};
+        double mNthAtom[3];
+        double mNthMinusOneAtom [3];
+        double mStarAtom [3];
+        double mStarMinusOneAtom [3];
         // 2nd and 3rd layer z components
         double mSecondLayerZ = 0.0;
         double mThirdLayerZ = 0.0;
+        void resetGeometry();
 
     public:
         // getter functions
@@ -77,6 +76,7 @@ class SurfaceClass
         // and the binding type. Atom indexing starts from one.
         void findNearbySites(const int atomIndex, const double range, 
                              const std::string siteType);
+        void findAllSites();
         bool writeToFile(std::string &outFile);
 };
 #endif

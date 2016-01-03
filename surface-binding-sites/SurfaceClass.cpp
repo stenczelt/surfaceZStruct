@@ -7,8 +7,6 @@
 #include <fstream>
 #include <iomanip>
 
-double SurfaceClass::m_DELTA_Z = 2.5;
-
 std::string SurfaceClass::getSurfaceType() const
 {
     return (mSurfaceType);
@@ -49,26 +47,40 @@ const BindingSiteClass* SurfaceClass::getBindingSite(unsigned int index) const /
 
 bool SurfaceClass::setSurfaceType(std::string inSurface)
 {
-    mSurfaceType = inSurface;
-    return (true);
+    bool isSet = false;
+    if (inSurface == "fcc100" || inSurface == "fcc110" || inSurface == "fcc111" ||
+        inSurface == "bcc100" || inSurface == "bcc110" || inSurface == "bcc111" ||
+        inSurface == "hcp0001")
+    {
+        mSurfaceType = inSurface;
+        isSet = true;;
+    }
+    return (isSet);
 }
 
 bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicSymbols)
 {
+    resetGeometry();
     bool isSet = true;
-    mNumOfAtoms = numOfAtoms;
-    int k =0;
+    int k = 0;
+    int numOfSurfAtoms = 0;
+    std::string surfaceAtom = atomicSymbols[0];
     for (int i=0; i<numOfAtoms; ++i)
     {
-        std::vector<double> temp;
-        temp.push_back(coordinates[3*k]);
-        temp.push_back(coordinates[3*k+1]);
-        temp.push_back(coordinates[3*k+2]);
-        mCoordinates.push_back(temp);
-        mAtomicSymbols.push_back(atomicSymbols[k]);
+        if (atomicSymbols[k] == surfaceAtom)
+        {
+            std::vector<double> temp;
+            temp.push_back(coordinates[3*k]);
+            temp.push_back(coordinates[3*k+1]);
+            temp.push_back(coordinates[3*k+2]);
+            mCoordinates.push_back(temp);
+            mAtomicSymbols.push_back(atomicSymbols[k]);
+            ++numOfSurfAtoms;
+        }
         ++k;
     }
-    
+    mNumOfAtoms = numOfSurfAtoms;
+
     if (setSlabSize())
     {
         // setting mNthAtom & mNumOfAtoms
@@ -171,17 +183,19 @@ bool SurfaceClass::setSlabSize()
     {
         if (mCoordinates[i][1] <= mCoordinates[0][1]+tolerance &&
             mCoordinates[i][1] >= mCoordinates[0][1]-tolerance &&
-            mCoordinates[i][2] == mCoordinates[0][2])
+            mCoordinates[i][2] <= mCoordinates[0][2]+tolerance &&
+            mCoordinates[i][2] >= mCoordinates[0][2]-tolerance)
         {
             ++width;
         }
-        if (mCoordinates[i][2] == mCoordinates[0][2])
+        if (mCoordinates[i][2] <= mCoordinates[0][2]+tolerance &&
+            mCoordinates[i][2] >= mCoordinates[0][2]-tolerance)
         {
             ++layer;
         }
         length = layer / width;
         height = mNumOfAtoms / layer;
-        if (height < 3)
+        if (height < 2)
         {
             std::cout << "ERROR: The slab should have at least 2 layers" << std::endl;
             isSet = false;
@@ -211,6 +225,7 @@ bool SurfaceClass::isFound(const double &inX, const double &inY, const double &i
 
 int SurfaceClass::findHollow()
 {
+    double m_DELTA_Z = 1.5;
     if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
     {
         for (int i=0; i<mSlabSize[0]-1; ++i)
@@ -282,6 +297,7 @@ int SurfaceClass::findHollow()
 
 int SurfaceClass::findHcp()
 {
+    double m_DELTA_Z = 2.0;
     double prevI_1 = 1.0;
     double limit_1 = mSlabSize[0]-1;
     double prevI_2 = 1.5;
@@ -370,6 +386,7 @@ int SurfaceClass::findHcp()
 
 int SurfaceClass::findFcc()
 {
+    double m_DELTA_Z = 2.0;
     if (mSurfaceType == "fcc111" || mSurfaceType == "bcc111" || mSurfaceType == "hcp0001")
     {
         double prevI = 0.5;
@@ -378,7 +395,6 @@ int SurfaceClass::findFcc()
         {
             for (double i=prevI; i<limit; ++i) // i is the X offset
             {
-                std::cout << i << "     " << j << "\n";
                 double offX = i * mDeltaX;
                 double offY = j * mDistance + mDistance/3;
                 double fccX = mNthAtom[0] - offX;
@@ -433,6 +449,7 @@ int SurfaceClass::findFcc()
 
 int SurfaceClass::findAtop()
 {
+    double m_DELTA_Z = 2.5;
     for (int i=0; i<mSlabSize[0]; ++i) // i is the X offset
     {
         for (int j=0; j<mSlabSize[1]; ++j) // j is the Y offset
@@ -486,6 +503,7 @@ int SurfaceClass::findAtop()
 
 int SurfaceClass::findLongBridge()
 {
+    double m_DELTA_Z = 2.0;
     double offX, offY, LbrgX, LbrgY, LbrgZ = 0.0;
     if (mSurfaceType == "fcc110")
     {
@@ -565,6 +583,7 @@ int SurfaceClass::findLongBridge()
 
 int SurfaceClass::findShortBridge()
 {
+    double m_DELTA_Z = 2.0;
     double offX, offY, SbrgX, SbrgY, SbrgZ = 0.0;
     if (mSurfaceType == "fcc110")
     {
@@ -622,6 +641,7 @@ int SurfaceClass::findShortBridge()
 
 int SurfaceClass::findBridge()
 {
+    double m_DELTA_Z = 2.0;
     double offX, offY, brgX, brgY = 0.0;
     double brgZ = mNthAtom[2] + m_DELTA_Z;
     if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
@@ -747,7 +767,7 @@ void SurfaceClass::findNearbySites(const int atomIndex, const double radius,
     int numOfSites = mBindingSites.size();
     for (int i=0; i<numOfSites; ++i)
     {
-        if (mBindingSites[i].getType() == siteType)
+        if (mBindingSites[i].getType() == siteType || siteType == "all")
         {
             double refX = mCoordinates[atomIndex-1][0];
             double refY = mCoordinates[atomIndex-1][1];
@@ -767,6 +787,42 @@ void SurfaceClass::findNearbySites(const int atomIndex, const double radius,
                 std::cout << "ERROR: This site is NOT within the specified radius/type" << std::endl;
             }
         }
+    }
+}
+
+void SurfaceClass::findAllSites()
+{
+    if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
+    {
+        // TODO if (findHollow() != 0) {ERROR}
+        findHollow();
+        findAtop();
+        findBridge();
+    }
+    else if (mSurfaceType == "fcc111" || mSurfaceType == "bcc111" || mSurfaceType == "hcp0001")
+    {
+        findHcp();
+        findFcc();
+        findAtop();
+        findBridge();
+    }
+    else if (mSurfaceType == "fcc110" || mSurfaceType == "bcc110")
+    {
+        findHollow();
+        findAtop();
+        findLongBridge();
+        findShortBridge();
+    }
+    else
+    {
+        std::cout << "ERROR: not a supported surface type" << std::endl;
+    }
+    // here, we have the mBindingSites vector with all the binding sites
+    int numOfSites = mBindingSites.size();
+    for (int i=0; i<numOfSites; ++i)
+    {
+        mSelectedBindingSites.push_back(mBindingSites[i]);
+        std::cout << "This site IS within the specified radius/type" << std::endl;
     }
 }
 
@@ -795,4 +851,16 @@ bool SurfaceClass::writeToFile(std::string &outFile)
     ofs.close();
     success = true;
     return (success);
+}
+
+void SurfaceClass::resetGeometry()
+{
+//    mAtomicSymbols.clear();
+    std::vector<BindingSiteClass> swap1;
+    mBindingSites.swap(swap1);
+    mSelectedBindingSites.swap(swap1);
+    std::vector<std::string> swap2;
+    mAtomicSymbols.swap(swap2);
+    std::vector< std::vector<double> > swap3;
+    mCoordinates.swap(swap3);
 }
