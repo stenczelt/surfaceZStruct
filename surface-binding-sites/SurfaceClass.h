@@ -25,7 +25,8 @@ class SurfaceClass
         // fcc100, 110, 111, bcc100, 110, 111, hcp0001
         std::string mSurfaceType;
         // number of surface atoms
-        int mNumOfAtoms = 0;
+        int mNumOfSurfAtoms = 0;
+        int mNumOfAdsorbateAtoms = 0;
         // number of atoms in x, y, and z direction in slab
         int mSlabSize[3] = {0, 0, 0}; // x * y * z
         // a vector to store all the binding sites of the surface
@@ -33,9 +34,11 @@ class SurfaceClass
         // a vector to store only the sites within a range and atom
         std::vector<BindingSiteClass> mSelectedBindingSites; 
         // a vector to store atomic sybmols
-        std::vector<std::string> mAtomicSymbols;
+        std::vector<std::string> mSurfaceSymbols;
+        std::vector<std::string> mAdsorbateSymbols;
         // a 2D vector to store atomic coordinates
         std::vector< std::vector<double> > mCoordinates;
+        std::vector< std::vector<double> > mAdsorbateCoord;
         // some parameters
         double mDeltaX = 0.0;
         double mDeltaY = 0.0;

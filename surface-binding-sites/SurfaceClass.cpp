@@ -14,7 +14,7 @@ std::string SurfaceClass::getSurfaceType() const
 
 int SurfaceClass::getNumOfAtoms() const
 {
-    return (mNumOfAtoms);
+    return (mNumOfSurfAtoms);
 }
 
 int SurfaceClass::getSurfaceWidth() const
@@ -64,6 +64,7 @@ bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* at
     bool isSet = true;
     int k = 0;
     int numOfSurfAtoms = 0;
+    int numOfAdsorbateAtoms = 0;
     std::string surfaceAtom = atomicSymbols[0];
     for (int i=0; i<numOfAtoms; ++i)
     {
@@ -74,22 +75,33 @@ bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* at
             temp.push_back(coordinates[3*k+1]);
             temp.push_back(coordinates[3*k+2]);
             mCoordinates.push_back(temp);
-            mAtomicSymbols.push_back(atomicSymbols[k]);
+            mSurfaceSymbols.push_back(atomicSymbols[k]);
             ++numOfSurfAtoms;
+        }
+        else
+        {
+            std::vector<double> temp;
+            temp.push_back(coordinates[3*k]);
+            temp.push_back(coordinates[3*k+1]);
+            temp.push_back(coordinates[3*k+2]);
+            mAdsorbateCoord.push_back(temp);
+            mAdsorbateSymbols.push_back(atomicSymbols[k]);
+            ++numOfAdsorbateAtoms;
         }
         ++k;
     }
-    mNumOfAtoms = numOfSurfAtoms;
+    mNumOfSurfAtoms = numOfSurfAtoms;
+    mNumOfAdsorbateAtoms = numOfAdsorbateAtoms;
 
     if (setSlabSize())
     {
-        // setting mNthAtom & mNumOfAtoms
-        mNthAtom[0] = mCoordinates[mNumOfAtoms-1][0];
-        mNthAtom[1] = mCoordinates[mNumOfAtoms-1][1];
-        mNthAtom[2] = mCoordinates[mNumOfAtoms-1][2];
-        mNthMinusOneAtom[0] = mCoordinates[mNumOfAtoms-2][0];
-        mNthMinusOneAtom[1] = mCoordinates[mNumOfAtoms-2][1];
-        mNthMinusOneAtom[2] = mCoordinates[mNumOfAtoms-2][2];
+        // setting mNthAtom & mNumOfSurfAtoms
+        mNthAtom[0] = mCoordinates[mNumOfSurfAtoms-1][0];
+        mNthAtom[1] = mCoordinates[mNumOfSurfAtoms-1][1];
+        mNthAtom[2] = mCoordinates[mNumOfSurfAtoms-1][2];
+        mNthMinusOneAtom[0] = mCoordinates[mNumOfSurfAtoms-2][0];
+        mNthMinusOneAtom[1] = mCoordinates[mNumOfSurfAtoms-2][1];
+        mNthMinusOneAtom[2] = mCoordinates[mNumOfSurfAtoms-2][2];
         mDeltaX = mNthAtom[0] - mNthMinusOneAtom[0];
         mDeltaY = mNthAtom[1] - mNthMinusOneAtom[1];
         if (mSurfaceType == "fcc111" || mSurfaceType == "bcc111" || mSurfaceType == "hcp0001")
@@ -194,7 +206,7 @@ bool SurfaceClass::setSlabSize()
             ++layer;
         }
         length = layer / width;
-        height = mNumOfAtoms / layer;
+        height = mNumOfSurfAtoms / layer;
         if (height < 2)
         {
             std::cout << "ERROR: The slab should have at least 2 layers" << std::endl;
@@ -832,14 +844,20 @@ bool SurfaceClass::writeToFile(std::string &outFile)
     std::ofstream ofs;
     ofs.open(outFile.c_str());
 
-    ofs << std::to_string(mNumOfAtoms+mSelectedBindingSites.size()) << "\n";
+    ofs << std::to_string(mNumOfSurfAtoms+mNumOfAdsorbateAtoms+mSelectedBindingSites.size()) << "\n";
     ofs << "\n";
     ofs << std::fixed << std::setprecision(15);
     for (unsigned int i=0; i<mCoordinates.size(); ++i)
     {   
-        ofs << mAtomicSymbols[i] << "            " << mCoordinates[i][0]
+        ofs << mSurfaceSymbols[i] << "            " << mCoordinates[i][0]
             << "            " << mCoordinates[i][1]
             << "            " << mCoordinates[i][2] << "\n";
+    }
+    for (unsigned int k=0; k<mAdsorbateCoord.size(); ++k)
+    {
+        ofs << mAdsorbateSymbols[k] << "            " << mAdsorbateCoord[k][0]
+            << "            " << mAdsorbateCoord[k][1]
+            << "            " << mAdsorbateCoord[k][2] << "\n";
     }
     for (unsigned int j=0; j<mSelectedBindingSites.size(); ++j)
     {
@@ -855,12 +873,14 @@ bool SurfaceClass::writeToFile(std::string &outFile)
 
 void SurfaceClass::resetGeometry()
 {
-//    mAtomicSymbols.clear();
+//    mSurfaceSymbols.clear();
     std::vector<BindingSiteClass> swap1;
     mBindingSites.swap(swap1);
     mSelectedBindingSites.swap(swap1);
     std::vector<std::string> swap2;
-    mAtomicSymbols.swap(swap2);
+    mSurfaceSymbols.swap(swap2);
+    mAdsorbateSymbols.swap(swap2);
     std::vector< std::vector<double> > swap3;
     mCoordinates.swap(swap3);
+    mAdsorbateCoord.swap(swap3);
 }
