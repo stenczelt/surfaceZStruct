@@ -31,6 +31,10 @@ int main(int argc , char* argv[])
     }
     int numOfAtoms = std::stoi(*(xyzFile.begin()));
     std::string surfaceType = xyzFile[1];
+    if (xyzFile[1].empty())
+    {
+        std::cout << "ERROR: Set surfaece type in the input file" << std::endl;
+    }
 
     int size = 3*numOfAtoms;
     double* cartesianCoords = new double[size];
@@ -41,7 +45,11 @@ int main(int argc , char* argv[])
     std::string outFName = "bindingSites.xyz";
     if (aSurface.setSurfaceType(surfaceType))
     {
-        aSurface.setAtoms(numOfAtoms, cartesianCoords, atomicSymbols);
+        if (!aSurface.setAtoms(numOfAtoms, cartesianCoords, atomicSymbols))
+        {
+            std::cout << "ERROR: " << std::endl;
+            return (2);
+        }
 
         /*
         int numOfAtomsInLayer = aSurface.getSurfaceWidth() * aSurface.getSurfaceLength(); 
