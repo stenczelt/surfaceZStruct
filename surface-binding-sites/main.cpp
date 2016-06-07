@@ -30,7 +30,7 @@ int main(int argc , char* argv[])
         }
     }
     int numOfAtoms = std::stoi(*(xyzFile.begin()));
-    std::string surfaceType = xyzFile[1]
+    std::string surfaceType = xyzFile[1];
 
     int size = 3*numOfAtoms;
     double* xyz = new double[size];
@@ -39,7 +39,7 @@ int main(int argc , char* argv[])
     parseVector(xyzFile, xyz, numOfAtoms, atomicSymbols);
     SurfaceClass aSurface;
     std::string outFName = "bindingSites.xyz";
-    if (aSurface.setSurfaceType(surfaceType)
+    if (aSurface.setSurfaceType(surfaceType))
     {
         aSurface.setAtoms(numOfAtoms, xyz, atomicSymbols);
 
