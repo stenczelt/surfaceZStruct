@@ -43,8 +43,10 @@ int main(int argc , char* argv[])
     {
         aSurface.setAtoms(numOfAtoms, cartesianCoords, atomicSymbols);
 
+        /*
         int numOfAtomsInLayer = aSurface.getSurfaceWidth() * aSurface.getSurfaceLength(); 
         int index = 0;
+        
         while (index > aSurface.getNumOfAtoms() || 
                index < aSurface.getNumOfAtoms() - (numOfAtomsInLayer-1))
         {
@@ -61,6 +63,8 @@ int main(int argc , char* argv[])
         std::cin >> type;
 
         aSurface.findNearbySites(index, radius, type);
+        */
+        aSurface.findAllSites();
         aSurface.writeToFile(outFName);
     }
     delete [] cartesianCoords;
