@@ -68,10 +68,10 @@ bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* at
     std::string surfaceAtom = atomicSymbols[0];
     for (int i=0; i<numOfAtoms; ++i)
     {
-        if (atomicSymbols[k] == surfaceAtom)
+        if (atomicSymbols[k] == surfaceAtom) //TODO: you have duplicated code here. Fix it
         {
             std::vector<double> temp;
-            temp.push_back(coordinates[3*k]);
+            temp.push_back(coordinates[3*k]); //TODO: replace k with i
             temp.push_back(coordinates[3*k+1]);
             temp.push_back(coordinates[3*k+2]);
             mCoordinates.push_back(temp);
@@ -521,7 +521,7 @@ int SurfaceClass::findLongBridge()
     {
         for (int i=0; i<mSlabSize[0]; ++i) // i is the X offset
         {
-            for (int j=0; j<mSlabSize[1]; ++j) // j is the Y offset
+            for (int j=0; j<mSlabSize[1]-1; ++j) // j is the Y offset
             {
                 offX = i * mDeltaX + mDeltaX/2;
                 offY = j * mDistance;
@@ -834,7 +834,7 @@ void SurfaceClass::findAllSites()
     for (int i=0; i<numOfSites; ++i)
     {
         mSelectedBindingSites.push_back(mBindingSites[i]);
-        std::cout << "This site IS within the specified radius/type" << std::endl;
+        //std::cout << "This site IS within the specified radius/type" << std::endl;
     }
 }
 
