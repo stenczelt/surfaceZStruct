@@ -33,15 +33,15 @@ int main(int argc , char* argv[])
     std::string surfaceType = xyzFile[1];
 
     int size = 3*numOfAtoms;
-    double* xyz = new double[size];
+    double* cartesianCoords = new double[size];
     std::string* atomicSymbols = new std::string[numOfAtoms];
 
-    parseVector(xyzFile, xyz, numOfAtoms, atomicSymbols);
+    parseVector(xyzFile, cartesianCoords, numOfAtoms, atomicSymbols);
     SurfaceClass aSurface;
     std::string outFName = "bindingSites.xyz";
     if (aSurface.setSurfaceType(surfaceType))
     {
-        aSurface.setAtoms(numOfAtoms, xyz, atomicSymbols);
+        aSurface.setAtoms(numOfAtoms, cartesianCoords, atomicSymbols);
 
         int numOfAtomsInLayer = aSurface.getSurfaceWidth() * aSurface.getSurfaceLength(); 
         int index = 0;
@@ -63,7 +63,7 @@ int main(int argc , char* argv[])
         aSurface.findNearbySites(index, radius, type);
         aSurface.writeToFile(outFName);
     }
-    delete [] xyz;
+    delete [] cartesianCoords;
     delete [] atomicSymbols;
     return (0);
 }
