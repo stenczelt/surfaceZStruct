@@ -8,7 +8,7 @@
 #include <cstring>
 #include <string>
 
-bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
+bool populateVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
                  std::string* inSymbols);
 
 int main(int argc , char* argv[])
@@ -36,7 +36,7 @@ int main(int argc , char* argv[])
     double* cartesianCoords = new double[size];
     std::string* atomicSymbols = new std::string[numOfAtoms];
 
-    parseVector(xyzFile, cartesianCoords, numOfAtoms, atomicSymbols);
+    populateVector(xyzFile, cartesianCoords, numOfAtoms, atomicSymbols);
     SurfaceClass aSurface;
     std::string outFName = "bindingSites.xyz";
     if (aSurface.setSurfaceType(surfaceType))
@@ -68,7 +68,7 @@ int main(int argc , char* argv[])
     return (0);
 }
 
-bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,
+bool populateVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,
                  std::string* inSymbols)
 {
     bool success = true;
@@ -85,7 +85,7 @@ bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,
         }
         ++k;
     }
-    int m =0;
+    int m = 0;
     for (auto l=inVec.begin()+2; l != inVec.end(); ++l)
     {
         std::string unwanted = "";
