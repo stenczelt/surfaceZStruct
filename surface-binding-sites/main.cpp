@@ -14,15 +14,15 @@ bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,
 int main(int argc , char* argv[])
 {
     std::vector<std::string> xyzFile; // vector to store the input file
-    if (argc != 3)
+    if (argc != 2)
     {   
         std::cout << "ERROR - wrong number of parameters" << std::endl;
-        std::cout << "Usage: " << argv[0] << " <surface type> <input file name> " << std::endl;
+        std::cout << "Usage: " << argv[0] << " <input file name> " << std::endl;
         return (1);
     }
     else // reading the input file
     {
-        std::ifstream inFile (argv[2]);
+        std::ifstream inFile (argv[1]);
         std::string newLine;
         while (std::getline(inFile, newLine))
         {
@@ -30,6 +30,7 @@ int main(int argc , char* argv[])
         }
     }
     int numOfAtoms = std::stoi(*(xyzFile.begin()));
+    std::string surfaceType = xyzFile[1]
 
     int size = 3*numOfAtoms;
     double* xyz = new double[size];
@@ -38,7 +39,7 @@ int main(int argc , char* argv[])
     parseVector(xyzFile, xyz, numOfAtoms, atomicSymbols);
     SurfaceClass aSurface;
     std::string outFName = "bindingSites.xyz";
-    if (aSurface.setSurfaceType(argv[1]))
+    if (aSurface.setSurfaceType(surfaceType)
     {
         aSurface.setAtoms(numOfAtoms, xyz, atomicSymbols);
 
