@@ -257,7 +257,7 @@ int SurfaceClass::findHollow()
             }
         }
     }
-    else if (mSurfaceType == "fcc110") //TODO fcc110-hollow: include the layer above mNthAtom
+    else if (mSurfaceType == "fcc110")
     {
         for (int i=0; i<mSlabSize[0]-1; ++i)
         {
@@ -282,10 +282,14 @@ int SurfaceClass::findHollow()
         double prevI = 0.5;
         for (int j=0; j<mSlabSize[1]; ++j)
         {
-            for (double i=prevI; i<limit; i=i+0.5)
+            for (double i=prevI; i<limit-0.5; i=i+0.5)
             {
                 double offX = i * mDeltaX;
-                double offY = j * mDistance + mDistance/2;
+                double offY = j * mDistance + mDistance/3;
+                if (i == floor(i))
+                {
+                    offY = j * mDistance + 2*mDistance/3;
+                }
                 double hollowX = mNthAtom[0] - offX;
                 double hollowY = mNthAtom[1] - offY;
                 double hollowZ = mNthAtom[2] + m_DELTA_Z;
