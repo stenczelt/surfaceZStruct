@@ -285,10 +285,14 @@ int SurfaceClass::findHollow()
             for (double i=prevI; i<limit-0.5; i=i+0.5)
             {
                 double offX = i * mDeltaX;
-                double offY = j * mDistance + mDistance/3;
-                if (i == floor(i))
+                double offY = j * mDistance + mDistance/3; // i whole number and j even OR i rational and j odd
+                if (i == floor(i) && j%2 == 0) // i whole number and j even
                 {
                     offY = j * mDistance + 2*mDistance/3;
+                }
+                else if (i != floor(i) && j%2 != 0)
+                {
+                    offY = j * mDistance + 2*mDistance/3; // i rational and j odd
                 }
                 double hollowX = mNthAtom[0] - offX;
                 double hollowY = mNthAtom[1] - offY;
