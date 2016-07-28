@@ -3,3 +3,7 @@
 *.o
 *.a
 *.xyz
+gsm-test/
+radius-test/
+radius-test-1R-2R/
+test/

@@ -1,0 +1,60 @@
+# Use this Makefile with make
+
+# Executable name
+CMD = align.exe
+
+# -------- description of DFLAGS ---------------
+
+
+# -------- Define environmental variable C_COMPILER -----------
+# Make sure it is defined
+#          ifeq ($(strip$(FORTRAN_COMPILER)),)
+# Otherwise you can define it here also by uncommenting next line
+#FC = icpc -gcc-name=gcc-4.5 -std=c++0x -openmp -I$(MKLROOT)/include
+FC = g++ -std=c++11 -I$(MKLROOT)/include
+# FC = g++ -fopenmp -I$(MKLROOT)/include
+DFLAGS =  #-Define the cpp flags to be used
+#DFLAGS =  #-Define the cpp flags to be used
+OFLAGS =  # optimization
+
+#Intel parallel openmp (only w/icpc compiler)
+#LINKERFLAGS =  -L$(MKLROOT)/lib/em64t -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lm
+#LINKERFLAGS =  -L$(MKLROOT)/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread 
+LINKERFLAGS =  -Wl,--no-as-needed -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
+# MAC OS linkers
+#LINKERFLAGS = -lm -framework Accelerate
+
+
+
+#
+# Implicit rules for handling src files
+#  ( uses static pattern rules, see info for make )
+.c.o:
+	$(FC) -c -g $(DFLAGS) -Wimplicit $<
+.cpp.o:
+	$(FC) -c -g $(DFLAGS) $<
+
+OBJECTS = main.o icoord.o pTable.o stringtools.o utils.o  mm_grad.o align.o  SurfaceClass.o BindingSiteClass.o
+
+$(CMD) : $(OBJECTS)
+	$(FC) $(DEBUG_FLAGS) $(OFLAGS) $(LINKERFLAGS) $(OBJECTS)  -o ./$(CMD)
+
+clean:
+	/bin/rm -f *.o *.i *.mod *.exe a.out make.log
+
+cleano:
+	rm -f *.o *.i
+
+depend :
+	g++ -MM *.cpp *.c >> Makefile 
+
+# DO NOT DELETE created with g++ -MM *.cpp *.c
+main.o: main.cpp icoord.h align.h
+align.o: align.cpp align.h icoord.h utils.h
+icoord.o: icoord.cpp icoord.h 
+mm_grad.o: mm_grad.cpp icoord.h
+pTable.o: pTable.cpp pTable.h
+stringtools.o: stringtools.cpp stringtools.h
+utils.o: utils.cpp utils.h
+SurfaceClass.o: SurfaceClass.cpp SurfaceClass.h 
+BindingSiteClass.o: BindingSiteClass.cpp BindingSiteClass.h

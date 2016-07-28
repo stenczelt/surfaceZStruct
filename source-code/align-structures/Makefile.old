@@ -1,0 +1,49 @@
+all: main.exe
+
+#main.exe: align.o icoord.o main.o pTable.o stringtools.o utils.o mm_grad.o mem.o iccomp.o zstruct.o mopac.o
+main.exe: align.o icoord.o main.o pTable.o stringtools.o utils.o mm_grad.o
+	#g++ -gdwarf-3 -O3 align.o icoord.o main.o pTable.o stringtools.o utils.o mm_grad.o mem.o iccomp.o zstruct.o mopac.o -o main.exe
+	g++ -gdwarf-3 -O3 align.o icoord.o main.o pTable.o stringtools.o utils.o mm_grad.o -o main.exe 
+
+align.o: align.cpp align.h
+	#g++ -std=c++11 -gdwarf-3 -c -O3 -Wall align.cpp -o align.o
+	g++ -gdwarf-3 -c -O3 -Wall align.cpp -o align.o
+
+icoord.o: icoord.cpp icoord.h
+	#g++ -std=c++11 -gdwarf-3 -c -O3 -Wall icoord.cpp -o icoord.o
+	g++ -gdwarf-3 -c -O3 -Wall icoord.cpp -o icoord.o
+
+main.o: main.cpp
+	#g++ -std=c++11 -gdwarf-3 -c -O3 -Wall main.cpp -o main.o
+	g++ -gdwarf-3 -c -O3 -Wall main.cpp -o main.o
+
+pTable.o: pTable.cpp pTable.h
+	g++ -gdwarf-3 -c -O3 -Wall pTable.cpp -o pTable.o
+
+#mm_grad.o: mm_grad.cpp
+#	g++ -gdwarf-3 -c -O3 -Wall mm_grad.cpp -o mm_grad.o
+
+#mem.o: mem.cpp
+#	g++ -gdwarf-3 -c -O3 -Wall mem.cpp -o mem.o
+
+#iccomp.o: iccomp.cpp
+#	g++ -gdwarf-3 -c -O3 -Wall iccomp.cpp -o iccomp.o
+
+stringtools.o: stringtools.cpp stringtools.h
+	g++ -gdwarf-3 -c -O3 -Wall stringtools.cpp -o stringtools.o
+	
+utils.o: utils.cpp utils.h constants.h
+	g++ -gdwarf-3 -c -O3 -Wall utils.cpp -o utils.o
+
+#zstruct.o: zstruct.cpp zstruct.h
+#	g++ -gdwarf-3 -c -O3 -Wall zstruct.cpp -o zstruct.o
+
+#mopac.o: mopac.cpp mopac.h
+#	g++ -gdwarf-3 -c -O3 -Wall mopac.cpp -o mopac.o
+
+mm_grad.o: mm_grad.cpp 
+	#g++ -std=c++11 -gdwarf-3 -c -O3 -Wall align.cpp -o align.o
+	g++ -gdwarf-3 -c -O3 -Wall mm_grad.cpp -o mm_grad.o
+
+clean: 
+	rm -rf main.exe align.o icoord.o main.o pTable.o stringtools.o utils.o #mm_grad.o mem.o #iccomp.o zstruct.o mopac.o
