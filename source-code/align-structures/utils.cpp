@@ -632,7 +632,8 @@ void order_array(int* olist, double* Ao, double* A, int na)
 double getRa(int* anumbers, int a1)
 {
   double value;
-  if	  (anumbers[a1]==1) value = 1.3;
+  if	  (anumbers[a1]==0) value = 1.0;
+  else if (anumbers[a1]==1) value = 1.3;
   else if (anumbers[a1]==3) value = 2.65; //PT
   else if (anumbers[a1]==4) value = 2.0; //PT
   else if (anumbers[a1]==5) value = 1.75;

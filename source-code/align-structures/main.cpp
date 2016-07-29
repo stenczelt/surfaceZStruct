@@ -106,14 +106,14 @@ int main(int argc, char* argv[])
     ic1.init(outFName);
     ic2.init(argv[2]);
 
-    Align alignObj;
-    alignObj.init(ic1.natoms,ic1.anames,ic1.anumbers,ic1.coords,ic2.natoms,ic2.anames,ic2.anumbers,ic2.coords);
+    //Align alignObj;
+    //alignObj.init(ic1.natoms,ic1.anames,ic1.anumbers,ic1.coords,ic2.natoms,ic2.anames,ic2.anumbers,ic2.coords);
 
-    int nadd = 1;
-    int* add = new int[4];
-    add[0] = 0; add[1] = 6; add[2] = 1; add[3] = 7;
-    alignObj.add_align(nadd,add);
-    alignObj.print_xyz();
+    //int nadd = 1;
+    //int* add = new int[4];
+    //add[0] = 0; add[1] = 6; add[2] = 1; add[3] = 7;
+    //alignObj.add_align(nadd,add);
+    //alignObj.print_xyz();
 
     delete [] slabCartesianCoords;
     delete [] slabAtomicSymbols;

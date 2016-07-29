@@ -77,7 +77,7 @@ double atom_masses[103]={-1.00,
 */
 
 double PTable::atom_mass(int anumber){
-   if ( (anumber>0) && (anumber<103) ) {
+   if ( (anumber>-2) && (anumber<103) ) {
       double mass=atom_masses[anumber];
       return mass;}
    else
@@ -95,7 +95,7 @@ int PTable::atom_number(string &aname){
    // The way it written it is a large loop, So be careful , 
    // dont use this a lot
    bool found= false;
-   for (int a=1; a<103; a++){ 
+   for (int a=-1; a<103; a++){ 
       // given the atom name find atom number
       if (aname==atom_symbol[a]){ found=true; return a;} 
    }

@@ -869,7 +869,7 @@ bool SurfaceClass::writeToFile(std::string &outFile)
     }
     for (unsigned int j=0; j<mSelectedBindingSites.size(); ++j)
     {
-        ofs << "x             ";
+        ofs << "X             ";
         ofs << mSelectedBindingSites[j].getX() << "            ";
         ofs << mSelectedBindingSites[j].getY() << "            ";
         ofs << mSelectedBindingSites[j].getZ() << "\n";

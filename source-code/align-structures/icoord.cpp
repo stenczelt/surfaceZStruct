@@ -774,7 +774,10 @@ void ICoord::get_xyzic()
 
   nxyzic = 0;
   for (int i=0;i<natoms;i++)
-    xyzic[i] = 0;
+  {
+      std::cout << "i: " << i << std::endl;
+      xyzic[i] = 0;
+  }
 
   for (int i=0;i<nbonds;i++)
   {
@@ -1321,7 +1324,7 @@ int ICoord::isTM(int a) {
 
 //may later be extended to all 5+ coord types
   int anum;
-  if (a>-1)
+  if (a>-2)
     anum = anumbers[a];
   else
     return 0;
@@ -1331,7 +1334,7 @@ int ICoord::isTM(int a) {
     TM = 2;
   else if (anum > 20)
   {
-    if (anum < 31)
+    if (anum < 31 || anum==-1)
       TM = 1;
     else if (38 < anum && anum < 49)
       TM = 1;
@@ -1348,7 +1351,8 @@ double ICoord::getR(int i){
   double value;
  
   int an = anumbers[i];
-  if      (an==1) value = 1.3;
+  if      (an==0) value = 1.0;
+  else if (an==1) value = 1.3;
   else if (an==3) value = 2.65; //PT
   else if (an==4) value = 2.0; //PT
   else if (an==5) value = 1.75;
@@ -1870,8 +1874,12 @@ void ICoord::freemem(){
 
 }
 
-
 void ICoord::alloc_mem(){
+ farBond = 1.0;
+ use_xyz = 0;
+
+ frozen = NULL;
+ xyzic = new int[natoms];
 
 // pgrad = new double[3*natoms];
  grad = new double[3*natoms];
@@ -1885,32 +1893,22 @@ void ICoord::alloc_mem(){
    bonds[i]=new int[2];
  bondd = new double[max_bonds];
 
- int max_bonds_tm = 25;
- /* bondstm = new int*[max_bonds_tm];
- for (int i=0;i<max_bonds_tm;i++)
-   bondstm[i] = new int[15]; //maximum is eta6
- bondstm2 = new int*[max_bonds_tm];
- for (int i=0;i<max_bonds_tm;i++)
-   bondstm2[i] = new int[15]; //maximum is eta6
-   */ // Mina
- 
-
  nangles = 0;
- max_angles=natoms*12; //was 24
+ max_angles=natoms*24;
  angles = new int*[max_angles];
  for (int i=0;i<max_angles;i++)
    angles[i]=new int[3];
  anglev = new double[max_angles];
 
  ntor = 0;
- max_torsions=natoms*20; //was 60
+ max_torsions=natoms*60;
  torsions = new int*[max_torsions];
  for (int i=0;i<max_torsions;i++)
    torsions[i] = new int[4];
  torv = new double[max_torsions];
 
  nimptor = 0;
- max_imptor=natoms*2; //was 10
+ max_imptor=natoms*10;
  imptor = new int*[max_imptor];
  for (int i=0;i<max_imptor;i++)
    imptor[i] = new int[4];
@@ -1931,9 +1929,5 @@ void ICoord::alloc_mem(){
  ffR = new double[natoms];
  ffeps = new double[natoms];
 
- // Mina q1 = 0;
- //Mina s1 = 0;
-
  return;
 }
-
