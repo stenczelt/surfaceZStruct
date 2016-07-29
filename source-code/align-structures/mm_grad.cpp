@@ -1,7 +1,3 @@
-// Please see license.txt for licensing and copyright information //
-// Author: Paul Zimmerman, University of Michigan //
-
-
 #include "icoord.h"
 #include "utils.h"
 using namespace std;
@@ -27,12 +23,6 @@ void ICoord::mm_init(){
 //VDW 1.4
       ffR[i] = 1.4;
       ffeps[i] = 0.002;
-    }
-    else if (anumbers[i] == 3)
-    {
-//VDW 1.4
-      ffR[i] = 2.5;
-      ffeps[i] = 0.003;
     }
     else if (anumbers[i] == 5)
     {
@@ -68,126 +58,47 @@ void ICoord::mm_init(){
       ffR[i] = 1.6;
       ffeps[i] = 0.0005;
     }
-    else if (anumbers[i] == 11) //Na
-    {
-      ffR[i] = 3.0;
-      ffeps[i] = 0.002;
-    }
-    else if (anumbers[i] == 12) //Mg
-    {
-      ffR[i] = 3.0;
-      ffeps[i] = 0.002;
-    }
     else if (anumbers[i] == 13)
     {
-      ffR[i] = 2.6;
+      ffR[i] = 2.8;
       ffeps[i] = 0.002;
+      //ffq[i] = 0.0;
     }
     else if (anumbers[i] == 14)
     {
       ffR[i] = 2.1;
       ffeps[i] = 0.002;
+      //ffq[i] = 0.0;
     }
     else if (anumbers[i] == 15)
     {
       ffR[i] = 1.8;
       ffeps[i] = 0.002;
+      //ffq[i] = 0.0;
     }
     else if (anumbers[i] == 16)
     {
       ffR[i] = 1.8;
       ffeps[i] = 0.002;
+      //ffq[i] = -0.15;
     }
     else if (anumbers[i] == 17)
     {
       ffR[i] = 1.8;
       ffeps[i] = 0.002;
-    }
-    else if (anumbers[i] == 26)
-    {
-      ffR[i] = 2.5;
-      ffeps[i] = 0.005;
+      //ffq[i] = -0.3;
     }
     else if (anumbers[i] == 27)
     {
-      ffR[i] = 2.5;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 28)
-    {
-      ffR[i] = 2.6;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 29)
-    {
-      ffR[i] = 2.7;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 35)
-    {
-      ffR[i] = 3.7;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 40)
-    {
-      ffR[i] = 3.5;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 46)
-    {
-      ffR[i] = 3.0;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 47)
-    {
-      ffR[i] = 2.9;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 48)
-    {
-      ffR[i] = 3.0;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 49)
-    {
-      ffR[i] = 3.1;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 73)
-    {
-      ffR[i] = 3.3;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 77)
-    {
-      ffR[i] = 3.5;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 78)
-    {
-      ffR[i] = 3.5;
-      ffeps[i] = 0.005;
-    }
-    else if (anumbers[i] == 79)
-    {
-      ffR[i] = 3.6;
+//VDW ??
+      ffR[i] = 2.0;
       ffeps[i] = 0.005;
     }
     else
-      printf(" mm_grad not implemented for element %2i \n",anumbers[i]);
+      printf(" Problem with mm_init() \n");
   }
 
   return;
-}
-
-/*
-double ICoord::mm_energy()
-{
-  double E = 0;
-  E += vdw_energy_all();
-  //others not yet implemented
-
-  return E;
 }
 
 int ICoord::mm_grad(){
@@ -195,14 +106,14 @@ int ICoord::mm_grad(){
   for (int i=0;i<3*natoms;i++)
     grad[i] = 0;
 
-//  bond_grad_all();
-//  angle_grad_all();
+  bond_grad_all();
+  angle_grad_all();
   vdw_grad_all();  
 
   //torsion_grad not yet complete
   //torsion_grad_all();
 
-//  imptor_grad_all();
+  imptor_grad_all();
 
   pgradrms = gradrms;
   gradrms = 0;
@@ -248,7 +159,7 @@ int ICoord::mm_grad(ICoord shadow){
 void ICoord::vdw_grad_all(){
 
   for (int i=0;i<n_nonbond;i++)
-    vdw_grad_1(nonbond[i][0],nonbond[i][1]);
+    vdw_grad_1(nonbond[i][0],nonbond[i][1],1.0);
 
   return;
 }
@@ -285,33 +196,7 @@ void ICoord::imptor_grad_all(){
   return;
 }
 
-double ICoord::vdw_energy_all()
-{
-  double E = 0;
-  for (int i=0;i<n_nonbond;i++)
-    E += vdw_energy_1(nonbond[i][0],nonbond[i][1]);
-
-  return E;
-}
-
-double ICoord::vdw_energy_1(int i, int j)
-{
-  double R = ffR[i] + ffR[j];
-  double eps = sqrt( ffeps[i] * ffeps[j] );
-
-  double r = distance(i,j);
-
-//  printf(" R: %1.4f r: %1.4f \n",R,r);
-  double Rr = R / r;
-  double Rr6 = Rr*Rr*Rr;
-  Rr6 = Rr6*Rr6;
-
-  double E = eps * ( Rr6*Rr6 - 2*Rr6 );
-
-  return E;
-}
-
-void ICoord::vdw_grad_1(int i, int j){
+void ICoord::vdw_grad_1(int i, int j, double scale){
 
   double R = ffR[i] + ffR[j];
   double eps = sqrt( ffeps[i] * ffeps[j] );
@@ -329,13 +214,69 @@ void ICoord::vdw_grad_1(int i, int j){
   double Rr6 = Rr2*Rr2*Rr2;
   
   double t = - eps * Rr6 * Rr2 * (-12 * Rr6 + 12) / R / R;
-//  printf(" t on %i %i is: %1.4f \n",i,j,t);
- // t *= -1; //CPMZ TMP
-  if (t>0.5)
+  t = scale*t/627.5; //convert back to a.u.
+  //printf(" t on %i %i is: %1.4f \n",i,j,t);
+ 
+  if (t>30.5) t = 30.5;
+  //if (t<-0.5) t = -0.5;
+  if ((i==3 && j==10) || (i==10 && j==3))
+    printf(" %i %i connection, t: %4.2f \n",i+1,j+1,t);
+
+#if 1
+  grad[3*i+0] += t*dx[0];
+  grad[3*i+1] += t*dx[1];
+  grad[3*i+2] += t*dx[2];
+  grad[3*j+0] -= t*dx[0];
+  grad[3*j+1] -= t*dx[1];
+  grad[3*j+2] -= t*dx[2];
+#else
+  grad[3*i+0] = t*dx[0];
+  grad[3*i+1] = t*dx[1];
+  grad[3*i+2] = t*dx[2];
+  grad[3*j+0] = -t*dx[0];
+  grad[3*j+1] = -t*dx[1];
+  grad[3*j+2] = -t*dx[2];
+#endif
+ 
+  delete [] dx;
+
+  return;
+}
+
+double ICoord::bond_stretch(int i, int j) {
+ 
+  return distance(i,j) - ffbondd(i,j);
+}
+
+
+
+void ICoord::lin_grad_1(int i, int j, double scale){
+
+  //printf(" grad on: %i %i scale: %3.2f \n",i,j,scale);
+  if (i==j) 
   {
-   // printf(" t: %4.1f",t);
-   t = 0.5;
+    printf(" i==j in lin_grad_1 \n");
+    exit(1);
   }
+  //if (abs(scale)>0.01) printf(" grad on: %i %i scale: %3.2f \n",i,j,scale);
+
+  double* dx = new double[3];
+  dx[0] = coords[3*i+0]-coords[3*j+0];
+  dx[1] = coords[3*i+1]-coords[3*j+1];
+  dx[2] = coords[3*i+2]-coords[3*j+2];
+
+  double norm = ( dx[0]*dx[0] + dx[1]*dx[1] + dx[2]*dx[2] );
+  norm = sqrt(norm);
+  dx[0] = dx[0] / norm;
+  dx[1] = dx[1] / norm;
+  dx[2] = dx[2] / norm;
+  //printf(" norm: %3.2f \n",norm);
+ 
+  double t = scale;
+  double TMAX = 0.5;
+  if (abs(t) > TMAX) t = sign(t)*TMAX;
+  //printf(" magnitude of gradient on %i %i: %1.4f, current stretch: %1.4f \n",i,j,t,d);
+  //printf(" equilibrium distance: %1.4f energy: %1.4f \n",ffbondd(i,j),ffbonde(i,j));
   grad[3*i+0] += t*dx[0];
   grad[3*i+1] += t*dx[1];
   grad[3*i+2] += t*dx[2];
@@ -348,22 +289,22 @@ void ICoord::vdw_grad_1(int i, int j){
   return;
 }
 
-double ICoord::bond_stretch(int i, int j) {
- 
-  return distance(i,j) - ffbondd(i,j);
-}
 
 void ICoord::bond_grad_1(int i, int j){
+
+  //printf(" grad on: %i %i \n",i,j);
 
   double* dx = new double[3];
   dx[0] = coords[3*i+0]-coords[3*j+0];
   dx[1] = coords[3*i+1]-coords[3*j+1];
   dx[2] = coords[3*i+2]-coords[3*j+2];
 
-//  double d = ( distance(i,j) - ffbondd(i,j) );
-  double d = bond_stretch(i,j);
+  double d = ( distance(i,j) - ffbondd(i,j)*2. );
+//  double d = bond_stretch(i,j);
   
-  double t = - d * ffbonde(i,j);
+  double t = d * ffbonde(i,j);
+  double TMAX = 0.005;
+  if (abs(t) > TMAX) t = sign(t)*TMAX;
   //printf(" magnitude of gradient on %i %i: %1.4f, current stretch: %1.4f \n",i,j,t,d);
   //printf(" equilibrium distance: %1.4f energy: %1.4f \n",ffbondd(i,j),ffbonde(i,j));
   grad[3*i+0] += t*dx[0];
@@ -478,10 +419,13 @@ void ICoord::torsion_grad_1(int i, int j, int k, int l){
 // this term must be updated:
 //fftorm(i,j,k,l)
 //  printf(" sin(0): %1.4f \n",sin(angle - fftord(i,j,k,l)*3.14/180));
-  double dEdphi = 2 * fftore(i,j,k,l) * sin(angle - fftord(i,j,k,l)*3.14159/180);
 
-  printf(" grad mag on torsion %i %i %i %i: %1.4f, angle: %1.4f \n",i,j,k,l,dEdphi,angle*180/3.14);
-  printf(" equilibrium distance: %1.4f energy: %1.4f \n",fftord(i,j,k,l),fftore(i,j,k,l));
+//  double dEdphi = 2 * fftore(i,j,k,l) * sin(angle - fftord(i,j,k,l)*3.14159/180);
+//below from imptord with a minus sign
+  double dEdphi = 2 * ffimptore(i,j,k,l) * sin(fftord(i,j,k,l) - angle);
+
+  //printf(" grad mag on torsion %i %i %i %i: %1.4f, angle: %1.4f \n",i,j,k,l,dEdphi,angle*180/3.14);
+  //printf(" equilibrium distance: %1.4f energy: %1.4f \n",fftord(i,j,k,l),fftore(i,j,k,l));
 
   double* S = new double[3];
   double* Fi = new double[3];
@@ -563,20 +507,7 @@ void ICoord::imptor_grad_1(int i, int j, int k, int l){
 //w  double dEdphi = 2 * ffimptore(i,j,k,l) * angle;
 //  double dEdphi = 2 * ffimptore(i,j,k,l) * angle;
 //old flat only  double dEdphi = -2 * ffimptore(i,j,k,l) * sin(3.14159 - angle);
-  double dAngle;
-  double dEdphi; 
-  if (angle>=0)
-  {
-    dAngle = ffimptord(i,j,k,l) - angle;
-    dEdphi = -2 * ffimptore(i,j,k,l) * sin(dAngle);
-  //  printf(" dAngle1: %1.1f ffimptord: %1.1f angle: %1.1f \n",dAngle,ffimptord(i,j,k,l),angle);
-  }
-  else
-  {
-    dAngle = (ffimptord(i,j,k,l) + angle);
-    dEdphi = -2 * ffimptore(i,j,k,l) * sin(-dAngle);
-  //  printf(" dAngle2: %1.1f ffimptord: %1.1f angle: %1.1f \n",dAngle,-ffimptord(i,j,k,l),angle);
-  }
+  double dEdphi = -2 * ffimptore(i,j,k,l) * sin(ffimptord(i,j,k,l) - angle);
 
 //  printf(" grad mag on imptor %i %i %i %i: %1.4f, angle: %1.4f \n",i,j,k,l,dEdphi,angle*180/3.14);
 //  printf(" equilibrium distance: %1.4f energy: %1.4f \n",180.0,ffimptore(i,j,k,l));
@@ -629,12 +560,6 @@ double ICoord::ffbondd(int i, int j){
     return 1.1;
   else if (anumbers[i]==7 && anumbers[j]==1)
     return 1.1;
-  else if (anumbers[i]==6 && anumbers[j]==7)
-    return 1.45;
-  else if (anumbers[i]==7 && anumbers[j]==6)
-    return 1.45;
-  else if (anumbers[i]==7 && anumbers[j]==7)
-    return 1.4;
   else if (anumbers[i]==1 && anumbers[j]==8)
     return 1.0;
   else if (anumbers[i]==8 && anumbers[j]==1)
@@ -653,38 +578,10 @@ double ICoord::ffbondd(int i, int j){
     return 1.33;
   else if (anumbers[i]==9 && anumbers[j]==6)
     return 1.33;
-  else if (anumbers[i]==1 && anumbers[j]==13)
-    return 1.6;
-  else if (anumbers[i]==13 && anumbers[j]==1)
-    return 1.6;
-  else if (anumbers[i]==1 && anumbers[j]==15)
-    return 1.44;
-  else if (anumbers[i]==15 && anumbers[j]==1)
-    return 1.44;
-  else if (anumbers[i]==1 && anumbers[j]==16)
-    return 1.35;
-  else if (anumbers[i]==16 && anumbers[j]==1)
-    return 1.35;
-  else if (anumbers[i]==1 && anumbers[j]==17)
-    return 1.33;
-  else if (anumbers[i]==17 && anumbers[j]==1)
-    return 1.33;
-  else if (anumbers[i]==1 && anumbers[j]==73)
-    return 1.75;
-  else if (anumbers[i]==73 && anumbers[j]==1)
-    return 1.75;
-  else if (anumbers[i]==7 && anumbers[j]==73)
-    return 2.15;
-  else if (anumbers[i]==73 && anumbers[j]==7)
-    return 2.15;
-  else if (anumbers[i]==8 && anumbers[j]==73)
-    return 1.9;
-  else if (anumbers[i]==73 && anumbers[j]==8)
-    return 1.9;
   else
   {
 //    printf(" no bond params found for %i %i \n",i,j);
-    return (getR(i)+getR(j))/2.2; //was 2
+    return (getR(i)+getR(j))/2;
   }
 }
 
@@ -714,12 +611,12 @@ double ICoord::ffanglee(int i, int j){
 
 double ICoord::fftord(int i, int j, int k, int l){
 
-   return 120;
+   return 0.;
 }
 
 double ICoord::fftore(int i, int j, int k, int l){
 
-   return 0.05;
+   return 0.1;
 }
 
 double ICoord::fftorm(int i, int j, int k, int l){
@@ -732,8 +629,8 @@ double ICoord::ffimptore(int i, int j, int k, int l){
 
 //  printf(" in imptore, ijkl: %i %i %i %i \n",i,j,k,l);
 //  printf(" k anumber: %i \n",anumbers[k]);
-#if 1
-  if (anumbers[k]==7)
+#if 0
+  if (anumbers[k]==6)
     return 0.15;
   else
 #endif
@@ -751,7 +648,7 @@ double ICoord::ffimptord(int i, int j, int k, int l){
 
 void ICoord::print_grad(){
   
-  printf(" Gradient:\n");
+  printf(" Gradient in XYZ:\n");
   for (int i=0;i<natoms;i++)
   {
     printf(" %1.4f %1.4f %1.4f \n",grad[3*i+0],grad[3*i+1],grad[3*i+2]);
@@ -759,4 +656,3 @@ void ICoord::print_grad(){
 
   return;
 }
-*/
