@@ -77,6 +77,7 @@ class Align
         double norm(double* x, int size);
         void get_rotation_matrix(double** rotMat, double* thetas);
         void print_xyz_gen(int natoms, string* anames, double* coords);
+        void align_to_Z(int numOfAtoms, double* cartesians, string* atomicNames);
 
 };
 

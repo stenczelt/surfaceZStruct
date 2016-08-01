@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     int add[2] = {29, 60};
     alignObj.add_align(nadd, add);
     std::cout << "After alignment: \n\n"; 
-//    alignObj.print_xyz();
+    alignObj.print_xyz();
     
 
     delete [] slabCartesianCoords;

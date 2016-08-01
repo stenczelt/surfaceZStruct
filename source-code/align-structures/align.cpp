@@ -50,6 +50,15 @@ int Align::get_bonds(int atom1, ICoord ic1, int* bonded)
     return nfound;
 }
 
+void Align::align_to_Z(int numOfAtoms, double* cartesians, string* atomicNames)
+{
+    // convert to polar coordinates
+    double radius, theta, phi = 0.0;
+    double polarCoords[numOfAtoms][3]; // 3 : r, theta, phi
+    
+}
+
+/*
 void Align::align_to_x(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames, int sign, double offset)
 {
     //printf(" aligning structure near to x axis, sign: %i offset: %3.2f (degrees) \n",sign,offset);
@@ -70,6 +79,7 @@ void Align::align_to_x(int numOfAtoms, int t1, int t2, double* xyz, string* atom
     x1[0] = xyz[3*t2+0] - xyz[3*t1+0];
     x1[1] = xyz[3*t2+1] - xyz[3*t1+1];
     x1[2] = xyz[3*t2+2] - xyz[3*t1+2];
+    std::cout << x1[0] << "  " << x1[1] << "  " << x1[2] << "@@@@@@@@@\n";
 
     double n1 = norm(x1,3);
     for (int i=0;i<3;i++) x1[i] = x1[i]/n1;
@@ -214,7 +224,7 @@ void Align::align_to_x(int numOfAtoms, int t1, int t2, double* xyz, string* atom
 
     return;
 }
-
+*/
 void Align::rotate_around_x(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz)
 {
     //printf("  rotating fragment around x axis: %3.2f (degrees) \n",torv);
@@ -461,8 +471,8 @@ void Align::add_align(int nadd1, int* add1)
 
     //get v1's for all add atoms
     // TODO: magic numbers??
-    double* v1a = new double[3*nadd1];
-    for (int i=0;i<3*nadd1;i++) v1a[i] = 0.;
+//    double* v1a = new double[3*nadd1];
+//    for (int i=0;i<3*nadd1;i++) v1a[i] = 0.;
     //double* v1b = new double[3*nadd1];
     //for (int i=0;i<3*nadd1;i++) v1b[i] = 0.;
     double* v1b = new double[3]; //x, y, z, coordinate
@@ -511,8 +521,8 @@ void Align::add_align(int nadd1, int* add1)
 
             //TODO: This should be surface normal at the binding site
             //first atom's vector
-            v1a[0] = v1a[1] = 0.0;
-            v1a[2] = 1.0;
+//            v1a[0] = v1a[1] = 0.0;
+//            v1a[2] = 1.0;
             /*
             for (int j=0;j<nbondsatom1;j++)
             {
@@ -614,7 +624,7 @@ void Align::add_align(int nadd1, int* add1)
     {
         for (int j=0;j<3;j++)
         {
-            v2[j]   += v1a[3*i+j];
+            //v2[j]   += v1a[3*i+j];
             v2[3+j] += v1b[3*i+j];
         }
     }
@@ -698,9 +708,9 @@ void Align::add_align(int nadd1, int* add1)
     int atom2 = add1[2*0+1];
     //double center[3] = {1.276328, 3.828983, 13.305000};
     double centerSurface[3], centerAdsorbate[3], displacement[3] = {0.0, 0.0, 0.0};
-    centerSurface[0] = xyz1[3*atom1+0];
-    centerSurface[1] = xyz1[3*atom1+1];
-    centerSurface[2] = xyz1[3*atom1+2];
+    centerSurface[0] = xyz1[3*(atom1-1)+0];
+    centerSurface[1] = xyz1[3*(atom1-1)+1];
+    centerSurface[2] = xyz1[3*(atom1-1)+2];
 
     // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
     // == order is preserved
@@ -713,7 +723,7 @@ void Align::add_align(int nadd1, int* add1)
     displacement[0] = centerSurface[0] - centerAdsorbate[0];
     displacement[1] = centerSurface[1] - centerAdsorbate[1];
     displacement[2] = centerSurface[2] - centerAdsorbate[2] + DELTA_Z;
-    std::cout << "*****" << centerSurface[0] << "******" << centerAdsorbate[0] << "*****" 
+    std::cout << "*****" << centerSurface[0] << "******" << centerSurface[1] << "******" << centerAdsorbate[0] << "*****" 
               << displacement[0] << std::endl;
     
     //move geometry to center
@@ -753,27 +763,27 @@ void Align::add_align(int nadd1, int* add1)
     //print_xyz_gen(numOfAtoms2+2,atomicNames2a,xyz2a);
 
 
-    /*
+    std::cout << v2[3] << "  " << v2[4] << "  " << v2[5] << "\n";
     //align v2 along x/-x direction
-    int t1 = numOfAtoms1;
-    int t2 = numOfAtoms1+1;
-    align_to_x(numOfAtoms1+2,t1,t2,xyz1a,atomicNames1a,1,10.);
-    t1 = numOfAtoms2;
-    t2 = numOfAtoms2+1;
-    align_to_x(numOfAtoms2+2,t1,t2,xyz2a,atomicNames2a,-1,10.); //TODO: magic numbers??
+    //int t1 = numOfAtoms1;
+    //int t2 = numOfAtoms1+1;
+    //align_to_x(numOfAtoms1+2,t1,t2,xyz1a,atomicNames1a,1,10.);
+    //int t1 = numOfAtoms2;
+    //int t2 = numOfAtoms2+1;
+    //align_to_x(numOfAtoms2+2,t1,t2,xyz2a,atomicNames2a,-1,10.); //TODO: magic numbers??
 
     //print_xyz_gen(numOfAtoms1+2,atomicNames1a,xyz1a);
     //print_xyz_gen(numOfAtoms2+2,atomicNames2a,xyz2a);
 
     //face each other at X Angstroms
     double X = 8.;
-    for (int i=0;i<3*numOfAtoms1;i++)
-        xyz1[i] = xyz1a[i];
+    //for (int i=0;i<3*numOfAtoms1;i++)
+        //xyz1[i] = xyz1a[i];
     for (int i=0;i<3*numOfAtoms2;i++)
         xyz2[i] = xyz2a[i];
     for (int i=0;i<numOfAtoms2;i++)
         xyz2[3*i+0] += X;
-*/
+
 
 /* TODO
     //prepare for vdw opt
@@ -862,7 +872,7 @@ void Align::add_align(int nadd1, int* add1)
     delete [] xyz2a;
 
     delete [] v2;
-    delete [] v1a;
+    //delete [] v1a;
     delete [] v1b;
     delete [] bonded1;
     delete [] bonded2;
