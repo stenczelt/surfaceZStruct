@@ -1194,3 +1194,12 @@ double Utils::vecMag(double* u, int LEN){
   return vm;
 }
 
+double Utils::norm(double* x, int size)
+{
+  double val = 0.; 
+  for (int i=0;i<size;i++)
+    val += x[i]*x[i];
+  val = sqrt(val);
+
+  return val;
+}

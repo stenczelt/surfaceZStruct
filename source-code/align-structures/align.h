@@ -65,6 +65,7 @@ class Align
                   int numOfAtoms2i, string* atomicNames2i, int* anumbers2i, double* xyz2i);
         void add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, double* xyz3i);
         void align_zero();
+        //void add_align(int nadd1, int* add1, double zBindingSite);
         void add_align(int nadd1, int* add1);
         int add_align_v(int nadd1, int* add1, int wtm, double* aprv);
         void shuttle_align(int nadd1, int* add1);
@@ -73,7 +74,9 @@ class Align
         void print_xyz_3();
 
         void freemem();
-        //double norm(double* x, int size);
+        double norm(double* x, int size);
+        void get_rotation_matrix(double** rotMat, double* thetas);
+        void print_xyz_gen(int natoms, string* anames, double* coords);
 
 };
 

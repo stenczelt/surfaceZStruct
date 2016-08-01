@@ -2,6 +2,7 @@
 // Author: Paul Zimmerman, University of Michigan //
 
 
+#include <algorithm>
 #include "align.h"
 using namespace std;
 
@@ -21,7 +22,7 @@ int Align::check_frag(int atom1, int atom2)
     return same_frag;
 }
 
-int Align::check_frag_3(int atom1, int atom2)
+/*int Align::check_frag_3(int atom1, int atom2)
 {
     int f1,f2;
     if (atom1<numOfAtoms1+numOfAtoms2) f1 = 1;
@@ -33,7 +34,7 @@ int Align::check_frag_3(int atom1, int atom2)
     if (f1!=f2) same_frag = 0;
 
     return same_frag;
-}
+}*/
 
 int Align::get_bonds(int atom1, ICoord ic1, int* bonded)
 {
@@ -449,6 +450,7 @@ void Align::align_zero()
   return;
 }
 
+//void Align::add_align(int nadd1, int* add1, double zBindingSite)
 void Align::add_align(int nadd1, int* add1)
 {
     if (inited==0)
@@ -457,37 +459,30 @@ void Align::add_align(int nadd1, int* add1)
         return;
     }
 
-#if 0
-    printf("\n in add_align, adding:");
-    for (int i=0;i<nadd1;i++)
-        printf(" %i-%i",add1[2*i+0]+1,add1[2*i+1]+1);
-    printf("\n");
-    //printf(" in add_align numOfAtoms1: %i numOfAtoms2: %i \n",numOfAtoms1,numOfAtoms2);
-#endif
-
     //get v1's for all add atoms
     // TODO: magic numbers??
     double* v1a = new double[3*nadd1];
     for (int i=0;i<3*nadd1;i++) v1a[i] = 0.;
-    double* v1b = new double[3*nadd1];
-    for (int i=0;i<3*nadd1;i++) v1b[i] = 0.;
-    double* c1 = new double[6]; //center points
+    //double* v1b = new double[3*nadd1];
+    //for (int i=0;i<3*nadd1;i++) v1b[i] = 0.;
+    double* v1b = new double[3]; //x, y, z, coordinate
+    for (int i=0;i<3;i++) v1b[i] = 0.;
+    //double* c1 = new double[6]; //center points
 
     int* bonded1 = new int[8];
     int* bonded2 = new int[8];
-    int* bonded3 = new int[8];
+//    int* bonded3 = new int[8];
 
-    ICoord ic1,ic2;
+    // TODO: There is a Align::init which is called before calling "add_align"
+    // function, so why repeating it here?
+    ICoord ic1, ic2;
     ic1.init(numOfAtoms1,atomicNames1,anumbers1,xyz1);
     ic1.make_frags();
     ic1.bond_frags();
-    //ic1.ic_create_nobonds();
-    //ic1.print_bonds();
+
     ic2.init(numOfAtoms2,atomicNames2,anumbers2,xyz2);
     ic2.make_frags();
     ic2.bond_frags();
-    //ic2.ic_create_nobonds();
-    //ic2.print_bonds();
 
     int npf1 = 0;
     int npf2 = 0;
@@ -498,7 +493,8 @@ void Align::add_align(int nadd1, int* add1)
     {
         int atom1 = add1[2*i+0];
         int atom2 = add1[2*i+1];
-        int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; } // swap()
+        //int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; }
+        if (atom1>atom2) {std::swap(atom1, atom2);}
 
         int same_frag = check_frag(atom1,atom2);
         //printf(" atom1: %i atom2: %i same_frag: %i \n",atom1+1,atom2+1,same_frag);
@@ -506,31 +502,25 @@ void Align::add_align(int nadd1, int* add1)
         if (!same_frag)
         {
             found = 1;
-            int nbondsatom1, nbondsatom2;
-            nbondsatom1 = get_bonds(atom1,ic1,bonded1);
+            //int nbondsatom1, nbondsatom2;
+            int nbondsatom2 = 0;
+            // int nbondsatom2;
+            // TODO: we can use this to see if the binding site is available
+            //nbondsatom1 = get_bonds(atom1,ic1,bonded1);
             nbondsatom2 = get_bonds(atom2,ic2,bonded2);
 
+            //TODO: This should be surface normal at the binding site
             //first atom's vector
+            v1a[0] = v1a[1] = 0.0;
+            v1a[2] = 1.0;
+            /*
             for (int j=0;j<nbondsatom1;j++)
             {
                 v1a[3*nvf1+0] += xyz1[3*atom1+0] - xyz1[3*bonded1[j]+0];
                 v1a[3*nvf1+1] += xyz1[3*atom1+1] - xyz1[3*bonded1[j]+1];
                 v1a[3*nvf1+2] += xyz1[3*atom1+2] - xyz1[3*bonded1[j]+2];
             }
-#if 0
-            if (nbondsatom1==1 && ic1.coordn[bonded1[0]]==3)
-            {
-                int atom1c = bonded1[0];
-                int nbondsatom1c = get_bonds(atom1c,ic1,bonded3)
-                    double imptorv = ic1.torsion_val(bonded3[0],atom1,bonded3[1],bonded3[2]);
-                //printf("  imptorv: %4.2f \n",imptorv);
-                if (fabs(imptorv)>175.)
-                {
-                    //printf("  using oop v1 \n");
-                    planar_cross(&v1a[3*nvf1],a3,bonded3,xyz1);
-                }
-            }
-#endif
+
             if (nbondsatom1==2)
             {
                 double anglev = ic1.angle_val(bonded1[0],atom1,bonded1[1]);
@@ -558,15 +548,9 @@ void Align::add_align(int nadd1, int* add1)
             double n1 = norm(&v1a[3*nvf1],3);
             for (int j=0;j<3;j++)
                 v1a[3*nvf1+j] = v1a[3*nvf1+j] / n1;
-#if 0
-            printf(" v1a(atom1): \n");
-            for (int j=0;j<3;j++)
-                printf(" %4.3f",v1a[3*nvf1+j]);
-            printf("\n");
-#endif
 
             nvf1++;
-
+            */
 
             //second atom's vector
             for (int j=0;j<nbondsatom2;j++)
@@ -599,15 +583,9 @@ void Align::add_align(int nadd1, int* add1)
             {
                 align_v1(nvf2+1,v1b);
             }
-            n1 = norm(&v1b[3*nvf2],3);
+            double n1 = norm(&v1b[3*nvf2],3);
             for (int j=0;j<3;j++)
                 v1b[3*nvf2+j] = v1b[3*nvf2+j] / n1;
-#if 0
-            printf(" v1b(atom2): \n");
-            for (int j=0;j<3;j++)
-                printf(" %4.3f",v1b[3*nvf2+j]);
-            printf("\n");
-#endif
 
             nvf2++;
 
@@ -629,15 +607,16 @@ void Align::add_align(int nadd1, int* add1)
 #endif
 
 
-    //averaging over v1 to get v2
+    //averaging over v1a and v1b to get v2
     double* v2 = new double[6];
     for (int i=0;i<6;i++) v2[i] = 0.;
-    for (int i=0;i<nadd1;i++)
+    for (int i=0;i<nadd1;i++) // why averaging over all adds ??
     {
         for (int j=0;j<3;j++)
+        {
             v2[j]   += v1a[3*i+j];
-        for (int j=0;j<3;j++)
             v2[3+j] += v1b[3*i+j];
+        }
     }
 
     double n1 = norm(v2,3);
@@ -679,6 +658,7 @@ void Align::add_align(int nadd1, int* add1)
     printf("\n");
 #endif
 
+/*
     //get central location for each
     int cfound = 0;
     for (int i=0;i<6;i++) c1[i] = 0.;
@@ -695,9 +675,10 @@ void Align::add_align(int nadd1, int* add1)
             //printf(" c1 for %i-%i \n",atom1+1,atom2+1);
             cfound++;
             for (int j=0;j<3;j++)
+            {
                 c1[j]   += xyz1[3*atom1+j];
-            for (int j=0;j<3;j++)
                 c1[3+j] += xyz2[3*atom2+j];
+            }
         }
     } //loop i over nadd
     if (cfound>1)
@@ -710,48 +691,76 @@ void Align::add_align(int nadd1, int* add1)
         printf(" %4.3f",c1[j]);
     printf("\n");
 #endif
+*/
+    //get binding site coordinates
+    //TODO: implement a function and call it in main
+    int atom1 = add1[2*0+0];
+    int atom2 = add1[2*0+1];
+    //double center[3] = {1.276328, 3.828983, 13.305000};
+    double centerSurface[3], centerAdsorbate[3], displacement[3] = {0.0, 0.0, 0.0};
+    centerSurface[0] = xyz1[3*atom1+0];
+    centerSurface[1] = xyz1[3*atom1+1];
+    centerSurface[2] = xyz1[3*atom1+2];
 
+    // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
+    // == order is preserved
+    atom2 -= numOfAtoms1;
+    centerAdsorbate[0] = xyz2[3*(atom2-1)+0];
+    centerAdsorbate[1] = xyz2[3*(atom2-1)+1];
+    centerAdsorbate[2] = xyz2[3*(atom2-1)+2];
 
+    const double DELTA_Z = 3.0;
+    displacement[0] = centerSurface[0] - centerAdsorbate[0];
+    displacement[1] = centerSurface[1] - centerAdsorbate[1];
+    displacement[2] = centerSurface[2] - centerAdsorbate[2] + DELTA_Z;
+    std::cout << "*****" << centerSurface[0] << "******" << centerAdsorbate[0] << "*****" 
+              << displacement[0] << std::endl;
+    
     //move geometry to center
-    double* xyz1a = new double[3*(numOfAtoms1+2)];
+    //double* xyz1a = new double[3*(numOfAtoms1+2)]; //TODO: +2 ??
     double* xyz2a = new double[3*(numOfAtoms2+2)];
-    string* atomicNames1a = new string[numOfAtoms1+2];
+    //string* atomicNames1a = new string[numOfAtoms1+2];
     string* atomicNames2a = new string[numOfAtoms2+2];
-    for (int i=0;i<numOfAtoms1;i++) atomicNames1a[i] = atomicNames1[i];
-    atomicNames1a[numOfAtoms1] = "X";
-    atomicNames1a[numOfAtoms1+1] = "X";
+    //for (int i=0;i<numOfAtoms1;i++) atomicNames1a[i] = atomicNames1[i];
+    //atomicNames1a[numOfAtoms1] = "X";
+    //atomicNames1a[numOfAtoms1+1] = "X";
     for (int i=0;i<numOfAtoms2;i++) atomicNames2a[i] = atomicNames2[i];
     atomicNames2a[numOfAtoms2] = "X";
     atomicNames2a[numOfAtoms2+1] = "X";
 
-    for (int i=0;i<numOfAtoms1;i++)
-    {
-        for (int j=0;j<3;j++)
-            xyz1a[3*i+j] = xyz1[3*i+j] - c1[j];
-    }
-    xyz1a[3*(numOfAtoms1)+0] = 0.; xyz1a[3*(numOfAtoms1)+1] = 0.;
-    xyz1a[3*(numOfAtoms1)+2] = 0.; xyz1a[3*(numOfAtoms1+1)+0] = v2[0];
-    xyz1a[3*(numOfAtoms1+1)+1] = v2[1]; xyz1a[3*(numOfAtoms1+1)+2] = v2[2];
+    //for (int i=0;i<numOfAtoms1;i++)
+    //{
+    //    for (int j=0;j<3;j++)
+    //        xyz1a[3*i+j] = xyz1[3*i+j] - c1[j];
+    //}
+    //xyz1a[3*(numOfAtoms1)+0] = 0.; xyz1a[3*(numOfAtoms1)+1] = 0.;
+    //xyz1a[3*(numOfAtoms1)+2] = 0.; xyz1a[3*(numOfAtoms1+1)+0] = v2[0];
+    //xyz1a[3*(numOfAtoms1+1)+1] = v2[1]; xyz1a[3*(numOfAtoms1+1)+2] = v2[2];
     //print_xyz_gen(numOfAtoms1+2,atomicNames1a,xyz1a);
 
     for (int i=0;i<numOfAtoms2;i++)
     {
         for (int j=0;j<3;j++)
-            xyz2a[3*i+j] = xyz2[3*i+j] - c1[3+j];
+        {
+            //xyz2a[3*i+j] = xyz2[3*i+j] - c1[3+j];
+            xyz2a[3*i+j] = xyz2[3*i+j] + displacement[j];
+        }
     }
     xyz2a[3*(numOfAtoms2)+0] = 0.; xyz2a[3*(numOfAtoms2)+1] = 0.;
     xyz2a[3*(numOfAtoms2)+2] = 0.; xyz2a[3*(numOfAtoms2+1)+0] = v2[3];
     xyz2a[3*(numOfAtoms2+1)+1] = v2[4]; xyz2a[3*(numOfAtoms2+1)+2] = v2[5];
+    //std::cout << "\n\n\n\n";
     //print_xyz_gen(numOfAtoms2+2,atomicNames2a,xyz2a);
 
 
+    /*
     //align v2 along x/-x direction
     int t1 = numOfAtoms1;
     int t2 = numOfAtoms1+1;
     align_to_x(numOfAtoms1+2,t1,t2,xyz1a,atomicNames1a,1,10.);
     t1 = numOfAtoms2;
     t2 = numOfAtoms2+1;
-    align_to_x(numOfAtoms2+2,t1,t2,xyz2a,atomicNames2a,-1,10.);
+    align_to_x(numOfAtoms2+2,t1,t2,xyz2a,atomicNames2a,-1,10.); //TODO: magic numbers??
 
     //print_xyz_gen(numOfAtoms1+2,atomicNames1a,xyz1a);
     //print_xyz_gen(numOfAtoms2+2,atomicNames2a,xyz2a);
@@ -764,8 +773,9 @@ void Align::add_align(int nadd1, int* add1)
         xyz2[i] = xyz2a[i];
     for (int i=0;i<numOfAtoms2;i++)
         xyz2[3*i+0] += X;
+*/
 
-
+/* TODO
     //prepare for vdw opt
     string* atomicNamesp = new string[numOfAtoms1+numOfAtoms2];
     int* anumbersp = new int[numOfAtoms1+numOfAtoms2];
@@ -844,10 +854,11 @@ void Align::add_align(int nadd1, int* add1)
         //print_xyz_gen(numOfAtoms2,atomicNames2,xyz2); Mina
         exit(1);
     }
+*/
 
-    delete [] atomicNames1a;
+    //delete [] atomicNames1a;
     delete [] atomicNames2a;
-    delete [] xyz1a;
+    //delete [] xyz1a;
     delete [] xyz2a;
 
     delete [] v2;
@@ -855,14 +866,14 @@ void Align::add_align(int nadd1, int* add1)
     delete [] v1b;
     delete [] bonded1;
     delete [] bonded2;
-    delete [] bonded3;
+    //delete [] bonded3;
 
     ic1.freemem();
     ic2.freemem();
 
-    delete [] atomicNamesp;
-    delete [] anumbersp;
-    icp.freemem();
+//    delete [] atomicNamesp;
+//    delete [] anumbersp;
+//    icp.freemem();
 
 
     return;
@@ -1890,3 +1901,41 @@ double Align::norm(double* x, int size)
     return val;
 }
 */
+
+double Align::norm(double* x, int size)
+{
+  double val = 0.;  
+  for (int i=0;i<size;i++)
+    val += x[i]*x[i];
+  val = sqrt(val);
+
+  return val; 
+}
+
+void Align::get_rotation_matrix(double** rotMat, double* thetas)
+{
+  double x=thetas[0]; double y=thetas[1]; double z=thetas[2];
+  rotMat[0][0] = cos(y)*cos(z);
+  rotMat[0][1] = -cos(y)*sin(z);
+  rotMat[0][2] = sin(y);
+  rotMat[1][0] = sin(x)*sin(y)*cos(z)+cos(x)*sin(z);
+  rotMat[1][1] = -sin(x)*sin(y)*sin(z)+cos(x)*cos(z);
+  rotMat[1][2] = -sin(x)*cos(y);
+  rotMat[2][0] = -cos(x)*sin(y)*cos(z)+sin(x)*sin(z);
+  rotMat[2][1] = cos(x)*sin(y)*sin(z)+sin(x)*cos(z);
+  rotMat[2][2] = cos(x)*cos(y);
+}
+
+void Align::print_xyz_gen(int natoms, string* anames, double* coords)
+{
+   
+ printf(" %i \n",natoms);
+ printf("\n");
+ for (int i=0;i<natoms;i++)
+ {
+     cout << "  " << anames[i];
+     printf(" %f %f %f \n",coords[3*i+0],coords[3*i+1],coords[3*i+2]);
+ }
+// printf("\n");
+   
+}

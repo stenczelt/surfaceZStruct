@@ -12,6 +12,10 @@
 #include <fstream>
 #include <stdio.h>
 
+
+// ic1, atom1, .. : Surface
+// ic2, atom2, .. : Adsorbate
+
 bool populateVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
                  std::string* inSymbols);
 
@@ -49,12 +53,6 @@ int main(int argc, char* argv[])
         {   
             xyzFileSlab.push_back(newLine);
         }   
-        //std::ifstream inFile (argv[2]);
-        //std::string newLine;
-        //while (std::getline(inFile, newLine))
-        //{   
-            //xyzFileAdsorbate.push_back(newLine);
-        //}   
     }   
     int numOfSlabAtoms = std::stoi(*(xyzFileSlab.begin()));
     //int numOfAdsorbateAtoms = std::stoi(*(xyzFileAdsorbate.begin()));
@@ -72,8 +70,6 @@ int main(int argc, char* argv[])
     //std::string* adsorbateAtomicSymbols = new std::string[numOfAdsorbateAtoms];
 
     populateVector(xyzFileSlab, slabCartesianCoords, numOfSlabAtoms, slabAtomicSymbols);
-    //populateVector(xyzFileAdsorbate, adsorbateCartesianCoords, numOfAdsorbateAtoms,
-    //                adsorbateAtomicSymbols);
     SurfaceClass aSurface;
     std::string outFName = "bindingSites.xyz";
     if (aSurface.setSurfaceType(surfaceType))
@@ -93,27 +89,37 @@ int main(int argc, char* argv[])
             xyzFileSites.push_back(newLine2);
         } */  
 
-        int siteNumber = 0;
-        std::cout << "Enter the binding site number:" << std::endl;
-        std::cin >> siteNumber;
-
         /*int sizeSlabSites = 3*numOfSlabAtoms;
         double* slabCartesianCoords = new double[sizeSlab];
         std::string* slabAtomicSymbols = new std::string[numOfSlabAtoms];
         populateVector(xyzFileSlab, slabCartesianCoords, numOfSlabAtoms, slabAtomicSymbols);*/
     } 
+
     ICoord ic1, ic2;
     ic1.init(outFName);
     ic2.init(argv[2]);
 
-    //Align alignObj;
-    //alignObj.init(ic1.natoms,ic1.anames,ic1.anumbers,ic1.coords,ic2.natoms,ic2.anames,ic2.anumbers,ic2.coords);
+    Align alignObj;
+    alignObj.init(ic1.natoms,ic1.anames,ic1.anumbers,ic1.coords,ic2.natoms,ic2.anames,ic2.anumbers,ic2.coords);
+    std::cout << "Before alignment: \n";
+//    alignObj.print_xyz();
 
-    //int nadd = 1;
-    //int* add = new int[4];
-    //add[0] = 0; add[1] = 6; add[2] = 1; add[3] = 7;
-    //alignObj.add_align(nadd,add);
-    //alignObj.print_xyz();
+    /*
+    int siteNumber = 0;
+    std::cout << "Enter the binding site number:" << std::endl;
+    std::cin >> siteNumber;
+
+    double xSite = ic1.coords[3*siteNumber];
+    double ySite = ic1.coords[3*siteNumber+1];
+    double zSite = ic1.coords[3*siteNumber+2];
+    std::cout << "z site: " << zSite << "\n";
+    */
+    int nadd = 1;
+    int add[2] = {29, 60};
+    alignObj.add_align(nadd, add);
+    std::cout << "After alignment: \n\n"; 
+//    alignObj.print_xyz();
+    
 
     delete [] slabCartesianCoords;
     delete [] slabAtomicSymbols;
