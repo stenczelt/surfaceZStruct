@@ -503,7 +503,6 @@ void Align::add_align(int nadd1, int* add1)
     {
         int atom1 = add1[2*i+0];
         int atom2 = add1[2*i+1];
-        //int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; }
         if (atom1>atom2) {std::swap(atom1, atom2);}
 
         int same_frag = check_frag(atom1,atom2);
@@ -523,44 +522,6 @@ void Align::add_align(int nadd1, int* add1)
             //first atom's vector
 //            v1a[0] = v1a[1] = 0.0;
 //            v1a[2] = 1.0;
-            /*
-            for (int j=0;j<nbondsatom1;j++)
-            {
-                v1a[3*nvf1+0] += xyz1[3*atom1+0] - xyz1[3*bonded1[j]+0];
-                v1a[3*nvf1+1] += xyz1[3*atom1+1] - xyz1[3*bonded1[j]+1];
-                v1a[3*nvf1+2] += xyz1[3*atom1+2] - xyz1[3*bonded1[j]+2];
-            }
-
-            if (nbondsatom1==2)
-            {
-                double anglev = ic1.angle_val(bonded1[0],atom1,bonded1[1]);
-                if (anglev>175.)
-                {
-                    //printf("  using ool v1 \n");
-                    linear_right(&v1a[3*nvf1],atom1,bonded1,xyz1);
-                }
-            }
-            if (nbondsatom1==3)
-            {          
-                double imptorv = ic1.torsion_val(bonded1[0],atom1,bonded1[1],bonded1[2]);
-                //printf("  imptorv: %4.2f \n",imptorv);
-                if (fabs(imptorv)>175.)
-                {
-                    //printf("  using oop v1 \n");
-                    planar_cross(&v1a[3*nvf1],atom1,bonded1,xyz1);
-                    npf1++;
-                }
-            }
-            if (npf1>1)
-            {
-                align_v1(nvf1+1,v1a);
-            }
-            double n1 = norm(&v1a[3*nvf1],3);
-            for (int j=0;j<3;j++)
-                v1a[3*nvf1+j] = v1a[3*nvf1+j] / n1;
-
-            nvf1++;
-            */
 
             //second atom's vector
             for (int j=0;j<nbondsatom2;j++)
@@ -599,7 +560,7 @@ void Align::add_align(int nadd1, int* add1)
 
             nvf2++;
 
-        } // if !same_frag
+        } //if !same_frag
     } //loop i over nadd
 
     if (!found)
@@ -607,15 +568,6 @@ void Align::add_align(int nadd1, int* add1)
         //printf("  couldn't find anything to align \n");
         return;
     }
-
-#if 0
-    //CPMZ NOT IMPLEMENTED
-    if (npf1>0)
-        point_out(v1a,numOfAtoms1,xyz1);
-    if (npf2>0)
-        point_out(v1b,numOfAtoms2,xyz2);
-#endif
-
 
     //averaging over v1a and v1b to get v2
     double* v2 = new double[6];
@@ -635,11 +587,10 @@ void Align::add_align(int nadd1, int* add1)
     {
         int atom1 = add1[2*(nadd1-1)+0];
         int atom2 = add1[2*(nadd1-1)+1];
-        int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; } // swap()
+        if (atom1>atom2) {std::swap(atom1, atom2);}
         int nbondsatom1 = get_bonds(atom1,ic1,bonded1);
         linear_right(v2,atom1,bonded1,xyz1);
         n1 = norm(v2,3);
-        //    printf(" new norm: %8.6f \n",n1);
     }
     if (n2<0.000001)
     {
@@ -657,56 +608,10 @@ void Align::add_align(int nadd1, int* add1)
     for (int i=3;i<6;i++)
         v2[i] = v2[i] / n2;
 
-#if 0
-    printf("  v2(1):");
-    for (int j=0;j<3;j++)
-        printf(" %4.3f",v2[j]);
-    printf("\n");
-    printf("  v2(2):");
-    for (int j=0;j<3;j++)
-        printf(" %4.3f",v2[3+j]);
-    printf("\n");
-#endif
-
-/*
-    //get central location for each
-    int cfound = 0;
-    for (int i=0;i<6;i++) c1[i] = 0.;
-    for (int i=0;i<nadd1;i++)
-    {
-        int atom1 = add1[2*i+0];
-        int atom2 = add1[2*i+1];
-        int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; } // swap()
-        int same_frag = check_frag(atom1,atom2);
-
-        atom2 -= numOfAtoms1;
-        if (!same_frag)
-        {
-            //printf(" c1 for %i-%i \n",atom1+1,atom2+1);
-            cfound++;
-            for (int j=0;j<3;j++)
-            {
-                c1[j]   += xyz1[3*atom1+j];
-                c1[3+j] += xyz2[3*atom2+j];
-            }
-        }
-    } //loop i over nadd
-    if (cfound>1)
-        for (int j=0;j<6;j++)
-            c1[j] = c1[j] / cfound;
-
-#if 0
-    printf("  c1:");
-    for (int j=0;j<6;j++)
-        printf(" %4.3f",c1[j]);
-    printf("\n");
-#endif
-*/
     //get binding site coordinates
-    //TODO: implement a function and call it in main
+    //TODO: This should be implemented in a loop
     int atom1 = add1[2*0+0];
     int atom2 = add1[2*0+1];
-    //double center[3] = {1.276328, 3.828983, 13.305000};
     double centerSurface[3], centerAdsorbate[3], displacement[3] = {0.0, 0.0, 0.0};
     centerSurface[0] = xyz1[3*(atom1-1)+0];
     centerSurface[1] = xyz1[3*(atom1-1)+1];
@@ -723,30 +628,15 @@ void Align::add_align(int nadd1, int* add1)
     displacement[0] = centerSurface[0] - centerAdsorbate[0];
     displacement[1] = centerSurface[1] - centerAdsorbate[1];
     displacement[2] = centerSurface[2] - centerAdsorbate[2] + DELTA_Z;
-    std::cout << "*****" << centerSurface[0] << "******" << centerSurface[1] << "******" << centerAdsorbate[0] << "*****" 
-              << displacement[0] << std::endl;
+    std::cout << "*****" << centerSurface[0] << "******" << centerSurface[1] << "******" 
+            << centerAdsorbate[0] << "*****" << displacement[0] << std::endl;
     
-    //move geometry to center
-    //double* xyz1a = new double[3*(numOfAtoms1+2)]; //TODO: +2 ??
-    double* xyz2a = new double[3*(numOfAtoms2+2)];
-    //string* atomicNames1a = new string[numOfAtoms1+2];
+    //move geometry to binding site
+    double* xyz2a = new double[3*(numOfAtoms2+2)]; // TODO: +2 ??
     string* atomicNames2a = new string[numOfAtoms2+2];
-    //for (int i=0;i<numOfAtoms1;i++) atomicNames1a[i] = atomicNames1[i];
-    //atomicNames1a[numOfAtoms1] = "X";
-    //atomicNames1a[numOfAtoms1+1] = "X";
     for (int i=0;i<numOfAtoms2;i++) atomicNames2a[i] = atomicNames2[i];
     atomicNames2a[numOfAtoms2] = "X";
     atomicNames2a[numOfAtoms2+1] = "X";
-
-    //for (int i=0;i<numOfAtoms1;i++)
-    //{
-    //    for (int j=0;j<3;j++)
-    //        xyz1a[3*i+j] = xyz1[3*i+j] - c1[j];
-    //}
-    //xyz1a[3*(numOfAtoms1)+0] = 0.; xyz1a[3*(numOfAtoms1)+1] = 0.;
-    //xyz1a[3*(numOfAtoms1)+2] = 0.; xyz1a[3*(numOfAtoms1+1)+0] = v2[0];
-    //xyz1a[3*(numOfAtoms1+1)+1] = v2[1]; xyz1a[3*(numOfAtoms1+1)+2] = v2[2];
-    //print_xyz_gen(numOfAtoms1+2,atomicNames1a,xyz1a);
 
     for (int i=0;i<numOfAtoms2;i++)
     {
@@ -767,6 +657,7 @@ void Align::add_align(int nadd1, int* add1)
     //align v2 along x/-x direction
     //int t1 = numOfAtoms1;
     //int t2 = numOfAtoms1+1;
+    //TODO: align_to_Z
     //align_to_x(numOfAtoms1+2,t1,t2,xyz1a,atomicNames1a,1,10.);
     //int t1 = numOfAtoms2;
     //int t2 = numOfAtoms2+1;
