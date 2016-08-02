@@ -2,9 +2,13 @@
 // Author: Paul Zimmerman, University of Michigan //
 
 
+#include <math.h>
 #include <algorithm>
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/LU>
 #include "align.h"
 using namespace std;
+using namespace Eigen;
 
 //TODO: implement point_out function for planes
 
@@ -50,12 +54,72 @@ int Align::get_bonds(int atom1, ICoord ic1, int* bonded)
     return nfound;
 }
 
-void Align::align_to_Z(int numOfAtoms, double* cartesians, string* atomicNames)
+void Align::align_to_Z(int inNumOfAtoms, double* inCartesians, string* inAtomicNames, 
+                       double* inVector, int vectorSize)
 {
-    // convert to polar coordinates
-    double radius, theta, phi = 0.0;
-    double polarCoords[numOfAtoms][3]; // 3 : r, theta, phi
+    // normalize vector
+    double Vnorm = norm(inVector, vectorSize);
+    for(int i=0; i<vectorSize; i++)
+    {
+        inVector[i] = inVector[i] / Vnorm;
+    }
+    Eigen::Vector3d vectorToCentral;
+    vectorToCentral << inVector[0], inVector[1], inVector[2];
+    Eigen::Vector3d vectorZ;
+    vectorZ << 0., 0., 1.;
+    // U = F^-1 G F
+    // http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
     
+    Eigen::Matrix3d Gmatrix;
+    Gmatrix << vectorToCentral.dot(vectorZ), -1*(vectorToCentral.cross(vectorZ)).norm(), 0., 
+            (vectorToCentral.cross(vectorZ)).norm(), vectorToCentral.dot(vectorZ), 0., 0., 0., 1.;
+    std::cout << Gmatrix << "\n";
+    Eigen::Vector3d vectorV;
+    for (int i=0; i<vectorSize; i++)
+    {
+        vectorV(i) = vectorZ(i) - Gmatrix(0, 0) * vectorToCentral(i);
+    }
+    vectorV.normalize();
+    Eigen::Vector3d vectorW = vectorZ.cross(vectorToCentral);
+
+    Eigen::Matrix3d FinverseMatrix;
+    FinverseMatrix(0,0) = vectorToCentral(0);
+    FinverseMatrix(1,0) = vectorToCentral(1);
+    FinverseMatrix(2,0) = vectorToCentral(2);
+    FinverseMatrix(0,1) = vectorV(0);
+    FinverseMatrix(1,1) = vectorV(1);
+    FinverseMatrix(2,1) = vectorV(2);
+    FinverseMatrix(0,2) = vectorW(0);
+    FinverseMatrix(1,2) = vectorW(1);
+    FinverseMatrix(2,2) = vectorW(2);
+
+    Eigen::Matrix3d Fmatrix = FinverseMatrix;
+    Fmatrix.inverse();
+
+    Eigen::Matrix3d Umatrix = FinverseMatrix * Gmatrix * Fmatrix;
+
+    //Eigen::Matrix<double, inNumOfAtoms, 3> outCartesians;
+    Eigen::MatrixXd outCartesians(inNumOfAtoms,3);
+    for (int i=0; i<inNumOfAtoms; i++)
+    {
+        for (int j=0; j<vectorSize; j++)
+        {
+            outCartesians(i,j) = inCartesians[3*i+j];
+        }
+    }
+
+    std::cout << "UMATRIX" << Umatrix << "\n";
+    outCartesians = Umatrix * (outCartesians.transpose());
+    outCartesians.transpose();
+
+    std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
+//    std::cout << Umatrix*vectorToCentral << "\n";
+    
+    for (int i=0; i<inNumOfAtoms; i++)
+    {
+        std::cout << inAtomicNames[i] << "  " << outCartesians(i,0) << "   " << outCartesians(i,1) 
+                  << "   " << outCartesians(i,2) << "\n";
+    }
 }
 
 /*
@@ -86,8 +150,6 @@ void Align::align_to_x(int numOfAtoms, int t1, int t2, double* xyz, string* atom
 
     //printf(" vector from t1 to t2: %6.4f %6.4f %6.4f \n",x1[0],x1[1],x1[2]);
 
-    double* xyzn = new double[3*numOfAtoms];
-    for (int i=0;i<3*numOfAtoms;i++) xyzn[i] = 0.;
     double* xyz1 = new double[3*numOfAtoms];
     for (int i=0;i<numOfAtoms;i++)
     {
@@ -130,6 +192,7 @@ void Align::align_to_x(int numOfAtoms, int t1, int t2, double* xyz, string* atom
 
     get_rotation_matrix(rotm,angles);
 
+    double* xyzn = new double[3*numOfAtoms];
     for (int i=0;i<3*numOfAtoms;i++) xyzn[i] = 0.;
     for (int i=0;i<numOfAtoms;i++)
         for (int j=0;j<3;j++)
@@ -658,6 +721,7 @@ void Align::add_align(int nadd1, int* add1)
     //int t1 = numOfAtoms1;
     //int t2 = numOfAtoms1+1;
     //TODO: align_to_Z
+    align_to_Z(numOfAtoms2, xyz2a, atomicNames2a, centerAdsorbate, 3);
     //align_to_x(numOfAtoms1+2,t1,t2,xyz1a,atomicNames1a,1,10.);
     //int t1 = numOfAtoms2;
     //int t2 = numOfAtoms2+1;

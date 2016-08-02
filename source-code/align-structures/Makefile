@@ -2,6 +2,8 @@
 
 # Executable name
 CMD = align.exe
+INC=-I$(MKLROOT)/include -I/export/zimmerman/mjafari/ZStruct-S/source-code/align-structures
+#INC=-I$(MKLROOT)/include
 
 # -------- description of DFLAGS ---------------
 
@@ -11,7 +13,8 @@ CMD = align.exe
 #          ifeq ($(strip$(FORTRAN_COMPILER)),)
 # Otherwise you can define it here also by uncommenting next line
 #FC = icpc -gcc-name=gcc-4.5 -std=c++0x -openmp -I$(MKLROOT)/include
-FC = g++ -gdwarf-3 -std=c++11 -I$(MKLROOT)/include
+#FC = g++ -gdwarf-3 -std=c++11 -I$(MKLROOT)/include
+FC = g++ -gdwarf-3 -std=c++11 $(INC)
 # FC = g++ -fopenmp -I$(MKLROOT)/include
 DFLAGS =  #-Define the cpp flags to be used
 #DFLAGS =  #-Define the cpp flags to be used
