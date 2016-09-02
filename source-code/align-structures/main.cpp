@@ -97,12 +97,13 @@ int main(int argc, char* argv[])
 
     ICoord ic1, ic2;
     ic1.init(outFName);
+    //ic1.init(argv[1]);
     ic2.init(argv[2]);
 
     Align alignObj;
     alignObj.init(ic1.natoms,ic1.anames,ic1.anumbers,ic1.coords,ic2.natoms,ic2.anames,ic2.anumbers,ic2.coords);
     std::cout << "Before alignment: \n";
-//    alignObj.print_xyz();
+    alignObj.print_xyz();
 
     /*
     int siteNumber = 0;
@@ -115,7 +116,8 @@ int main(int argc, char* argv[])
     std::cout << "z site: " << zSite << "\n";
     */
     int nadd = 1;
-    int add[2] = {29, 60};
+    //int add[2] = {29, 60};
+    int add[2] = {28, 59};
     alignObj.add_align(nadd, add);
     std::cout << "After alignment: \n\n"; 
     alignObj.print_xyz();

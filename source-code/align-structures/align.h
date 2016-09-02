@@ -41,8 +41,10 @@ class Align
         int check_frag_3(int atom1, int atom2);
         // get number of atoms bonded to atom 1 (atom1)
         int get_bonds(int atom1, ICoord ic1, int* bonded);
-        void align_to_x(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames,
-                        int sign, double offset);
+        void align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames,
+                        int sign);
+        //void align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames,
+        //                int sign, double offset);
         // rotates fragment around X axis
         void rotate_around_x(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz);
         void linear_right(double* v1, int atom1, int* bonded, double* xyz);
@@ -78,7 +80,7 @@ class Align
         void get_rotation_matrix(double** rotMat, double* thetas);
         void print_xyz_gen(int natoms, string* anames, double* coords);
         void align_to_Z(int inNumOfAtoms, double* inCartesians, string* inAtomicNames, 
-                        double* vectorToCentral, int vectorSize);
+                        double* v1b, double* vectorToCentral, int vectorSize);
 };
 
 #endif
