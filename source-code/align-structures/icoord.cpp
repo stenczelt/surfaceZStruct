@@ -1783,20 +1783,25 @@ int ICoord::read_ics(string filename)
   return nbonds + nangles + ntor;
 }
 
-double ICoord::mm_energy()
+//double ICoord::mm_energy()
+double ICoord::mm_energy(int atom1, int atom2)
 {
-  double E = 0;
-  E += vdw_energy_all();
+  double Energy = 0.;
+  //Energy += vdw_energy_all();
+  Energy += vdw_energy_all(atom1, atom2);
   //others not yet implemented
 
-  return E;
+  return Energy;
 }
 
-double ICoord::vdw_energy_all()
+//double ICoord::vdw_energy_all()
+double ICoord::vdw_energy_all(int atom1, int atom2)
 {
   double E = 0;
-  for (int i=0;i<n_nonbond;i++)
-    E += vdw_energy_1(nonbond[i][0],nonbond[i][1]);
+  //std::cout << "vdw_energy_all\n" << n_nonbond << "     " << std::endl;
+  //for (int i=0;i<n_nonbond;i++)
+  //  E += vdw_energy_1(nonbond[i][0],nonbond[i][1]);
+  E = vdw_energy_1(atom1, atom2);
 
   return E;
 }
@@ -1804,6 +1809,7 @@ double ICoord::vdw_energy_all()
 double ICoord::vdw_energy_1(int i, int j)
 {
   double R = ffR[i] + ffR[j];
+  std::cout << "test R:  " << ffR[i] << "   " << ffR[j] << std::endl;
   double eps = sqrt( ffeps[i] * ffeps[j] );
 
   double r = distance(i,j);

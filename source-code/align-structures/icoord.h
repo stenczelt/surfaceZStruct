@@ -272,7 +272,8 @@ class ICoord {
         void print_xyz();
         void print_xyz_save(string filename);
         void print_xyz_save(string xyzfile_string, double energy);
-        double vdw_energy_all();
+        //double vdw_energy_all();
+        double vdw_energy_all(int atom1, int atom2);
         double vdw_energy_1(int i, int j);
 
 
@@ -291,7 +292,8 @@ class ICoord {
         void save_hessp(string filename);
         void read_hessp(string filename);
         void read_hessxyz(string filename, int write);
-        double mm_energy();
+        //double mm_energy();
+        double mm_energy(int atom1, int atom2);
 };
 
 
