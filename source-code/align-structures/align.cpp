@@ -55,153 +55,24 @@ int Align::get_bonds(int atom1, ICoord ic1, int* bonded)
     return nfound;
 }
 
-void Align::align_to_Z(int inNumOfAtoms, double* inCartesians, string* inAtomicNames, 
-                       double* v1b, double* inVector, int vectorSize)
+void applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix)
 {
-    std::cout << "INPUT  " << std::endl;
-    for (int i=0; i<inNumOfAtoms; i++)
-    {
-        std::cout << inAtomicNames[i] << "  " << inCartesians[3*i+0]
-                  << "   " << inCartesians[3*i+1]
-                  << "   " << inCartesians[3*i+2] << "\n";
-    }
-    // define vectors and normalize
-    //std::cout << "In vector &&&&&&&&&&&&&&&&&&&&" << inVector[0] << inVector[1] << inVector[2] <<  "\n";
-    //std::cout << "In vector &&&&&&&&&&&&&&&&&&&&" << -1*v1b[0] << "    " << -1*v1b[1] << "    " << -1*v1b[2] <<  "\n";
-    Eigen::Vector3d vectorToCentral;
-    //Eigen::Vector3d bond1;
-    //Eigen::Vector3d bond2;
-    //Eigen::Vector3d bond3;
-    //vectorToCentral << inVector[0], inVector[1], inVector[2];
-    vectorToCentral << v1b[0]+inVector[0], v1b[1]+inVector[1], v1b[2]+inVector[2];
-    //bond1 << inVector[0], inVector[1], inVector[2];
-    //bond2 << inVector[3], inVector[4], inVector[5];
-    //bond3 << inVector[6], inVector[7], inVector[8];
-    //std::cout << "(((((((((((((((((((((((((((((((((((((((((((((((" << bond2 << "\n";
-    double vectorNorm = vectorToCentral.norm();
-    vectorToCentral.normalize();
-    std::cout << "normalized" << vectorToCentral(0) << vectorToCentral(1) <<
-            vectorToCentral(2) << "\n";
-    // Z direction
-    Eigen::Vector3d vectorZ;
-    vectorZ << 0., 0., 1.; //TODO
-    vectorZ.normalize();
-    std::cout << "vector Z" << vectorZ(0) << "\n";
-    // U = F^-1 G F
-    // http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
-    // define G matrix as explained in the above link
-    Eigen::Matrix3d Gmatrix;
-    Gmatrix << vectorToCentral.dot(vectorZ), -1*(vectorToCentral.cross(vectorZ)).norm(), 0., 
-            (vectorToCentral.cross(vectorZ)).norm(), vectorToCentral.dot(vectorZ), 0., 0., 0., 1.;
-    std::cout << "G MAtrix\n" << Gmatrix << "\n";
-    // define vector V & W
-    Eigen::Vector3d vectorV;
-    for (int i=0; i<vectorSize; i++)
-    {
-        vectorV(i) = vectorZ(i) - (Gmatrix(0,0) * vectorToCentral(i));
-    }
-    vectorV.normalize();
-    Eigen::Vector3d vectorW = vectorZ.cross(vectorToCentral);
-    //std::cout << "vector V\n" << vectorV << "\n";
-    //std::cout << "vector W\n" << vectorW << "\n";
+    double* xyzTemp = new double[3*numOfAtoms];
+    for (int i=0;i<3*numOfAtoms;i++) xyzTemp[i] = 0.;
+    for (int i=0;i<numOfAtoms;i++)
+        for (int j=0;j<3;j++)
+            for (int k=0;k<3;k++)
+                xyzTemp[3*i+j] += rotationMatrix[j][k]*xyz[3*i+k];
+    for (int i=0;i<3*numOfAtoms;i++)
+        xyz[i] = xyzTemp[i];
 
-    // define F^-1
-    Eigen::Matrix3d FinverseMatrix;
-    FinverseMatrix(0,0) = vectorToCentral(0);
-    FinverseMatrix(1,0) = vectorToCentral(1);
-    FinverseMatrix(2,0) = vectorToCentral(2);
-    FinverseMatrix(0,1) = vectorV(0);
-    FinverseMatrix(1,1) = vectorV(1);
-    FinverseMatrix(2,1) = vectorV(2);
-    FinverseMatrix(0,2) = vectorW(0);
-    FinverseMatrix(1,2) = vectorW(1);
-    FinverseMatrix(2,2) = vectorW(2);
-    //std::cout << "F inverse MAtrix\n" << FinverseMatrix << "\n";
-
-    // define F
-    Eigen::Matrix3d Fmatrix = FinverseMatrix.inverse();
-    //std::cout << "F  MAtrix\n" << Fmatrix << "\n";
-    Eigen::Matrix3d Umatrix = FinverseMatrix * Gmatrix * Fmatrix;
-
-    //Eigen::Matrix<double, inNumOfAtoms, 3> outCartesians;
-    Eigen::MatrixXd outCartesians(inNumOfAtoms,3);
-    for (int i=0; i<inNumOfAtoms; i++)
-    {
-        for (int j=0; j<vectorSize; j++)
-        {
-            if (j == 0)
-            {
-                outCartesians(i,j) = inCartesians[3*i+j] + v1b[0];
-            }
-            else if (j == 1)
-            {
-                outCartesians(i,j) = inCartesians[3*i+j] + v1b[1];
-            }
-            else if (j == 2)
-            {
-                outCartesians(i,j) = inCartesians[3*i+j] + v1b[2];
-            }
-        }
-    }
-    //std::cout << "outCartesians\n" << outCartesians << "\n";
-    //std::cout << "666666666666666\n" << outCartesians.rows() << outCartesians.cols() << "\n";
-
-    //std::cout << "UMATRIX" << Umatrix << "\n";
-    Eigen::MatrixXd outCartesians_2(3, inNumOfAtoms);
-    outCartesians_2 = Umatrix * (outCartesians.transpose());
-    //std::cout << "88888888\n" << outCartesians_2.rows() << outCartesians_2.cols() << "\n";
-    Eigen::MatrixXd outCartesians_3(inNumOfAtoms, 3);
-    outCartesians_3 = outCartesians_2.transpose();
-    //std::cout << "77777777777\n" << outCartesians_3.rows() << outCartesians_3.cols() << "\n";
-
-    std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n After UMatrix operation\n";
-    std::cout << vectorToCentral << "\n\n";
-    std::cout << Umatrix * vectorToCentral << "\n\n";
-    //std::cout << Umatrix * bond1 << "\n\n";
-    //std::cout << Umatrix * bond2 << "\n\n";
-    //std::cout << Umatrix * bond3 << "\n\n";
-
-    std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
-    for (int i=0; i<inNumOfAtoms; i++)
-    {
-        //std::cout << inAtomicNames[i] << "  " << outCartesians(i,0)*vectorNorm 
-        //          << "   " << outCartesians(i,1)*vectorNorm 
-        //          << "   " << outCartesians(i,2)*vectorNorm << "\n";
-        std::cout << inAtomicNames[i] << "  " << outCartesians_3(i,0)
-                  << "   " << outCartesians_3(i,1)
-                  << "   " << outCartesians_3(i,2) << "\n";
-    }
+    delete [] xyzTemp;
 }
 
-
-//void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames, int sign, double offset)
 void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames, int sign)
 {
-    //printf(" aligning structure near to x axis, sign: %i offset: %3.2f (degrees) \n",sign,offset);
-#if 0
-    if (numOfAtoms==4)
-    {
-        printf(" align_to_z, numOfAtoms: %i \n",numOfAtoms);
-        print_xyz_gen(numOfAtoms,atomicNames,xyz);
-    }
-#endif
-
-    //t1 --> 0,0,0
-    //t2 --> a,0,0
-
-//    offset = offset * 3.14159 / 180.;
-
-    //double* x1 = new double[3];
-    //x1[0] = xyz[3*t2+0] - xyz[3*t1+0];
-    //x1[1] = xyz[3*t2+1] - xyz[3*t1+1];
-    //x1[2] = xyz[3*t2+2] - xyz[3*t1+2];
-    //std::cout << x1[0] << "  " << x1[1] << "  " << x1[2] << "@@@@@@@@@\n";
-
-    //double n1 = norm(x1,3);
-    //for (int i=0;i<3;i++) x1[i] = x1[i]/n1;
-
-    //printf(" vector from t1 to t2: %6.4f %6.4f %6.4f \n",x1[0],x1[1],x1[2]);
-
+    // xyz1 Temporary Cartesian coordinates of vectors pointing from 
+    // the arbitrary origin to each atom
     double* xyz1 = new double[3*numOfAtoms];
     for (int i=0;i<numOfAtoms;i++)
     {
@@ -209,45 +80,39 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
         xyz1[3*i+1] = xyz[3*i+1] - xyz[3*t1+1];
         xyz1[3*i+2] = xyz[3*i+2] - xyz[3*t1+2];
     }
-    //print_xyz_gen(numOfAtoms,atomicNames,xyz1);
-    //printf("b  %s %4.3f %4.3f %4.3f \n",atomicNames[t1].c_str(),xyz1[3*t1+0],xyz1[3*t1+1],xyz1[3*t1+2]);
-    //printf("b  %s %4.3f %4.3f %4.3f \n",atomicNames[t2].c_str(),xyz1[3*t2+0],xyz1[3*t2+1],xyz1[3*t2+2]);
 
+    // Rotation matrix, check Wikipedia!
     double** rotm = new double*[3];
     rotm[0] = new double[3];
     rotm[1] = new double[3];
     rotm[2] = new double[3];
 
+    //unit vectors representing angles wrt the xyz planes
     double* u1 = new double[3];
     double* x1 = new double[3];
 
-    //align second atom to x axis
+    // A vector pointing from the arbitrary origin to the free side 
+    // of the molecule (t2 coordinates are defined based on v1b)
     x1[0] = xyz1[3*t2+0] - xyz1[3*t1+0];
     x1[1] = xyz1[3*t2+1] - xyz1[3*t1+1];
     x1[2] = xyz1[3*t2+2] - xyz1[3*t1+2];
 
-    //  n1 = sqrt(x1[0]*x1[0]+x1[1]*x1[1]+x1[2]*x1[2]);
     double n1 = sqrt(x1[0]*x1[0]+x1[2]*x1[2]);
-    //n1 = sqrt(x1[2]*x1[2]+x1[0]*x1[0]); //Mina
-    if (n1>0.)
-        for (int i=0;i<3;i++) x1[i] = x1[i]/n1;
 
-    u1[0] = x1[0];
-    u1[1] = x1[1];
-    u1[2] = x1[2];
-    //printf(" u1: %4.3f %4.3f %4.3f \n",u1[0],u1[1],u1[2]);
+    if (n1>0.)
+        for (int i=0;i<3;i++) u1[i] = x1[i]/n1;
 
     double* angles = new double[3];
     angles[0] = angles[1] = angles[2] = 0.;
-    //angles[1] = acos(u1[0])+offset/3.14159;
-    angles[1] = acos(u1[2]); // Mina
+
+    angles[1] = acos(u1[2]);
     if (u1[2]<0.) angles[1] = angles[1] * -1;
-    //if (u1[2]<0.) angles[1] = angles[1] * 1;
-    //angles[2] = acos(u1[1]);
-    //printf(" angle of %i %i to x axis: %4.3f \n",t1,t2,angles[1]/3.14159);
 
     get_rotation_matrix(rotm,angles);
 
+    applyRotationMatrix(numOfAtoms, xyz1, rotm);
+
+    /*
     double* xyzn = new double[3*numOfAtoms];
     for (int i=0;i<3*numOfAtoms;i++) xyzn[i] = 0.;
     for (int i=0;i<numOfAtoms;i++)
@@ -256,66 +121,30 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
                 xyzn[3*i+j] += rotm[j][k]*xyz1[3*i+k];
     for (int i=0;i<3*numOfAtoms;i++)
         xyz1[i] = xyzn[i];
-
-    //print_xyz_gen(numOfAtoms,atomicNames,xyzn);
-    //printf("1  %s %4.3f %4.3f %4.3f \n",atomicNames[t1].c_str(),xyz1[3*t1+0],xyz1[3*t1+1],xyz1[3*t1+2]);
-    //printf("1  %s %4.3f %4.3f %4.3f \n",atomicNames[t2].c_str(),xyz1[3*t2+0],xyz1[3*t2+1],xyz1[3*t2+2]);
-
+        */
 
     //start second rotation
-    x1[0] = xyz1[3*t2+0] - xyz1[3*t1+0];
-    x1[1] = xyz1[3*t2+1] - xyz1[3*t1+1];
-    x1[2] = xyz1[3*t2+2] - xyz1[3*t1+2];
 
-    //  n1 = sqrt(x1[0]*x1[0]+x1[1]*x1[1]+x1[2]*x1[2]);
-    //n1 = sqrt(x1[0]*x1[0]+x1[1]*x1[1]);
     n1 = sqrt(x1[2]*x1[2]+x1[1]*x1[1]); //Mina
     if (n1>0.0)
-        for (int i=0;i<3;i++) x1[i] = x1[i]/n1;
+        for (int i=0;i<3;i++) u1[i] = x1[i]/n1;
 
-    u1[0] = x1[0];
-    u1[1] = x1[1];
-    u1[2] = x1[2];
-    //printf(" u1: %4.3f %4.3f %4.3f \n",u1[0],u1[1],u1[2]);
 
     angles[0] = angles[1] = angles[2] = 0.;
-//    angles[2] = acos(u1[0])+offset;
     angles[0] = acos(u1[2]); //Mina
-//    if (u1[1]>0.) angles[2] = angles[2] * -1;
-    //if (u1[1]>0.) angles[2] = angles[2] * 1;
-    //printf(" angle of %i %i to x axis: %4.3f \n",t1,t2,angles[2]/3.14159);
 
     get_rotation_matrix(rotm,angles);
+    applyRotationMatrix(numOfAtoms, xyz1, rotm);
 
-    for (int i=0;i<3*numOfAtoms;i++) xyzn[i] = 0.;
-    for (int i=0;i<numOfAtoms;i++)
-        for (int j=0;j<3;j++)
-            for (int k=0;k<3;k++)
-                xyzn[3*i+j] += rotm[j][k]*xyz1[3*i+k];
-    for (int i=0;i<3*numOfAtoms;i++)
-        xyz1[i] = xyzn[i];
-
-    //  if (numOfAtoms==4)
-    //    print_xyz_gen(numOfAtoms,atomicNames,xyzn);
-    //printf("2  %s %4.3f %4.3f %4.3f \n",atomicNames[t1].c_str(),xyz1[3*t1+0],xyz1[3*t1+1],xyz1[3*t1+2]);
-    //printf("2  %s %4.3f %4.3f %4.3f \n",atomicNames[t2].c_str(),xyz1[3*t2+0],xyz1[3*t2+1],xyz1[3*t2+2]);
 
     if (sign==-1)
     {
         angles[0] = angles[1] = angles[2] = 0.;
         angles[0] = 3.14159265;
-        //if (u1[1]>0.) angles[2] = angles[2] * -1;
-        //printf(" angle of %i %i to x axis: %4.3f \n",t1,t2,angles[2]/3.14159);
 
         get_rotation_matrix(rotm,angles);
+        applyRotationMatrix(numOfAtoms, xyz1, rotm);
 
-        for (int i=0;i<3*numOfAtoms;i++) xyzn[i] = 0.;
-        for (int i=0;i<numOfAtoms;i++)
-            for (int j=0;j<3;j++)
-                for (int k=0;k<3;k++)
-                    xyzn[3*i+j] += rotm[j][k]*xyz1[3*i+k];
-        for (int i=0;i<3*numOfAtoms;i++)
-            xyz1[i] = xyzn[i];
     }
 
 
@@ -334,29 +163,29 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
 #endif
 
     for (int i=0;i<3*numOfAtoms;i++)
-        xyz[i] = xyzn[i];
+        xyz[i] = xyz1[i];
     std::cout << "align to x" << std::endl;
-    print_xyz_gen(numOfAtoms,atomicNames,xyzn);
+    print_xyz_gen(numOfAtoms,atomicNames,xyz1);
 
     delete [] angles;
     for (int i=0;i<3;i++)
         delete [] rotm[i];
     delete [] rotm;
 
-    delete [] xyzn;
+    //delete [] xyzn;
     delete [] xyz1;
 
     return;
 }
 
-void Align::rotate_around_x(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz)
+void Align::rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz)
 {
     //printf("  rotating fragment around x axis: %3.2f (degrees) \n",torv);
 
     int numOfAtoms = numOfAtoms1 + numOfAtoms2;
 
-    double* xyzn = new double[3*numOfAtoms];
-    for (int i=0;i<3*numOfAtoms;i++) xyzn[i] = 0.;
+    double* xyzTemp = new double[3*numOfAtoms];
+    for (int i=0;i<3*numOfAtoms;i++) xyzTemp[i] = 0.;
 
     double* angles = new double[3];
     double** rotm = new double*[3];
@@ -364,20 +193,23 @@ void Align::rotate_around_x(int numOfAtoms1, int numOfAtoms2, double torv, doubl
     rotm[1] = new double[3];
     rotm[2] = new double[3];
 
-    angles[0] = torv * 3.1415926/180.;
-    angles[1] = angles[2] = 0.;
+    //angles[0] = torv * 3.1415926/180.;
+    //angles[1] = angles[2] = 0.;
+    angles[0] = angles[1] = 0.;
+    angles[2] = torv * 3.1415926/180.;
 
     get_rotation_matrix(rotm, angles);
+    applyRotationMatrix(numOfAtoms, xyz, rotm);
 
-    for (int i=0;i<3*numOfAtoms;i++) xyzn[i] = 0.;
+    /*for (int i=0;i<3*numOfAtoms;i++) xyzTemp[i] = 0.;
     for (int i=0;i<numOfAtoms2;i++)
         for (int j=0;j<3;j++)
             for (int k=0;k<3;k++)
-                xyzn[3*(numOfAtoms1+i)+j] += rotm[j][k]*xyz[3*(i+numOfAtoms1)+k];
+                xyzTemp[3*(numOfAtoms1+i)+j] += rotm[j][k]*xyz[3*(i+numOfAtoms1)+k];
     for (int i=0;i<3*numOfAtoms2;i++)
-        xyz[3*numOfAtoms1+i] = xyzn[3*numOfAtoms1+i];
+        xyz[3*numOfAtoms1+i] = xyzTemp[3*numOfAtoms1+i];*/
 
-    delete [] xyzn;
+    //delete [] xyzTemp;
     delete [] angles;
     delete [] rotm[0];
     delete [] rotm[1];
@@ -462,27 +294,32 @@ void Align::point_out(double* v1, int numOfAtoms, double* xyz)
     return;
 }
 
-void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp)
+//void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp)
+void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp, int atom1, int atom2)
 {
     //printf(" in vdw_vector_opt \n");
-    double E = 0.;
-    double pE = 0.;
+    double Energy = 0.;
+    double potentialE = 0.;
     double THRESH = 0.001;
-    double emin = 1000000.;
-    for (int i=0;i<100;i++)
+    double energyMin = 1000000.;
+    int numOfSteps = 100;
+    for (int i=0;i<numOfSteps;i++)
     {
-        pE = E;
-        E = icp.mm_energy();
-        //printf(" E: %6.5f \n",E);
+        potentialE = Energy;
+        //Energy = icp.mm_energy();
+        Energy = icp.mm_energy(atom1, atom2);
+        printf(" Energy: %6.5f \n",Energy);
 
-        if (E<emin) emin = E;
-        if (E>pE+THRESH && E>emin) break;
+        if (Energy<energyMin) energyMin = Energy;
+        if (Energy>potentialE+THRESH && Energy>energyMin) break;
 
         for (int j=0;j<numOfAtoms2;j++)
             for (int k=0;k<3;k++)
                 icp.coords[3*numOfAtoms1+3*j+k] -= 0.1*v1[k];
+                printf(" v1[3]: %6.5f \n",v1[3]);
 
-        // print_xyz_gen(icp.numOfAtoms,icp.atomicNames,icp.coords);
+        //std::cout << "after each step:\n";
+        //print_xyz_gen(icp.natoms,icp.anames,icp.coords);
     }
     return;
 }
@@ -503,7 +340,7 @@ void Align::init(int numOfAtoms1i, string* atomicNames1i, int* anumbers1i, doubl
     xyz2 = new double[3*numOfAtoms2];
     xyz1s = new double[3*numOfAtoms1];
     xyz2s = new double[3*numOfAtoms2];
-    xyza = new double[3*(numOfAtoms1+numOfAtoms2)];
+    xyzAugmented = new double[3*(numOfAtoms1+numOfAtoms2)];
 
     for (int i=0;i<numOfAtoms1;i++)
     {
@@ -520,14 +357,14 @@ void Align::init(int numOfAtoms1i, string* atomicNames1i, int* anumbers1i, doubl
     for (int i=0;i<3*numOfAtoms2;i++)
         xyz2s[i] = xyz2[i] = xyz2i[i];
     for (int i=0;i<3*numOfAtoms1;i++)
-        xyza[i] = xyz1i[i];
+        xyzAugmented[i] = xyz1i[i];
     for (int i=0;i<3*numOfAtoms2;i++)
-        xyza[3*numOfAtoms1+i] = xyz2i[i];
+        xyzAugmented[3*numOfAtoms1+i] = xyz2i[i];
 
     atomicNames3 = NULL;
     anumbers3 = NULL;
     xyz3 = NULL;
-    xyza3 = NULL;
+    xyzAugmented3 = NULL;
 
     return;
 }
@@ -544,7 +381,7 @@ void Align::add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, 
         if (atomicNames3!=NULL) delete [] atomicNames3;
         if (anumbers3!=NULL) delete [] anumbers3;
         if (xyz3!=NULL) delete [] xyz3;
-        if (xyza3!=NULL) delete [] xyza3;
+        if (xyzAugmented3!=NULL) delete [] xyzAugmented3;
     }
     inited = 3;
 
@@ -552,7 +389,7 @@ void Align::add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, 
     atomicNames3 = new string[numOfAtoms3];
     anumbers3 = new int[numOfAtoms3];
     xyz3 = new double[3*numOfAtoms3];
-    xyza3 = new double[3*(numOfAtoms1+numOfAtoms2+numOfAtoms3)];
+    xyzAugmented3 = new double[3*(numOfAtoms1+numOfAtoms2+numOfAtoms3)];
 
     for (int i=0;i<numOfAtoms3;i++)
     {
@@ -577,15 +414,15 @@ void Align::align_zero()
 
  //full pair geometry
   for (int i=0;i<3*numOfAtoms1;i++)
-    xyza[i] = xyz1[i];
+    xyzAugmented[i] = xyz1[i];
   for (int i=0;i<3*numOfAtoms2;i++)
-    xyza[3*numOfAtoms1+i] = xyz2[i];
+    xyzAugmented[3*numOfAtoms1+i] = xyz2[i];
 
   return;
 }
 
 //void Align::add_align(int nadd1, int* add1, double zBindingSite)
-void Align::add_align(int nadd1, int* add1)
+void Align::add_align(int nadd1, int* add1, int nearbyAtom)
 {
     if (inited==0)
     {
@@ -623,33 +460,25 @@ void Align::add_align(int nadd1, int* add1)
     int nvf1 = 0;
     int nvf2 = 0;
     int found = 0;
-    // 3 = x, y, z
-    //double vectorBonds[9] = {};
     for (int i=0;i<nadd1;i++)
     {
         int atom1 = add1[2*i+0];
         int atom2 = add1[2*i+1];
-        std::cout << "begin for loop\n " << atom1 << "     " << atom2 << std::endl;
         if (atom1>atom2) {std::swap(atom1, atom2);}
 
         int same_frag = check_frag(atom1,atom2);
         //printf(" atom1: %i atom2: %i same_frag: %i \n",atom1+1,atom2+1,same_frag);
         atom2 -= numOfAtoms1;
-        std::cout << "begin if\n " << numOfAtoms1 << "      "  << atom1 << "     " << atom2 << std::endl;
         if (!same_frag)
         {
             found = 1;
             //int nbondsatom1, nbondsatom2;
             int nbondsatom2 = 0;
-            // int nbondsatom2;
             // TODO: we can use this to see if the binding site is available
             //nbondsatom1 = get_bonds(atom1,ic1,bonded1);
             nbondsatom2 = get_bonds(atom2,ic2,bonded2);
-            std::cout << "# bonds atom 2:   " << nbondsatom2 << std::endl;
-            std::cout << "atom 2:   " << atom2 << std::endl;
 
-            //TODO: This should be surface normal at the binding site
-            //first atom's vector
+            //first atom's vector (surface)
             v1a[0] = v1a[1] = 0.0;
             v1a[2] = 1.0;
 
@@ -659,22 +488,8 @@ void Align::add_align(int nadd1, int* add1)
                 v1b[3*nvf2+0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
                 v1b[3*nvf2+1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
                 v1b[3*nvf2+2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
-
-                //vectorBonds[3*j+0] = xyz2[3*bonded2[j]+0] - xyz2[3*atom2+0];
-                //vectorBonds[3*j+1] = xyz2[3*bonded2[j]+1] - xyz2[3*atom2+1];
-                //vectorBonds[3*j+2] = xyz2[3*bonded2[j]+2] - xyz2[3*atom2+2];
             }
-            /*std::cout << "{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{\n" << vectorBonds[3] << vectorBonds[4] << vectorBonds[5] << "\n"
-                << xyz2[3*bonded2[0]+0] - xyz2[3*atom2+0] << "\n"
-                << xyz2[3*bonded2[0]+1] - xyz2[3*atom2+1] << "\n"
-                << xyz2[3*bonded2[0]+2] - xyz2[3*atom2+2] << "\n"
-                << xyz2[3*bonded2[1]+0] - xyz2[3*atom2+0] << "\n"
-                << xyz2[3*bonded2[1]+1] - xyz2[3*atom2+1] << "\n"
-                << xyz2[3*bonded2[1]+2] - xyz2[3*atom2+2] << "\n"
-                << xyz2[3*bonded2[2]+0] - xyz2[3*atom2+0] << "\n"
-                << xyz2[3*bonded2[2]+1] - xyz2[3*atom2+1] << "\n"
-                << xyz2[3*bonded2[2]+2] - xyz2[3*atom2+2] << "\n";
-            std::cout << "TEST TEST" << v1b[0] << "        " << v1b[1] << "        " << v1b[2] << std::endl;*/
+
             if (nbondsatom2==2)
             {
                 double anglev = ic2.angle_val(bonded2[0],atom2,bonded2[1]);
@@ -754,38 +569,8 @@ void Align::add_align(int nadd1, int* add1)
     for (int i=3;i<6;i++)
         v2[i] = v2[i] / n2;
 
-    //get binding site coordinates
-    //TODO: This should be implemented in a loop
-    int atom1 = add1[2*0+0];
-    int atom2 = add1[2*0+1];
-    double centerSurface[3], centerAdsorbate[3], displacement[3] = {0.0, 0.0, 0.0};
-    //centerSurface[0] = xyz1[3*(atom1-1)+0];
-    //centerSurface[1] = xyz1[3*(atom1-1)+1];
-    //centerSurface[2] = xyz1[3*(atom1-1)+2];
-    centerSurface[0] = xyz1[3*atom1+0];
-    centerSurface[1] = xyz1[3*atom1+1];
-    centerSurface[2] = xyz1[3*atom1+2];
-
-    // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
-    // == order is preserved
-    atom2 -= numOfAtoms1;
-    //centerAdsorbate[0] = xyz2[3*(atom2-1)+0];
-    //centerAdsorbate[1] = xyz2[3*(atom2-1)+1];
-    //centerAdsorbate[2] = xyz2[3*(atom2-1)+2];
-    centerAdsorbate[0] = xyz2[3*atom2+0];
-    centerAdsorbate[1] = xyz2[3*atom2+1];
-    centerAdsorbate[2] = xyz2[3*atom2+2];
-
-    const double DELTA_Z = 3.0;
-    displacement[0] = centerSurface[0] - centerAdsorbate[0];
-    displacement[1] = centerSurface[1] - centerAdsorbate[1];
-    displacement[2] = centerSurface[2] - centerAdsorbate[2] + DELTA_Z;
-    //std::cout << "*****" << centerSurface[0] << "******" << centerSurface[1] << "******" 
-    //        << centerAdsorbate[0] << "*****" << displacement[0] << std::endl;
-    
-    //move geometry to binding site
+    // get ready for rotation
     double* xyz2a = new double[3*(numOfAtoms2+2)]; // TODO: +2 ??
-    double xyz2Displaced[3*numOfAtoms2] = { };
     string* atomicNames2a = new string[numOfAtoms2+2];
     for (int i=0;i<numOfAtoms2;i++) atomicNames2a[i] = atomicNames2[i];
     atomicNames2a[numOfAtoms2] = "X";
@@ -795,105 +580,134 @@ void Align::add_align(int nadd1, int* add1)
     {
         for (int j=0;j<3;j++)
         {
-            //xyz2a[3*i+j] = xyz2[3*i+j] - c1[3+j];
-            //xyz2Displaced[3*i+j] = xyz2[3*i+j] + displacement[j];
-            xyz2a[3*i+j] = xyz2[3*i+j] + displacement[j];
+            xyz2a[3*i+j] = xyz2[3*i+j];
         }
     }
-    xyz2a[3*(numOfAtoms2)+0] = 0.; xyz2a[3*(numOfAtoms2)+1] = 0.;
-    xyz2a[3*(numOfAtoms2)+2] = 0.; xyz2a[3*(numOfAtoms2+1)+0] = v2[3];
-    xyz2a[3*(numOfAtoms2+1)+1] = v2[4]; xyz2a[3*(numOfAtoms2+1)+2] = v2[5];
-    //std::cout << "\n\n\n\n";
-    //print_xyz_gen(numOfAtoms2+2,atomicNames2a,xyz2a);
+    xyz2a[3*(numOfAtoms2)+0] = 0.;
+    xyz2a[3*(numOfAtoms2)+1] = 0.;
+    xyz2a[3*(numOfAtoms2)+2] = 0.;
+    xyz2a[3*(numOfAtoms2+1)+0] = v2[3];
+    xyz2a[3*(numOfAtoms2+1)+1] = v2[4];
+    xyz2a[3*(numOfAtoms2+1)+2] = v2[5];
 
-
-    //std::cout << v2[3] << "  " << v2[4] << "  " << v2[5] << "\n";
-    //align v2 along x/-x direction
-    //int t1 = numOfAtoms1;
-    //int t2 = numOfAtoms1+1;
-    // TODO : vectorToCentral
-    //double vectorToCentral[3] = {xyz2Displaced[0], xyz2Displaced[1], xyz2Displaced[2]};
-    //double vectorToCentral[3] = {1., 3., 4.};
-    //std::cout << "&&&&&&&&&&&&&&&&&&&&" << vectorToCentral[0] << xyz2Displaced[0] << "\n";
-    //align_to_Z(numOfAtoms2, xyz2Displaced, atomicNames2, v1b, 3);
-    //align_to_Z(numOfAtoms2, xyz2Displaced, atomicNames2, vectorToCentral, 3);
-    //align_to_Z(numOfAtoms2, xyz2Displaced, atomicNames2, v1b, vectorToCentral, 3);
-    //align_to_z(numOfAtoms1+2,t1,t2,xyz1a,atomicNames1a,1,10.);
+    // align to Z
     int t1 = numOfAtoms2;
     int t2 = numOfAtoms2+1;
-    //align_to_z(numOfAtoms2+2,t1,t2,xyz2a,atomicNames2a,-1,10.); //TODO: magic numbers??
-    align_to_z(numOfAtoms2+2,t1,t2,xyz2a,atomicNames2a,-1); //Mina
+    align_to_z(numOfAtoms2+2,t1,t2,xyz2a,atomicNames2a,-1);
 
-    //print_xyz_gen(numOfAtoms1+2,atomicNames1a,xyz1a);
-    //print_xyz_gen(numOfAtoms2+2,atomicNames2a,xyz2a);
+    for (int i=0;i<3*numOfAtoms2;i++)
+        xyz2[i] = xyz2a[i];
+
+
+    //get binding site coordinates
+    //TODO: This should be implemented in a loop
+    int atom1 = add1[2*0+0];
+    int atom2 = add1[2*0+1];
+    double centerSurface[3], centerAdsorbate[3], displacement[3] = {0.0, 0.0, 0.0};
+    centerSurface[0] = xyz1[3*atom1+0];
+    centerSurface[1] = xyz1[3*atom1+1];
+    centerSurface[2] = xyz1[3*atom1+2];
+
+    // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
+    // == order is preserved
+    atom2 -= numOfAtoms1;
+    centerAdsorbate[0] = xyz2[3*atom2+0];
+    centerAdsorbate[1] = xyz2[3*atom2+1];
+    centerAdsorbate[2] = xyz2[3*atom2+2];
+
+    const double DELTA_Z = 0.0;
+    displacement[0] = centerSurface[0] - centerAdsorbate[0];
+    displacement[1] = centerSurface[1] - centerAdsorbate[1];
+    displacement[2] = centerSurface[2] - centerAdsorbate[2] + DELTA_Z;
+    // move to binding site
+    for (int i=0;i<numOfAtoms2;i++)
+    {
+        for (int j=0;j<3;j++)
+        {
+            //xyz2Displaced[3*i+j] = xyz2[3*i+j] + displacement[j];
+            xyz2[3*i+j] += displacement[j];
+        }
+    }
 
     //face each other at X Angstroms
     //double X = 8.;
     //for (int i=0;i<3*numOfAtoms1;i++)
         //xyz1[i] = xyz1a[i];
-    for (int i=0;i<3*numOfAtoms2;i++)
-        xyz2[i] = xyz2Displaced[i];
+    //for (int i=0;i<3*numOfAtoms2;i++)
+    //    xyz2[i] = xyz2Displaced[i];
     //for (int i=0;i<numOfAtoms2;i++)
         //xyz2[3*i+0] += X;
 
 
-/* TODO
+
     //prepare for vdw opt
-    string* atomicNamesp = new string[numOfAtoms1+numOfAtoms2];
-    int* anumbersp = new int[numOfAtoms1+numOfAtoms2];
+    //string* atomicNamesCombined = new string[numOfAtoms1+numOfAtoms2];
+    //int* atomicNumbersCombined = new int[numOfAtoms1+numOfAtoms2];
+    string atomicNamesCombined[numOfAtoms1+numOfAtoms2];
+    int atomicNumbersCombined[numOfAtoms1+numOfAtoms2];
     for (int i=0;i<numOfAtoms1;i++)
-        atomicNamesp[i] = atomicNames1[i];
+        atomicNamesCombined[i] = atomicNames1[i];
     for (int i=0;i<numOfAtoms2;i++)
-        atomicNamesp[numOfAtoms1+i] = atomicNames2[i];
+        atomicNamesCombined[numOfAtoms1+i] = atomicNames2[i];
     for (int i=0;i<numOfAtoms1;i++)
-        anumbersp[i] = anumbers1[i];
+        atomicNumbersCombined[i] = anumbers1[i];
     for (int i=0;i<numOfAtoms2;i++)
-        anumbersp[numOfAtoms1+i] = anumbers2[i];
+        atomicNumbersCombined[numOfAtoms1+i] = anumbers2[i];
     //full pair geometry, before vdw opt
     for (int i=0;i<3*numOfAtoms1;i++)
-        xyza[i] = xyz1[i];
+        xyzAugmented[i] = xyz1[i];
     for (int i=0;i<3*numOfAtoms2;i++)
-        xyza[3*numOfAtoms1+i] = xyz2[i];
+        xyzAugmented[3*numOfAtoms1+i] = xyz2[i];
 
     ICoord icp;
-    icp.init(numOfAtoms1+numOfAtoms2,atomicNamesp,anumbersp,xyza);
+    icp.init(numOfAtoms1+numOfAtoms2,atomicNamesCombined,atomicNumbersCombined,xyzAugmented);
 
     //print_xyz();
 
     //rotate about central axis
+    //TODO
     if (nadd1>1)
     {
         int atom1 = add1[0];
         int atom2 = add1[1];
-        int tmp1 = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp1; }
-        int a3 = add1[2];
-        int a4 = add1[3];
-        int tmp2 = a3; if (a3>a4) { a3 = a4; a4 = tmp2; }
+        //int tmp1 = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp1; }
+        if (atom1>atom2) { std::swap(atom1, atom2); }
+        int atom3 = add1[2];
+        int atom4 = add1[3];
+        //int tmp2 = a3; if (a3>a4) { a3 = a4; a4 = tmp2; }
+        if (atom3>atom4) { std::swap(atom3, atom4); }
 
-        int same_frag = check_frag(atom1,atom2) + check_frag(a3,a4);
-        if (!same_frag && atom1!=a3 && atom2!=a4)
+        int same_frag = check_frag(atom1,atom2) + check_frag(atom3,atom4);
+        if (!same_frag && atom1!=atom3 && atom2!=atom4)
         {
-            double torv = icp.torsion_val(atom1,a3,a4,atom2);
+            double torv = icp.torsion_val(atom1,atom3,atom4,atom2);
             //printf("  central torv: %4.2f (%i %i %i %i) \n",torv,atom1+1,a3+1,a4+1,atom2+1);
-            rotate_around_x(numOfAtoms1,numOfAtoms2,-torv,icp.coords);
+            rotate_around_z(numOfAtoms1,numOfAtoms2,-torv,icp.coords); //TODO
         }
     }
 
     double* vx = new double[3];
-    vx[1] = vx[2] = 0.;
-    vx[0] = 1.0;
-    vdw_vector_opt(numOfAtoms1,numOfAtoms2,vx,icp);
+    //vx[1] = vx[2] = 0.;
+    //vx[0] = 1.0;
+    vx[0] = vx[1] = 0.;
+    vx[2] = 5.0;
+    //vdw_vector_opt(numOfAtoms1,numOfAtoms2,vx,icp);
+    // Suppose atom1tmp is always a surface atom
+    int atom1tmp = nearbyAtom;
+    //int atom1tmp = add1[0];
+    int atom2tmp = add1[1];
+    vdw_vector_opt(numOfAtoms1, numOfAtoms2, vx, icp, atom1tmp, atom2tmp);
     delete [] vx;
 
     for (int i=0;i<3*(numOfAtoms1+numOfAtoms2);i++)
-        xyza[i] = icp.coords[i];
+        xyzAugmented[i] = icp.coords[i];
 
     for (int i=0;i<3*numOfAtoms1;i++)
-        xyz1[i] = xyza[i];
+        xyz1[i] = xyzAugmented[i];
     for (int i=0;i<3*numOfAtoms2;i++)
-        xyz2[i] = xyza[3*numOfAtoms1+i];
+        xyz2[i] = xyzAugmented[3*numOfAtoms1+i];
 
-    //print_xyz_gen(numOfAtoms1+numOfAtoms2,icp.atomicNames,xyza);
+    //print_xyz_gen(numOfAtoms1+numOfAtoms2,icp.atomicNames,xyzAugmented);
 
     int badgeom = 0;
     for (int i=0;i<3*numOfAtoms1;i++)
@@ -916,15 +730,15 @@ void Align::add_align(int nadd1, int* add1)
         //print_xyz_gen(numOfAtoms2,atomicNames2,xyz2); Mina
         exit(1);
     }
-*/
+
 
     //delete [] atomicNames1a;
-    //delete [] atomicNames2a;
+    delete [] atomicNames2a;
     //delete [] xyz1a;
-    //delete [] xyz2a;
+    delete [] xyz2a;
 
     delete [] v2;
-    //delete [] v1a;
+    delete [] v1a;
     delete [] v1b;
     delete [] bonded1;
     delete [] bonded2;
@@ -933,9 +747,9 @@ void Align::add_align(int nadd1, int* add1)
     ic1.freemem();
     ic2.freemem();
 
-//    delete [] atomicNamesp;
-//    delete [] anumbersp;
-//    icp.freemem();
+    //delete [] atomicNamesCombined;
+    //delete [] atomicNumbersCombined;
+    icp.freemem();
 
 
     return;
@@ -1344,24 +1158,24 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
 
 
     //prepare for vdw opt
-    string* atomicNamesp = new string[numOfAtoms1+numOfAtoms2];
-    int* anumbersp = new int[numOfAtoms1+numOfAtoms2];
+    string* atomicNamesCombined = new string[numOfAtoms1+numOfAtoms2];
+    int* atomicNumbersCombined = new int[numOfAtoms1+numOfAtoms2];
     for (int i=0;i<numOfAtoms1;i++)
-        atomicNamesp[i] = atomicNames1[i];
+        atomicNamesCombined[i] = atomicNames1[i];
     for (int i=0;i<numOfAtoms2;i++)
-        atomicNamesp[numOfAtoms1+i] = atomicNames2[i];
+        atomicNamesCombined[numOfAtoms1+i] = atomicNames2[i];
     for (int i=0;i<numOfAtoms1;i++)
-        anumbersp[i] = anumbers1[i];
+        atomicNumbersCombined[i] = anumbers1[i];
     for (int i=0;i<numOfAtoms2;i++)
-        anumbersp[numOfAtoms1+i] = anumbers2[i];
+        atomicNumbersCombined[numOfAtoms1+i] = anumbers2[i];
     //full pair geometry, before vdw opt
     for (int i=0;i<3*numOfAtoms1;i++)
-        xyza[i] = xyz1[i];
+        xyzAugmented[i] = xyz1[i];
     for (int i=0;i<3*numOfAtoms2;i++)
-        xyza[3*numOfAtoms1+i] = xyz2[i];
+        xyzAugmented[3*numOfAtoms1+i] = xyz2[i];
 
     ICoord icp;
-    icp.init(numOfAtoms1+numOfAtoms2,atomicNamesp,anumbersp,xyza);
+    icp.init(numOfAtoms1+numOfAtoms2,atomicNamesCombined,atomicNumbersCombined,xyzAugmented);
 
     //print_xyz();
 
@@ -1391,14 +1205,14 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
     delete [] vx;
 
     for (int i=0;i<3*(numOfAtoms1+numOfAtoms2);i++)
-        xyza[i] = icp.coords[i];
+        xyzAugmented[i] = icp.coords[i];
 
     for (int i=0;i<3*numOfAtoms1;i++)
-        xyz1[i] = xyza[i];
+        xyz1[i] = xyzAugmented[i];
     for (int i=0;i<3*numOfAtoms2;i++)
-        xyz2[i] = xyza[3*numOfAtoms1+i];
+        xyz2[i] = xyzAugmented[3*numOfAtoms1+i];
 
-    //print_xyz_gen(numOfAtoms1+numOfAtoms2,icp.atomicNames,xyza);
+    //print_xyz_gen(numOfAtoms1+numOfAtoms2,icp.atomicNames,xyzAugmented);
 
     int badgeom = 0;
     for (int i=0;i<3*numOfAtoms1;i++)
@@ -1437,8 +1251,8 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
     ic1.freemem();
     ic2.freemem();
 
-    delete [] atomicNamesp;
-    delete [] anumbersp;
+    delete [] atomicNamesCombined;
+    delete [] atomicNumbersCombined;
     icp.freemem();
 
 
@@ -1490,7 +1304,7 @@ void Align::shuttle_align(int nadd1, int* add1)
     int* bonded3 = new int[8];
 
     ICoord ic1,ic2;
-    ic1.init(natom12,atomicNames12,anumbers12,xyza);
+    ic1.init(natom12,atomicNames12,anumbers12,xyzAugmented);
     ic1.make_frags();
     ic1.bond_frags();
     //ic1.ic_create_nobonds();
@@ -1523,9 +1337,9 @@ void Align::shuttle_align(int nadd1, int* add1)
             //first atom's vector
             for (int j=0;j<nbondsatom1;j++)
             {
-                v1a[3*nvf1+0] += xyza[3*atom1+0] - xyza[3*bonded1[j]+0];
-                v1a[3*nvf1+1] += xyza[3*atom1+1] - xyza[3*bonded1[j]+1];
-                v1a[3*nvf1+2] += xyza[3*atom1+2] - xyza[3*bonded1[j]+2];
+                v1a[3*nvf1+0] += xyzAugmented[3*atom1+0] - xyzAugmented[3*bonded1[j]+0];
+                v1a[3*nvf1+1] += xyzAugmented[3*atom1+1] - xyzAugmented[3*bonded1[j]+1];
+                v1a[3*nvf1+2] += xyzAugmented[3*atom1+2] - xyzAugmented[3*bonded1[j]+2];
             }
             if (nbondsatom1==2)
             {
@@ -1533,7 +1347,7 @@ void Align::shuttle_align(int nadd1, int* add1)
                 if (anglev>175.)
                 {
                     //printf("  using ool v1 \n");
-                    linear_right(&v1a[3*nvf1],atom1,bonded1,xyza);
+                    linear_right(&v1a[3*nvf1],atom1,bonded1,xyzAugmented);
                 }
             }
             if (nbondsatom1==3)
@@ -1543,7 +1357,7 @@ void Align::shuttle_align(int nadd1, int* add1)
                 if (fabs(imptorv)>175.)
                 {
                     //printf("  using oop v1 \n");
-                    planar_cross(&v1a[3*nvf1],atom1,bonded1,xyza);
+                    planar_cross(&v1a[3*nvf1],atom1,bonded1,xyzAugmented);
                     npf1++;
                 }
             }
@@ -1644,7 +1458,7 @@ void Align::shuttle_align(int nadd1, int* add1)
         int atom2 = add1[2*(nadd1-1)+1];
         int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; }
         int nbondsatom1 = get_bonds(atom1,ic1,bonded1);
-        linear_right(v2,atom1,bonded1,xyza);
+        linear_right(v2,atom1,bonded1,xyzAugmented);
         n1 = norm(v2,3);
         //    printf(" new norm: %8.6f \n",n1);
     }
@@ -1691,7 +1505,7 @@ void Align::shuttle_align(int nadd1, int* add1)
             //printf(" c1 for %i-%i \n",atom1+1,atom2+1);
             cfound++;
             for (int j=0;j<3;j++)
-                c1[j]   += xyza[3*atom1+j];
+                c1[j]   += xyzAugmented[3*atom1+j];
             for (int j=0;j<3;j++)
                 c1[3+j] += xyz3[3*atom2+j];
         }
@@ -1770,31 +1584,31 @@ void Align::shuttle_align(int nadd1, int* add1)
 
 
     //prepare for vdw opt
-    string* atomicNamesp = new string[natom12+numOfAtoms3];
-    int* anumbersp = new int[natom12+numOfAtoms3];
+    string* atomicNamesCombined = new string[natom12+numOfAtoms3];
+    int* atomicNumbersCombined = new int[natom12+numOfAtoms3];
     for (int i=0;i<numOfAtoms1;i++)
-        atomicNamesp[i] = atomicNames1[i];
+        atomicNamesCombined[i] = atomicNames1[i];
     for (int i=0;i<numOfAtoms2;i++)
-        atomicNamesp[numOfAtoms1+i] = atomicNames2[i];
+        atomicNamesCombined[numOfAtoms1+i] = atomicNames2[i];
     for (int i=0;i<numOfAtoms3;i++)
-        atomicNamesp[natom12+i] = atomicNames3[i];
+        atomicNamesCombined[natom12+i] = atomicNames3[i];
     for (int i=0;i<numOfAtoms1;i++)
-        anumbersp[i] = anumbers1[i];
+        atomicNumbersCombined[i] = anumbers1[i];
     for (int i=0;i<numOfAtoms2;i++)
-        anumbersp[numOfAtoms1+i] = anumbers2[i];
+        atomicNumbersCombined[numOfAtoms1+i] = anumbers2[i];
     for (int i=0;i<numOfAtoms3;i++)
-        anumbersp[natom12+i] = anumbers3[i];
+        atomicNumbersCombined[natom12+i] = anumbers3[i];
     //full pair geometry, before vdw opt
     for (int i=0;i<3*numOfAtoms1;i++)
-        xyza3[i] = xyz1[i];
+        xyzAugmented3[i] = xyz1[i];
     for (int i=0;i<3*numOfAtoms2;i++)
-        xyza3[3*numOfAtoms1+i] = xyz2[i];
+        xyzAugmented3[3*numOfAtoms1+i] = xyz2[i];
     for (int i=0;i<3*numOfAtoms3;i++)
-        xyza3[3*(natom12)+i] = xyz3[i];
+        xyzAugmented3[3*(natom12)+i] = xyz3[i];
 
 
     ICoord icp;
-    icp.init(natom12+numOfAtoms3,atomicNamesp,anumbersp,xyza3);
+    icp.init(natom12+numOfAtoms3,atomicNamesCombined,atomicNumbersCombined,xyzAugmented3);
 
     //print_xyz();
 
@@ -1824,16 +1638,16 @@ void Align::shuttle_align(int nadd1, int* add1)
     delete [] vx;
 
     for (int i=0;i<3*(natom12+numOfAtoms3);i++)
-        xyza3[i] = icp.coords[i];
+        xyzAugmented3[i] = icp.coords[i];
 
     for (int i=0;i<3*numOfAtoms1;i++)
-        xyz1[i] = xyza3[i];
+        xyz1[i] = xyzAugmented3[i];
     for (int i=0;i<3*numOfAtoms2;i++)
-        xyz2[i] = xyza3[3*numOfAtoms1+i];
+        xyz2[i] = xyzAugmented3[3*numOfAtoms1+i];
     for (int i=0;i<3*numOfAtoms3;i++)
-        xyz3[i] = xyza3[3*(natom12)+i];
+        xyz3[i] = xyzAugmented3[3*(natom12)+i];
 
-    //print_xyz_gen(natom12,icp.atomicNames,xyza);
+    //print_xyz_gen(natom12,icp.atomicNames,xyzAugmented);
 
     int badgeom = 0;
     for (int i=0;i<3*numOfAtoms1;i++)
@@ -1882,8 +1696,8 @@ void Align::shuttle_align(int nadd1, int* add1)
     ic1.freemem();
     ic2.freemem();
 
-    delete [] atomicNamesp;
-    delete [] anumbersp;
+    delete [] atomicNamesCombined;
+    delete [] atomicNumbersCombined;
     icp.freemem();
 
 
@@ -1936,14 +1750,14 @@ void Align::freemem()
         if (anumbers2!=NULL) delete [] anumbers2;
         if (xyz1!=NULL) delete [] xyz1;
         if (xyz2!=NULL) delete [] xyz2;
-        if (xyza!=NULL) delete [] xyza;
+        if (xyzAugmented!=NULL) delete [] xyzAugmented;
     }
     if (inited==3)
     {
         if (atomicNames3!=NULL) delete [] atomicNames3;
         if (anumbers3!=NULL) delete [] anumbers3;
         if (xyz3!=NULL) delete [] xyz3;
-        if (xyza3!=NULL) delete [] xyza3;
+        if (xyzAugmented3!=NULL) delete [] xyzAugmented3;
     }
 
     inited = 0;
