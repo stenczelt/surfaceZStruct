@@ -46,18 +46,19 @@ class Align
         //void align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames,
         //                int sign, double offset);
         // rotates fragment around X axis
-        void rotate_around_x(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz);
+        void rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz);
         void linear_right(double* v1, int atom1, int* bonded, double* xyz);
         void planar_cross(double* v1, int atom1, int* bonded, double* xyz);
         void align_v1(int nvf, double* v1);
         // not implemented!
         void point_out(double* v1, int numOfAtoms, double* xyz);
-        void vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp);
+        //void vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp);
+        void vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp, int atom1, int atom2);
 
     public:
         int inited;
-        double* xyza;
-        double* xyza3;
+        double* xyzAugmented;
+        double* xyzAugmented3;
         int numOfAtoms1;
         int numOfAtoms2;
         int avec1; //final rotation alignment, not implemented
@@ -68,7 +69,7 @@ class Align
         void add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, double* xyz3i);
         void align_zero();
         //void add_align(int nadd1, int* add1, double zBindingSite);
-        void add_align(int nadd1, int* add1);
+        void add_align(int nadd1, int* add1, int numOfSlabAtoms);
         int add_align_v(int nadd1, int* add1, int wtm, double* aprv);
         void shuttle_align(int nadd1, int* add1);
 
@@ -79,8 +80,6 @@ class Align
         double norm(double* x, int size);
         void get_rotation_matrix(double** rotMat, double* thetas);
         void print_xyz_gen(int natoms, string* anames, double* coords);
-        void align_to_Z(int inNumOfAtoms, double* inCartesians, string* inAtomicNames, 
-                        double* v1b, double* vectorToCentral, int vectorSize);
 };
 
 #endif
