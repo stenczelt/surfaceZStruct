@@ -1783,25 +1783,25 @@ int ICoord::read_ics(string filename)
   return nbonds + nangles + ntor;
 }
 
-//double ICoord::mm_energy()
-double ICoord::mm_energy(int atom1, int atom2)
+double ICoord::mm_energy()
+//double ICoord::mm_energy(int atom1, int atom2)
 {
   double Energy = 0.;
-  //Energy += vdw_energy_all();
-  Energy += vdw_energy_all(atom1, atom2);
+  Energy += vdw_energy_all();
+  //Energy += vdw_energy_all(atom1, atom2);
   //others not yet implemented
 
   return Energy;
 }
 
-//double ICoord::vdw_energy_all()
-double ICoord::vdw_energy_all(int atom1, int atom2)
+double ICoord::vdw_energy_all()
+//double ICoord::vdw_energy_all(int atom1, int atom2)
 {
   double E = 0;
-  //std::cout << "vdw_energy_all\n" << n_nonbond << "     " << std::endl;
-  //for (int i=0;i<n_nonbond;i++)
-  //  E += vdw_energy_1(nonbond[i][0],nonbond[i][1]);
-  E = vdw_energy_1(atom1, atom2);
+  std::cout << "vdw_energy_all\n" << n_nonbond << "     " << std::endl;
+  for (int i=0;i<n_nonbond;i++)
+    E += vdw_energy_1(nonbond[i][0],nonbond[i][1]);
+  //E = vdw_energy_1(atom1, atom2);
 
   return E;
 }
@@ -1809,8 +1809,8 @@ double ICoord::vdw_energy_all(int atom1, int atom2)
 double ICoord::vdw_energy_1(int i, int j)
 {
   double R = ffR[i] + ffR[j];
-  std::cout << "test R:  " << ffR[i] << "   " << ffR[j] << std::endl;
-  double eps = sqrt( ffeps[i] * ffeps[j] );
+  //std::cout << "test R:  " << ffR[i] << "   " << ffR[j] << std::endl;
+  double eps = sqrt( ffepsilon[i] * ffepsilon[j] );
 
   double r = distance(i,j);
 
@@ -1866,7 +1866,7 @@ void ICoord::freemem(){
  delete [] coordn;
 
  delete [] ffR;
- delete [] ffeps;
+ delete [] ffepsilon;
 
   delete [] anumbers;
   delete [] amasses;
@@ -1933,7 +1933,7 @@ void ICoord::alloc_mem(){
     coordn[i]=0;
 
  ffR = new double[natoms];
- ffeps = new double[natoms];
+ ffepsilon = new double[natoms];
 
  return;
 }
