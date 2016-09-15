@@ -14,7 +14,7 @@ void ICoord::mm_init(){
     if (anumbers[i] == -1 || anumbers[i] == 0)
     {
       ffR[i] = 0.0;
-      ffeps[i] = 0.002;
+      ffepsilon[i] = 0.002;
     }
     //if (anumbers[i] == 1)
     else if (anumbers[i] == 1) //Hydrogen
@@ -22,89 +22,89 @@ void ICoord::mm_init(){
 //VDW 1.2
 //CHARM: 1.34 A, 0.03 kcal/mol
       ffR[i] = 1.2;
-      ffeps[i] = 0.002;
+      ffepsilon[i] = 0.002;
     }
     else if (anumbers[i] == 2) //Helium
     {
 //VDW 1.4
       ffR[i] = 1.4;
-      ffeps[i] = 0.002;
+      ffepsilon[i] = 0.002;
     }
     else if (anumbers[i] == 5) // Boron
     {
 //VDW N/A, using same as carbon
       ffR[i] = 1.7;
-      ffeps[i] = 0.005;
+      ffepsilon[i] = 0.005;
     }
     else if (anumbers[i] == 6) // Carbon
     {
 //VDW 1.7
 //CHARM 2.1, 0.07
       ffR[i] = 1.7;
-      ffeps[i] = 0.005;
+      ffepsilon[i] = 0.005;
     }
     else if (anumbers[i] == 7) // Nitrogen
     {
 //VDW 1.55
 //CHARM 1.85, 0.2
       ffR[i] = 1.55;
-      ffeps[i] = 0.005;
+      ffepsilon[i] = 0.005;
     }
     else if (anumbers[i] == 8) // Oxygen
     {
 //VDW 1.52
 //CHARMM 1.7, 0.12
       ffR[i] = 1.52;
-      ffeps[i] = 0.005;
+      ffepsilon[i] = 0.005;
     }
     else if (anumbers[i] == 9) // Fluorine
     {
 //VDW 147
 //CHARMM 1.62 A, 0.1 kcal/mol
       ffR[i] = 1.6;
-      ffeps[i] = 0.0005;
+      ffepsilon[i] = 0.0005;
     }
     else if (anumbers[i] == 13) // Aluminum
     {
       ffR[i] = 2.8;
-      ffeps[i] = 0.002;
+      ffepsilon[i] = 0.002;
       //ffq[i] = 0.0;
     }
     else if (anumbers[i] == 14) // Silicon 
     {
       ffR[i] = 2.1;
-      ffeps[i] = 0.002;
+      ffepsilon[i] = 0.002;
       //ffq[i] = 0.0;
     }
     else if (anumbers[i] == 15) // Phosphorus
     {
       ffR[i] = 1.8;
-      ffeps[i] = 0.002;
+      ffepsilon[i] = 0.002;
       //ffq[i] = 0.0;
     }
     else if (anumbers[i] == 16) // Sulfur
     {
       ffR[i] = 1.8;
-      ffeps[i] = 0.002;
+      ffepsilon[i] = 0.002;
       //ffq[i] = -0.15;
     }
     else if (anumbers[i] == 17) // Chlorine 
     {
       ffR[i] = 1.8;
-      ffeps[i] = 0.002;
+      ffepsilon[i] = 0.002;
       //ffq[i] = -0.3;
     }
     else if (anumbers[i] == 27) // Cobalt
     {
 //VDW ??
       ffR[i] = 2.0;
-      ffeps[i] = 0.005;
+      ffepsilon[i] = 0.005;
       //ffq[i] = -0.3;
     }
     else if (anumbers[i] == 29) // Copper
     {
       ffR[i] = 1.4;
-      ffeps[i] = 0.003;
+      ffepsilon[i] = 0.003;
     }
     else
       printf(" Problem with mm_init() \n");
@@ -211,7 +211,7 @@ void ICoord::imptor_grad_all(){
 void ICoord::vdw_grad_1(int i, int j, double scale){
 
   double R = ffR[i] + ffR[j];
-  double eps = sqrt( ffeps[i] * ffeps[j] );
+  double eps = sqrt( ffepsilon[i] * ffepsilon[j] );
 
   double* dx = new double[3];
   dx[0] = coords[3*i+0]-coords[3*j+0];
