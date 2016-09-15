@@ -1,3 +1,4 @@
+// Mina Jafari, August 2016
 #include "align.h"
 #include "icoord.h"
 #include "utils.h"
@@ -16,28 +17,13 @@
 // ic1, atom1, .. : Surface
 // ic2, atom2, .. : Adsorbate
 
-bool populateVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
+bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
                  std::string* inSymbols);
+bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray, int &secondStructureIndex);
 
 int main(int argc, char* argv[])
 {
-    //std::ifstream inputFile1(argv[1]);
-    //std::ifstream inputFile2(argv[2]);
-    //std::string drivingCoord = argv[3];
-    //std::string inputFile1 = argv[1];
-    //std::string inputFile2 = argv[2];
-    
-    
-    // Input cartesians of slab and adsorbate: Done, in command line
-    // find surface sites
-    // pass new structures to align code
-    // Find binding sites on the slab and return coordinates for one of them
-    // Align and add adsorbate to that binding site
-    
-
     std::vector<std::string> xyzFileSlab; // vector to store the input file
-    //std::vector<std::string> xyzFileAdsorbate;
-    std::vector<std::string> xyzFileSites;
     if (argc != 3)
     {   
         std::cout << "ERROR - wrong number of parameters" << std::endl;
@@ -62,14 +48,14 @@ int main(int argc, char* argv[])
         std::cout << "ERROR: Set surface type in the input file" << std::endl;
     }   
 
-    int sizeSlab = 3*numOfSlabAtoms;
+    int slabSize = 3 * numOfSlabAtoms;
     //int sizeAdsorbate = 3*numOfAdsorbateAtoms;
-    double* slabCartesianCoords = new double[sizeSlab];
+    double* slabCartesianCoords = new double[slabSize];
     //double* adsorbateCartesianCoords = new double[sizeAdsorbate];
     std::string* slabAtomicSymbols = new std::string[numOfSlabAtoms];
     //std::string* adsorbateAtomicSymbols = new std::string[numOfAdsorbateAtoms];
 
-    populateVector(xyzFileSlab, slabCartesianCoords, numOfSlabAtoms, slabAtomicSymbols);
+    populateArrayFromVector(xyzFileSlab, slabCartesianCoords, numOfSlabAtoms, slabAtomicSymbols);
     SurfaceClass aSurface;
     std::string outFName = "bindingSites.xyz";
     if (aSurface.setSurfaceType(surfaceType))
@@ -81,18 +67,6 @@ int main(int argc, char* argv[])
         }   
         aSurface.findAllSites();
         aSurface.writeToFile(outFName);
-
-        /*std::ifstream inFile2 (outFName);
-        std::string newLine2;
-        while (std::getline(inFile2, newLine2))
-        {   
-            xyzFileSites.push_back(newLine2);
-        } */  
-
-        /*int sizeSlabSites = 3*numOfSlabAtoms;
-        double* slabCartesianCoords = new double[sizeSlab];
-        std::string* slabAtomicSymbols = new std::string[numOfSlabAtoms];
-        populateVector(xyzFileSlab, slabCartesianCoords, numOfSlabAtoms, slabAtomicSymbols);*/
     } 
 
     ICoord ic1, ic2;
@@ -102,33 +76,22 @@ int main(int argc, char* argv[])
 
     Align alignObj;
     alignObj.init(ic1.natoms,ic1.anames,ic1.anumbers,ic1.coords,ic2.natoms,ic2.anames,ic2.anumbers,ic2.coords);
-    std::cout << "Before alignment: \n";
-    alignObj.print_xyz();
 
-    /*
-    int siteNumber = 0;
-    std::cout << "Enter the binding site number:" << std::endl;
-    std::cin >> siteNumber;
-
-    double xSite = ic1.coords[3*siteNumber];
-    double ySite = ic1.coords[3*siteNumber+1];
-    double zSite = ic1.coords[3*siteNumber+2];
-    std::cout << "z site: " << zSite << "\n";
-    */
-    int nadd = 1;
-    //int add[2] = {29, 60};
-    int add[2] = {28, 59};
-    alignObj.add_align(nadd, add);
-    std::cout << "After alignment: \n\n"; 
-    alignObj.print_xyz();
+    int numOfAdd = 0;
+    int addArray[4] = {};
+    int secondStructureIndex = 0;
+    readFromFile("INPUT", numOfAdd, addArray, secondStructureIndex);
+    std::string orientationIn = "vertical";
+    alignObj.add_align(numOfAdd, addArray, secondStructureIndex, orientationIn);
+    std::string outFileName = "alignedStr.xyz";
+    alignObj.writeToFile(outFileName);
     
-
     delete [] slabCartesianCoords;
     delete [] slabAtomicSymbols;
     return (0);
 }
 
-bool populateVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,
+bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,
                  std::string* inSymbols)
 {
     bool success = true;
@@ -158,4 +121,64 @@ bool populateVector(std::vector<std::string> inVec, double* inArr, int numOfAtom
     return (success);
 }
 
+bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray, int &secondStructureIndex)
+{
+    bool success = false;
+    //int numOfAdd = numOfAddIn;
+    //int* addArray = addArrayIn;
+    //int secondStructureIndex = secondStructureIndexIn;
+    std::vector<std::string> inputFile;
+    std::string newLine;
+    ifstream inFile;
+    inFile.open(inFileName);
+    //std::ofstream inFile = inFileName;
+    while (std::getline(inFile, newLine))
+    {
+        inputFile.push_back(newLine);
+    }
+
+    std::stringstream ss(*inputFile.begin());
+    std::string unwanted = "";
+    std::string temp[5] = {};
+    //if (ss.peek() != "#")
+    ss >> unwanted >> numOfAdd;
+    if (numOfAdd == 1)
+    {
+        ss.str("");
+        ss.clear();
+        ss.str(*(inputFile.begin()+1));
+        ss >> unwanted >> unwanted >> temp[0] >> temp[1];
+        addArray[0] = std::stoi(temp[0]);
+        addArray[1] = std::stoi(temp[1]);
+        ss.str("");
+        ss.clear();
+        ss.str(*(inputFile.begin()+2));
+        ss >> unwanted >> temp[3];
+        secondStructureIndex = std::stoi(temp[3]);
+        success = true;
+    }
+    else if (numOfAdd == 2)
+    {
+        ss.str("");
+        ss.clear();
+        ss.str(*(inputFile.begin()+1));
+        ss >> unwanted >> unwanted >> temp[0] >> temp[1];
+        addArray[0] = std::stoi(temp[0]);
+        addArray[1] = std::stoi(temp[1]);
+        ss.str("");
+        ss.clear();
+        ss.str(*(inputFile.begin()+2));
+        ss >> unwanted >> unwanted >> temp[2] >> temp[3];
+        addArray[2] = std::stoi(temp[2]);
+        addArray[3] = std::stoi(temp[3]);
+        ss.str("");
+        ss.clear();
+        ss.str(*(inputFile.begin()+3));
+        ss >> unwanted >> temp[5];
+        secondStructureIndex = std::stoi(temp[5]);
+        success = true;
+    }
+
+    return success;
+}
 
