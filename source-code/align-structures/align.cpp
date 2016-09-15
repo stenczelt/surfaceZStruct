@@ -1,5 +1,6 @@
 // Please see license.txt for licensing and copyright information //
 // Author: Paul Zimmerman, University of Michigan //
+// Mina Jafari, August 2016
 
 
 #include <math.h>
@@ -219,15 +220,23 @@ void Align::rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, doubl
     return;
 }
 
-void Align::linear_right(double* v1, int atom1, int* bonded, double* xyz)
+void Align::linear_right(double* v1, int atom1, int* bonded, double* xyz, std::string orientationIn="horiz")
 {
     double* x1 = new double[3];
     for (int i=0;i<3;i++)
         x1[i] = xyz[3*atom1+i] - xyz[3*bonded[0]+i];
 
+    std::string orientation = orientationIn;
     double* x2 = new double[3];
-    x2[0] = x2[1] = 0.;
-    x2[2] = 1.;
+    if (orientation == "horiz")
+    {
+        x2[0] = x2[1] = 0.;
+        x2[2] = 1.;
+    }
+    else if (orientation == "vertical")
+    {
+        //TODO
+    }
 
     cross(v1,x1,x2);
 
@@ -294,8 +303,8 @@ void Align::point_out(double* v1, int numOfAtoms, double* xyz)
     return;
 }
 
-//void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp)
-void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp, int atom1, int atom2)
+void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp)
+//void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp, int atom1, int atom2)
 {
     //printf(" in vdw_vector_opt \n");
     double Energy = 0.;
@@ -306,8 +315,8 @@ void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord 
     for (int i=0;i<numOfSteps;i++)
     {
         potentialE = Energy;
-        //Energy = icp.mm_energy();
-        Energy = icp.mm_energy(atom1, atom2);
+        Energy = icp.mm_energy();
+        //Energy = icp.mm_energy(atom1, atom2);
         printf(" Energy: %6.5f \n",Energy);
 
         if (Energy<energyMin) energyMin = Energy;
@@ -422,7 +431,7 @@ void Align::align_zero()
 }
 
 //void Align::add_align(int nadd1, int* add1, double zBindingSite)
-void Align::add_align(int nadd1, int* add1, int nearbyAtom)
+void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientaionIn="horiz")
 {
     if (inited==0)
     {
@@ -440,8 +449,8 @@ void Align::add_align(int nadd1, int* add1, int nearbyAtom)
     //for (int i=0;i<3;i++) v1b[i] = 0.;
     double* c1 = new double[6]; //center points
 
-    int* bonded1 = new int[8];
-    int* bonded2 = new int[8];
+//    int* bonded1 = new int[8];
+    int* bonded2 = new int[8]; //size of 8 bc of the octohedral geometry
 //    int* bonded3 = new int[8];
 
     // TODO: There is a Align::init which is called before calling "add_align"
@@ -454,6 +463,8 @@ void Align::add_align(int nadd1, int* add1, int nearbyAtom)
     ic2.init(numOfAtoms2,atomicNames2,anumbers2,xyz2);
     ic2.make_frags();
     ic2.bond_frags();
+
+    std::string orientaion = orientaionIn;
 
     int npf1 = 0;
     int npf2 = 0;
@@ -496,15 +507,16 @@ void Align::add_align(int nadd1, int* add1, int nearbyAtom)
                 if (anglev>175.)
                 {
                     //printf("  using ool v1 (linear angle found) \n");
+                    //linear_right(&v1b[3*nvf2],atom2,bonded2,xyz2, orientaion);
                     linear_right(&v1b[3*nvf2],atom2,bonded2,xyz2);
                 }
             }
-            
+
             if (nbondsatom2==3)
             {
-                double imptorv = ic2.torsion_val(bonded2[0],atom2,bonded2[1],bonded2[2]);
-                //printf("  imptorv: %4.2f \n",imptorv);
-                if (fabs(imptorv)>175.)
+                double improperTorsionAngle = ic2.torsion_val(bonded2[0],atom2,bonded2[1],bonded2[2]);
+                //printf("  improperTorsionAngle: %4.2f \n",improperTorsionAngle);
+                if (fabs(improperTorsionAngle)>175.)
                 {
                     //printf("  using oop v1 (planar atom found) \n");
                     planar_cross(&v1b[3*nvf2],atom2,bonded2,xyz2);
@@ -542,9 +554,9 @@ void Align::add_align(int nadd1, int* add1, int nearbyAtom)
         }
     }
 
-    double n1 = norm(v2,3);
+//    double n1 = norm(v2,3);
     double n2 = norm(&v2[3],3);
-    if (n1<0.000001)
+/*    if (n1<0.000001)
     {
         int atom1 = add1[2*(nadd1-1)+0];
         int atom2 = add1[2*(nadd1-1)+1];
@@ -553,6 +565,7 @@ void Align::add_align(int nadd1, int* add1, int nearbyAtom)
         linear_right(v2,atom1,bonded1,xyz1);
         n1 = norm(v2,3);
     }
+*/
     if (n2<0.000001)
     {
         int atom1 = add1[2*(nadd1-1)+0];
@@ -564,8 +577,8 @@ void Align::add_align(int nadd1, int* add1, int nearbyAtom)
         n2 = norm(&v2[3],3);
         //    printf(" new norm: %8.6f \n",n2);
     }
-    for (int i=0;i<3;i++)
-        v2[i] = v2[i] / n1;
+    //for (int i=0;i<3;i++)
+    //    v2[i] = v2[i] / n1;
     for (int i=3;i<6;i++)
         v2[i] = v2[i] / n2;
 
@@ -601,42 +614,62 @@ void Align::add_align(int nadd1, int* add1, int nearbyAtom)
 
     //get binding site coordinates
     //TODO: This should be implemented in a loop
-    int atom1 = add1[2*0+0];
-    int atom2 = add1[2*0+1];
-    double centerSurface[3], centerAdsorbate[3], displacement[3] = {0.0, 0.0, 0.0};
-    centerSurface[0] = xyz1[3*atom1+0];
-    centerSurface[1] = xyz1[3*atom1+1];
-    centerSurface[2] = xyz1[3*atom1+2];
-
-    // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
-    // == order is preserved
-    atom2 -= numOfAtoms1;
-    centerAdsorbate[0] = xyz2[3*atom2+0];
-    centerAdsorbate[1] = xyz2[3*atom2+1];
-    centerAdsorbate[2] = xyz2[3*atom2+2];
-
-    const double DELTA_Z = 0.0;
-    displacement[0] = centerSurface[0] - centerAdsorbate[0];
-    displacement[1] = centerSurface[1] - centerAdsorbate[1];
-    displacement[2] = centerSurface[2] - centerAdsorbate[2] + DELTA_Z;
-    // move to binding site
-    for (int i=0;i<numOfAtoms2;i++)
+    for (int i=0; i<nadd1; i++)
     {
-        for (int j=0;j<3;j++)
+        int atom1 = add1[2*i+0];
+        int atom2 = add1[2*i+1];
+        double centerSurface[3], centerAdsorbate[3], displacement[3] = {0.0, 0.0, 0.0};
+        centerSurface[0] = xyz1[3*atom1+0];
+        centerSurface[1] = xyz1[3*atom1+1];
+        centerSurface[2] = xyz1[3*atom1+2];
+
+        // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
+        // == order is preserved
+        atom2 -= numOfAtoms1;
+        centerAdsorbate[0] = xyz2[3*atom2+0];
+        centerAdsorbate[1] = xyz2[3*atom2+1];
+        centerAdsorbate[2] = xyz2[3*atom2+2];
+
+        const double DELTA_Z = 0.0;
+        displacement[0] = centerSurface[0] - centerAdsorbate[0];
+        displacement[1] = centerSurface[1] - centerAdsorbate[1];
+        displacement[2] = centerSurface[2] - centerAdsorbate[2] + DELTA_Z;
+        // move to binding site
+        // assuming we never will have a case with more tham two adsorbate molecules/fragments
+        if (i == 0)
         {
-            //xyz2Displaced[3*i+j] = xyz2[3*i+j] + displacement[j];
-            xyz2[3*i+j] += displacement[j];
+            for (int i=0;i<numOfAtoms2;i++)
+            {
+                for (int j=0;j<3;j++)
+                {
+                    //xyz2Displaced[3*i+j] = xyz2[3*i+j] + displacement[j];
+                    xyz2[3*i+j] += displacement[j];
+                }
+            }
+        }
+        else if (atomIndex2 > 0 && nadd1 > 0)
+        {
+            int index = atomIndex2;
+            for (int i=index;i<numOfAtoms2;i++)
+            {
+                for (int j=0;j<3;j++)
+                {
+                    xyz2[3*i+j] += displacement[j];
+                }
+            }
         }
     }
 
-    //face each other at X Angstroms
-    //double X = 8.;
-    //for (int i=0;i<3*numOfAtoms1;i++)
+        //face each other at X Angstroms
+        //double X = 8.;
+        //for (int i=0;i<3*numOfAtoms1;i++)
         //xyz1[i] = xyz1a[i];
-    //for (int i=0;i<3*numOfAtoms2;i++)
-    //    xyz2[i] = xyz2Displaced[i];
-    //for (int i=0;i<numOfAtoms2;i++)
+        //for (int i=0;i<3*numOfAtoms2;i++)
+        //    xyz2[i] = xyz2Displaced[i];
+        //for (int i=0;i<numOfAtoms2;i++)
         //xyz2[3*i+0] += X;
+
+        // move to binding site
 
 
 
@@ -690,13 +723,14 @@ void Align::add_align(int nadd1, int* add1, int nearbyAtom)
     //vx[1] = vx[2] = 0.;
     //vx[0] = 1.0;
     vx[0] = vx[1] = 0.;
-    vx[2] = 5.0;
+    vx[2] = 1.0;
     //vdw_vector_opt(numOfAtoms1,numOfAtoms2,vx,icp);
     // Suppose atom1tmp is always a surface atom
-    int atom1tmp = nearbyAtom;
+    //int atom1tmp = nearbyAtom;
     //int atom1tmp = add1[0];
-    int atom2tmp = add1[1];
-    vdw_vector_opt(numOfAtoms1, numOfAtoms2, vx, icp, atom1tmp, atom2tmp);
+    //int atom2tmp = add1[1];
+    //vdw_vector_opt(numOfAtoms1, numOfAtoms2, vx, icp, atom1tmp, atom2tmp);
+//    vdw_vector_opt(numOfAtoms1, numOfAtoms2, vx, icp);
     delete [] vx;
 
     for (int i=0;i<3*(numOfAtoms1+numOfAtoms2);i++)
@@ -740,9 +774,9 @@ void Align::add_align(int nadd1, int* add1, int nearbyAtom)
     delete [] v2;
     delete [] v1a;
     delete [] v1b;
-    delete [] bonded1;
+//    delete [] bonded1;
     delete [] bonded2;
-    //delete [] bonded3;
+//    delete [] bonded3;
 
     ic1.freemem();
     ic2.freemem();
@@ -1765,17 +1799,6 @@ void Align::freemem()
     return;
 }
 
-DELTE this:
-double Align::norm(double* x, int size)
-{
-    double val = 0.0;
-    for (int i=0; i<size; i++)
-    {
-        val += x[i] * x[i];
-    }
-    val = sqrt(val);
-    return val;
-}
 */
 
 double Align::norm(double* x, int size)
@@ -1814,4 +1837,29 @@ void Align::print_xyz_gen(int natoms, string* anames, double* coords)
  }
 // printf("\n");
    
+}
+
+bool Align::writeToFile(std::string &outFile)
+{
+    bool success = false;
+    std::ofstream ofs;
+    ofs.open(outFile.c_str());
+
+    ofs << std::to_string(numOfAtoms1+numOfAtoms2) << "\n";
+    ofs << "\n";
+    ofs << std::fixed << std::setprecision(15);
+    for (unsigned int i=0; i<numOfAtoms1; i++)
+    {
+        ofs << atomicNames1[i] << "         " << xyz1[3*i+0] << "           " 
+            << xyz1[3*i+1] << "            " << xyz1[3*i+2] << "\n";
+    }
+    for (unsigned int i=0; i<numOfAtoms2; i++)
+    {
+        ofs << atomicNames2[i] << "         " << xyz2[3*i+0] << "           " 
+            << xyz2[3*i+1] << "            " << xyz2[3*i+2] << "\n";
+    }
+
+    ofs.close();
+    success = true;
+    return (success);
 }
