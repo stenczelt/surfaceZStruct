@@ -1798,7 +1798,6 @@ double ICoord::vdw_energy_all()
 //double ICoord::vdw_energy_all(int atom1, int atom2)
 {
   double E = 0;
-  std::cout << "vdw_energy_all\n" << n_nonbond << "     " << std::endl;
   for (int i=0;i<n_nonbond;i++)
     E += vdw_energy_1(nonbond[i][0],nonbond[i][1]);
   //E = vdw_energy_1(atom1, atom2);
