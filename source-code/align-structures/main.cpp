@@ -85,6 +85,7 @@ int main(int argc, char* argv[])
     alignObj.add_align(numOfAdd, addArray, secondStructureIndex, orientationIn);
     std::string outFileName = "alignedStr.xyz";
     alignObj.writeToFile(outFileName);
+    std::cout << "Output is written to aligned.xyz file\n";
     
     delete [] slabCartesianCoords;
     delete [] slabAtomicSymbols;
