@@ -630,36 +630,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
         int atom2 = add1[2*i+1];
         atom2 -= numOfAtoms1;
         moveToOrigin(atom2, atomIndex2, nadd1);
-//        double centerAdsorbate[3] = {0.0, 0.0, 0.0};
 
-        // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
-        // == order is preserved
-/*        centerAdsorbate[0] = xyz2[3*atom2+0];
-        centerAdsorbate[1] = xyz2[3*atom2+1];
-        centerAdsorbate[2] = xyz2[3*atom2+2];
-
-        // assuming we never will have a case with more tham two adsorbate molecules/fragments
-        if (i == 0)
-        {
-            for (int i=0;i<numOfAtoms2;i++)
-            {
-                for (int j=0;j<3;j++)
-                {
-                    //xyz2Displaced[3*i+j] = xyz2[3*i+j] + displacement[j];
-                    xyz2[3*i+j] -= centerAdsorbate[j];
-                }
-            }
-        }
-        else if (atomIndex2 > 0 && nadd1 > 0)
-        {
-            for (int i=atomIndex2;i<numOfAtoms2;i++)
-            {
-                for (int j=0;j<3;j++)
-                {
-                    xyz2[3*i+j] -= centerAdsorbate[j];
-                }
-            }
-        }*/
         // assuming atom2 is the central atom. Find the vector from atom2 to one of
         // the attached atoms. Find the cross product of that vector with v1b, the 
         // result should equal the surface normal
@@ -669,13 +640,8 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
         bondVector[1] = xyz2[3*bonded2[0]+1] - xyz2[3*atom2+1];
         bondVector[2] = xyz2[3*bonded2[0]+2] - xyz2[3*atom2+2];
 
-        //cross(surfNormal, bondVector, v1b);
         double zDir[3] = {0., 0., -1.};
         cross(surfNormal, bondVector, zDir);
-        //cross(surfNormal, bondVector, v2);
-        //double surfNormal[3] = {0., 1., 0.};
-        std::cout << "$$$$$$$$$$$$$$$$$ surf normal " << surfNormal[0] << " " << surfNormal[1] << " " << surfNormal[2] << "\n";
-        std::cout << "################# bond vctor " << bondVector[0] << " " << bondVector[1] << " " << bondVector[2] << "\n";
         // find the angle between surface normal and x axis
         double xAxis[3] = {1., 0., 0.};
         double dotProduct = surfNormal[0] * xAxis[0] + surfNormal[1] * xAxis[1] + surfNormal[2] * xAxis[2];
@@ -685,15 +651,9 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
         double angle = acos(cosTheta);
         std::cout << "%%%%%%%%%%%%%%%%%% angle: " << angle*180/3.14 << "\n";
 
-        //ICoord icp;
-        //icp.init(numOfAtoms2, atomicNames2, anumbers2, xyz2);
-        //rotate_around_z(numOfAtoms2, angle, icp.coords);
-    // align surface normal to x or y
+        // align surface normal to x
         rotate_around_z(numOfAtoms2, angle, xyz2);
     }
-
-
-
 
     //get binding site coordinates and move adsorbate to that site
     // atom1 belongs to surface
@@ -744,7 +704,6 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
 
     }
 
-
         //face each other at X Angstroms
         //double X = 8.;
         //for (int i=0;i<3*numOfAtoms1;i++)
@@ -754,13 +713,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
         //for (int i=0;i<numOfAtoms2;i++)
         //xyz2[3*i+0] += X;
 
-        // move to binding site
-
-
-
     //prepare for vdw opt
-    //string* atomicNamesCombined = new string[numOfAtoms1+numOfAtoms2];
-    //int* atomicNumbersCombined = new int[numOfAtoms1+numOfAtoms2];
     string atomicNamesCombined[numOfAtoms1+numOfAtoms2];
     int atomicNumbersCombined[numOfAtoms1+numOfAtoms2];
     for (int i=0;i<numOfAtoms1;i++)
@@ -804,16 +757,9 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
     }*/
 
     double* vx = new double[3];
-    //vx[1] = vx[2] = 0.;
-    //vx[0] = 1.0;
     vx[0] = vx[1] = 0.;
     vx[2] = 1.0;
-    //vdw_vector_opt(numOfAtoms1,numOfAtoms2,vx,icp);
     // Suppose atom1tmp is always a surface atom
-    //int atom1tmp = nearbyAtom;
-    //int atom1tmp = add1[0];
-    //int atom2tmp = add1[1];
-    //vdw_vector_opt(numOfAtoms1, numOfAtoms2, vx, icp, atom1tmp, atom2tmp);
     vdw_vector_opt(numOfAtoms1, numOfAtoms2, vx, icp);
     delete [] vx;
 
@@ -854,17 +800,14 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
     delete [] atomicNames2a;
     //delete [] xyz1a;
     delete [] xyz2a;
-
     delete [] v2;
     delete [] v1a;
     delete [] v1b;
 //    delete [] bonded1;
     delete [] bonded2;
 //    delete [] bonded3;
-
     ic1.freemem();
     ic2.freemem();
-
     //delete [] atomicNamesCombined;
     //delete [] atomicNumbersCombined;
     icp.freemem();
