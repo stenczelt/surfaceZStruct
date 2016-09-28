@@ -661,22 +661,22 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
     {
         int atom1 = add1[2*i+0];
         int atom2 = add1[2*i+1];
-        double centerSurface[3], centerAdsorbate[3], displacement[3] = {0.0, 0.0, 0.0};
-        centerSurface[0] = xyz1[3*atom1+0];
-        centerSurface[1] = xyz1[3*atom1+1];
-        centerSurface[2] = xyz1[3*atom1+2];
+        double SurfaceCenter[3], adsorbateCenter[3], displacement[3] = {0.0, 0.0, 0.0};
+        SurfaceCenter[0] = xyz1[3*atom1+0];
+        SurfaceCenter[1] = xyz1[3*atom1+1];
+        SurfaceCenter[2] = xyz1[3*atom1+2];
 
         // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
         // == order is preserved
         atom2 -= numOfAtoms1;
-        centerAdsorbate[0] = xyz2[3*atom2+0];
-        centerAdsorbate[1] = xyz2[3*atom2+1];
-        centerAdsorbate[2] = xyz2[3*atom2+2];
+        adsorbateCenter[0] = xyz2[3*atom2+0];
+        adsorbateCenter[1] = xyz2[3*atom2+1];
+        adsorbateCenter[2] = xyz2[3*atom2+2];
 
         const double DELTA_Z = 0.0;
-        displacement[0] = centerSurface[0] - centerAdsorbate[0];
-        displacement[1] = centerSurface[1] - centerAdsorbate[1];
-        displacement[2] = centerSurface[2] - centerAdsorbate[2] + DELTA_Z;
+        displacement[0] = SurfaceCenter[0] - adsorbateCenter[0];
+        displacement[1] = SurfaceCenter[1] - adsorbateCenter[1];
+        displacement[2] = SurfaceCenter[2] - adsorbateCenter[2] + DELTA_Z;
         // move to binding site
         // assuming we never will have a case with more tham two adsorbate molecules/fragments
         if (i == 0)
@@ -1899,14 +1899,14 @@ void Align::moveToOrigin(int atom2, int atomIndex2, int nadd1)
 //    { 
         //int atom1 = add1[2*i+0];
 //        int atom2 = add1[2*i+1];
-        double centerAdsorbate[3] = {0.0, 0.0, 0.0};
+        double adsorbateCenter[3] = {0.0, 0.0, 0.0};
 
         // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
         // == order is preserved
 //        atom2 -= numOfAtoms1;
-        centerAdsorbate[0] = xyz2[3*atom2+0];
-        centerAdsorbate[1] = xyz2[3*atom2+1];
-        centerAdsorbate[2] = xyz2[3*atom2+2];
+        adsorbateCenter[0] = xyz2[3*atom2+0];
+        adsorbateCenter[1] = xyz2[3*atom2+1];
+        adsorbateCenter[2] = xyz2[3*atom2+2];
 
         // assuming we never will have a case with more tham two adsorbate molecules/fragments
         //if (i == 0)
@@ -1917,7 +1917,7 @@ void Align::moveToOrigin(int atom2, int atomIndex2, int nadd1)
                 for (int j=0;j<3;j++)
                 {    
                     //xyz2Displaced[3*i+j] = xyz2[3*i+j] + displacement[j];
-                    xyz2[3*i+j] -= centerAdsorbate[j];
+                    xyz2[3*i+j] -= adsorbateCenter[j];
                 }    
             }    
         }    
@@ -1927,7 +1927,7 @@ void Align::moveToOrigin(int atom2, int atomIndex2, int nadd1)
             {    
                 for (int j=0;j<3;j++)
                 {    
-                    xyz2[3*i+j] -= centerAdsorbate[j];
+                    xyz2[3*i+j] -= adsorbateCenter[j];
                 }    
             }    
         }
