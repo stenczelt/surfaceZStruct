@@ -44,7 +44,6 @@ int Align::check_frag(int atom1, int atom2)
 int Align::get_bonds(int atom1, ICoord ic1, int* bonded)
 {
     int nfound = 0;
-    std::cout << "in get_bonds\n" << ic1.natoms << std::endl;
 
     for (int i=0;i<ic1.natoms;i++)
         if (i!=atom1 && ic1.bond_exists(i,atom1))
@@ -72,7 +71,7 @@ void applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix)
 
 void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames, int sign)
 {
-    // xyz1 Temporary Cartesian coordinates of vectors pointing from 
+    // xyz1 temporary Cartesian coordinates of vectors pointing from 
     // the arbitrary origin to each atom
     double* xyz1 = new double[3*numOfAtoms];
     for (int i=0;i<numOfAtoms;i++)
@@ -165,8 +164,6 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
 
     for (int i=0;i<3*numOfAtoms;i++)
         xyz[i] = xyz1[i];
-    std::cout << "align to x" << std::endl;
-    print_xyz_gen(numOfAtoms,atomicNames,xyz1);
 
     delete [] angles;
     for (int i=0;i<3;i++)
@@ -179,11 +176,14 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
     return;
 }
 
-void Align::rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz)
+//void Align::rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz)
+void Align::rotate_around_z(int numOfAtoms2, double torv, double* xyz)
 {
+    std::cout << "@@@@@@@@@@ Angle" << torv * 180./3.1415 << std::endl;
     //printf("  rotating fragment around x axis: %3.2f (degrees) \n",torv);
 
-    int numOfAtoms = numOfAtoms1 + numOfAtoms2;
+    //int numOfAtoms = numOfAtoms1 + numOfAtoms2;
+    int numOfAtoms = numOfAtoms2;
 
     double* xyzTemp = new double[3*numOfAtoms];
     for (int i=0;i<3*numOfAtoms;i++) xyzTemp[i] = 0.;
@@ -196,8 +196,20 @@ void Align::rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, doubl
 
     //angles[0] = torv * 3.1415926/180.;
     //angles[1] = angles[2] = 0.;
+    //angles[0] = torv * 180./3.1415;
+    //angles[1] = angles[2] = 0.;
     angles[0] = angles[1] = 0.;
-    angles[2] = torv * 3.1415926/180.;
+    if (torv >= 0)
+    {
+        // clockwise rotation for positive torv
+        angles[2] = torv * -180./3.1415926;
+    }
+    else if (torv < 0)
+    {
+        // counter-clockwise rotation for negative torv
+        angles[2] = torv * 180./3.1415926;
+    }
+    //angles[2] = torv * 3.1415926/180.;
 
     get_rotation_matrix(rotm, angles);
     applyRotationMatrix(numOfAtoms, xyz, rotm);
@@ -210,7 +222,7 @@ void Align::rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, doubl
     for (int i=0;i<3*numOfAtoms2;i++)
         xyz[3*numOfAtoms1+i] = xyzTemp[3*numOfAtoms1+i];*/
 
-    //delete [] xyzTemp;
+    delete [] xyzTemp;
     delete [] angles;
     delete [] rotm[0];
     delete [] rotm[1];
@@ -303,8 +315,8 @@ void Align::point_out(double* v1, int numOfAtoms, double* xyz)
     return;
 }
 
-void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp)
 //void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp, int atom1, int atom2)
+void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp)
 {
     //printf(" in vdw_vector_opt \n");
     double Energy = 0.;
@@ -317,7 +329,7 @@ void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord 
         potentialE = Energy;
         Energy = icp.mm_energy();
         //Energy = icp.mm_energy(atom1, atom2);
-        printf(" Energy: %6.5f \n",Energy);
+        //printf(" Energy: %6.5f \n",Energy);
 
         if (Energy<energyMin) energyMin = Energy;
         if (Energy>potentialE+THRESH && Energy>energyMin) break;
@@ -325,7 +337,7 @@ void Align::vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord 
         for (int j=0;j<numOfAtoms2;j++)
             for (int k=0;k<3;k++)
                 icp.coords[3*numOfAtoms1+3*j+k] -= 0.1*v1[k];
-                printf(" v1[3]: %6.5f \n",v1[3]);
+                //printf(" v1[3]: %6.5f \n",v1[3]);
 
         //std::cout << "after each step:\n";
         //print_xyz_gen(icp.natoms,icp.anames,icp.coords);
@@ -447,7 +459,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
     for (int i=0;i<3*nadd1;i++) v1b[i] = 0.;
     //double* v1b = new double[3]; //x, y, z, coordinate
     //for (int i=0;i<3;i++) v1b[i] = 0.;
-    double* c1 = new double[6]; //center points
+    //double* c1 = new double[6]; //center points
 
 //    int* bonded1 = new int[8];
     int* bonded2 = new int[8]; //size of 8 bc of the octohedral geometry
@@ -512,7 +524,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
                 }
             }
 
-            if (nbondsatom2==3)
+            if (nbondsatom2==3) //TODO: Does this work for planar molecules like benzene?
             {
                 double improperTorsionAngle = ic2.torsion_val(bonded2[0],atom2,bonded2[1],bonded2[2]);
                 //printf("  improperTorsionAngle: %4.2f \n",improperTorsionAngle);
@@ -611,9 +623,80 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
     for (int i=0;i<3*numOfAtoms2;i++)
         xyz2[i] = xyz2a[i];
 
+    // move atom2 to the origin of Cartesians, then move its attached atoms
+    for (int i=0; i<nadd1; i++)
+    {
+        //int atom1 = add1[2*i+0];
+        int atom2 = add1[2*i+1];
+        atom2 -= numOfAtoms1;
+        moveToOrigin(atom2, atomIndex2, nadd1);
+//        double centerAdsorbate[3] = {0.0, 0.0, 0.0};
 
-    //get binding site coordinates
-    //TODO: This should be implemented in a loop
+        // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
+        // == order is preserved
+/*        centerAdsorbate[0] = xyz2[3*atom2+0];
+        centerAdsorbate[1] = xyz2[3*atom2+1];
+        centerAdsorbate[2] = xyz2[3*atom2+2];
+
+        // assuming we never will have a case with more tham two adsorbate molecules/fragments
+        if (i == 0)
+        {
+            for (int i=0;i<numOfAtoms2;i++)
+            {
+                for (int j=0;j<3;j++)
+                {
+                    //xyz2Displaced[3*i+j] = xyz2[3*i+j] + displacement[j];
+                    xyz2[3*i+j] -= centerAdsorbate[j];
+                }
+            }
+        }
+        else if (atomIndex2 > 0 && nadd1 > 0)
+        {
+            for (int i=atomIndex2;i<numOfAtoms2;i++)
+            {
+                for (int j=0;j<3;j++)
+                {
+                    xyz2[3*i+j] -= centerAdsorbate[j];
+                }
+            }
+        }*/
+        // assuming atom2 is the central atom. Find the vector from atom2 to one of
+        // the attached atoms. Find the cross product of that vector with v1b, the 
+        // result should equal the surface normal
+        double surfNormal[3] = {};
+        double bondVector[3] = {};
+        bondVector[0] = xyz2[3*bonded2[0]+0] - xyz2[3*atom2+0];
+        bondVector[1] = xyz2[3*bonded2[0]+1] - xyz2[3*atom2+1];
+        bondVector[2] = xyz2[3*bonded2[0]+2] - xyz2[3*atom2+2];
+
+        //cross(surfNormal, bondVector, v1b);
+        double zDir[3] = {0., 0., -1.};
+        cross(surfNormal, bondVector, zDir);
+        //cross(surfNormal, bondVector, v2);
+        //double surfNormal[3] = {0., 1., 0.};
+        std::cout << "$$$$$$$$$$$$$$$$$ surf normal " << surfNormal[0] << " " << surfNormal[1] << " " << surfNormal[2] << "\n";
+        std::cout << "################# bond vctor " << bondVector[0] << " " << bondVector[1] << " " << bondVector[2] << "\n";
+        // find the angle between surface normal and x axis
+        double xAxis[3] = {1., 0., 0.};
+        double dotProduct = surfNormal[0] * xAxis[0] + surfNormal[1] * xAxis[1] + surfNormal[2] * xAxis[2];
+        double lengthOf1st = sqrt(pow(surfNormal[0], 2) + pow(surfNormal[1], 2) + pow(surfNormal[2], 2));
+        double lengthOf2nd = 1.0; // bc it's X axis
+        double cosTheta = dotProduct / (lengthOf1st * lengthOf2nd);
+        double angle = acos(cosTheta);
+        std::cout << "%%%%%%%%%%%%%%%%%% angle: " << angle*180/3.14 << "\n";
+
+        //ICoord icp;
+        //icp.init(numOfAtoms2, atomicNames2, anumbers2, xyz2);
+        //rotate_around_z(numOfAtoms2, angle, icp.coords);
+    // align surface normal to x or y
+        rotate_around_z(numOfAtoms2, angle, xyz2);
+    }
+
+
+
+
+    //get binding site coordinates and move adsorbate to that site
+    // atom1 belongs to surface
     for (int i=0; i<nadd1; i++)
     {
         int atom1 = add1[2*i+0];
@@ -658,7 +741,9 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
                 }
             }
         }
+
     }
+
 
         //face each other at X Angstroms
         //double X = 8.;
@@ -698,8 +783,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
     //print_xyz();
 
     //rotate about central axis
-    //TODO
-    if (nadd1>1)
+    /*if (nadd1>1)
     {
         int atom1 = add1[0];
         int atom2 = add1[1];
@@ -717,7 +801,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
             //printf("  central torv: %4.2f (%i %i %i %i) \n",torv,atom1+1,a3+1,a4+1,atom2+1);
             rotate_around_z(numOfAtoms1,numOfAtoms2,-torv,icp.coords); //TODO
         }
-    }
+    }*/
 
     double* vx = new double[3];
     //vx[1] = vx[2] = 0.;
@@ -730,7 +814,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
     //int atom1tmp = add1[0];
     //int atom2tmp = add1[1];
     //vdw_vector_opt(numOfAtoms1, numOfAtoms2, vx, icp, atom1tmp, atom2tmp);
-//    vdw_vector_opt(numOfAtoms1, numOfAtoms2, vx, icp);
+    vdw_vector_opt(numOfAtoms1, numOfAtoms2, vx, icp);
     delete [] vx;
 
     for (int i=0;i<3*(numOfAtoms1+numOfAtoms2);i++)
@@ -1862,4 +1946,47 @@ bool Align::writeToFile(std::string &outFile)
     ofs.close();
     success = true;
     return (success);
+}
+
+//void Align::moveToOrigin(int nadd1, int* add1, int atomIndex2)
+void Align::moveToOrigin(int atom2, int atomIndex2, int nadd1)
+{
+    // move atom2 to the origin of Cartesians, then move its attached atoms
+//    for (int i=0; i<nadd1; i++) 
+//    { 
+        //int atom1 = add1[2*i+0];
+//        int atom2 = add1[2*i+1];
+        double centerAdsorbate[3] = {0.0, 0.0, 0.0};
+
+        // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
+        // == order is preserved
+//        atom2 -= numOfAtoms1;
+        centerAdsorbate[0] = xyz2[3*atom2+0];
+        centerAdsorbate[1] = xyz2[3*atom2+1];
+        centerAdsorbate[2] = xyz2[3*atom2+2];
+
+        // assuming we never will have a case with more tham two adsorbate molecules/fragments
+        //if (i == 0)
+        if (nadd1 == 0)
+        {    
+            for (int i=0;i<numOfAtoms2;i++)
+            {    
+                for (int j=0;j<3;j++)
+                {    
+                    //xyz2Displaced[3*i+j] = xyz2[3*i+j] + displacement[j];
+                    xyz2[3*i+j] -= centerAdsorbate[j];
+                }    
+            }    
+        }    
+        else if (atomIndex2 > 0 && nadd1 > 0) 
+        {    
+            for (int i=atomIndex2;i<numOfAtoms2;i++)
+            {    
+                for (int j=0;j<3;j++)
+                {    
+                    xyz2[3*i+j] -= centerAdsorbate[j];
+                }    
+            }    
+        }
+//    }
 }
