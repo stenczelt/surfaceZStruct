@@ -92,7 +92,7 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
     double* x1 = new double[3];
 
     // A vector pointing from the arbitrary origin to the free side 
-    // of the molecule (t2 coordinates are defined based on v1b)
+    // of the molecule (t2 coordinates are defined based on averagedBondVector2)
     x1[0] = xyz1[3*t2+0] - xyz1[3*t1+0];
     x1[1] = xyz1[3*t2+1] - xyz1[3*t1+1];
     x1[2] = xyz1[3*t2+2] - xyz1[3*t1+2];
@@ -453,12 +453,12 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
 
     //get v1's for all add atoms
     // TODO: magic numbers??
-    double* v1a = new double[3*nadd1];
-    for (int i=0;i<3*nadd1;i++) v1a[i] = 0.;
-    double* v1b = new double[3*nadd1];
-    for (int i=0;i<3*nadd1;i++) v1b[i] = 0.;
-    //double* v1b = new double[3]; //x, y, z, coordinate
-    //for (int i=0;i<3;i++) v1b[i] = 0.;
+    double* averagedBondVector1 = new double[3*nadd1];
+    for (int i=0;i<3*nadd1;i++) averagedBondVector1[i] = 0.;
+    double* averagedBondVector2 = new double[3*nadd1];
+    for (int i=0;i<3*nadd1;i++) averagedBondVector2[i] = 0.;
+    //double* averagedBondVector2 = new double[3]; //x, y, z, coordinate
+    //for (int i=0;i<3;i++) averagedBondVector2[i] = 0.;
     //double* c1 = new double[6]; //center points
 
 //    int* bonded1 = new int[8];
@@ -502,15 +502,15 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
             nbondsatom2 = get_bonds(atom2,ic2,bonded2);
 
             //first atom's vector (surface)
-            v1a[0] = v1a[1] = 0.0;
-            v1a[2] = 1.0;
+            averagedBondVector1[0] = averagedBondVector1[1] = 0.0;
+            averagedBondVector1[2] = 1.0;
 
             //second atom's vector
             for (int j=0;j<nbondsatom2;j++)
             {
-                v1b[3*nvf2+0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
-                v1b[3*nvf2+1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
-                v1b[3*nvf2+2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
+                averagedBondVector2[3*nvf2+0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
+                averagedBondVector2[3*nvf2+1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
+                averagedBondVector2[3*nvf2+2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
             }
 
             if (nbondsatom2==2)
@@ -519,8 +519,8 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
                 if (anglev>175.)
                 {
                     //printf("  using ool v1 (linear angle found) \n");
-                    //linear_right(&v1b[3*nvf2],atom2,bonded2,xyz2, orientaion);
-                    linear_right(&v1b[3*nvf2],atom2,bonded2,xyz2);
+                    //linear_right(&averagedBondVector2[3*nvf2],atom2,bonded2,xyz2, orientaion);
+                    linear_right(&averagedBondVector2[3*nvf2],atom2,bonded2,xyz2);
                 }
             }
 
@@ -531,17 +531,17 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
                 if (fabs(improperTorsionAngle)>175.)
                 {
                     //printf("  using oop v1 (planar atom found) \n");
-                    planar_cross(&v1b[3*nvf2],atom2,bonded2,xyz2);
+                    planar_cross(&averagedBondVector2[3*nvf2],atom2,bonded2,xyz2);
                     npf2++;
                 }
             }
             if (npf2>1)
             {
-                align_v1(nvf2+1,v1b);
+                align_v1(nvf2+1,averagedBondVector2);
             }
-            double n1 = norm(&v1b[3*nvf2],3);
+            double n1 = norm(&averagedBondVector2[3*nvf2],3);
             for (int j=0;j<3;j++)
-                v1b[3*nvf2+j] = v1b[3*nvf2+j] / n1;
+                averagedBondVector2[3*nvf2+j] = averagedBondVector2[3*nvf2+j] / n1;
 
             nvf2++;
 
@@ -554,15 +554,15 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
         return;
     }
 
-    //averaging over v1a and v1b to get v2
+    //averaging over averagedBondVector1 and averagedBondVector2 to get v2
     double* v2 = new double[6];
     for (int i=0;i<6;i++) v2[i] = 0.;
     for (int i=0;i<nadd1;i++) // why averaging over all adds ??
     {
         for (int j=0;j<3;j++)
         {
-            v2[j]   += v1a[3*i+j];
-            v2[3+j] += v1b[3*i+j];
+            v2[j]   += averagedBondVector1[3*i+j];
+            v2[3+j] += averagedBondVector2[3*i+j];
         }
     }
 
@@ -632,7 +632,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
         moveToOrigin(atom2, atomIndex2, nadd1);
 
         // assuming atom2 is the central atom. Find the vector from atom2 to one of
-        // the attached atoms. Find the cross product of that vector with v1b, the 
+        // the attached atoms. Find the cross product of that vector with averagedBondVector2, the 
         // result should equal the surface normal
         double surfNormal[3] = {};
         double bondVector[3] = {};
@@ -801,8 +801,8 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
     //delete [] xyz1a;
     delete [] xyz2a;
     delete [] v2;
-    delete [] v1a;
-    delete [] v1b;
+    delete [] averagedBondVector1;
+    delete [] averagedBondVector2;
 //    delete [] bonded1;
     delete [] bonded2;
 //    delete [] bonded3;
@@ -839,10 +839,10 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
 #endif
 
     ///get v1's for all add atoms
-    double* v1a = new double[3*nadd1];
-    for (int i=0;i<3*nadd1;i++) v1a[i] = 0.;
-    double* v1b = new double[3*nadd1];
-    for (int i=0;i<3*nadd1;i++) v1b[i] = 0.;
+    double* averagedBondVector1 = new double[3*nadd1];
+    for (int i=0;i<3*nadd1;i++) averagedBondVector1[i] = 0.;
+    double* averagedBondVector2 = new double[3*nadd1];
+    for (int i=0;i<3*nadd1;i++) averagedBondVector2[i] = 0.;
     double* c1 = new double[6]; //center points
 
     int* bonded1 = new int[8];
@@ -885,9 +885,9 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
             //first atom's vector
             for (int j=0;j<nbondsatom1;j++)
             {
-                v1a[3*nvf1+0] += xyz1[3*atom1+0] - xyz1[3*bonded1[j]+0];
-                v1a[3*nvf1+1] += xyz1[3*atom1+1] - xyz1[3*bonded1[j]+1];
-                v1a[3*nvf1+2] += xyz1[3*atom1+2] - xyz1[3*bonded1[j]+2];
+                averagedBondVector1[3*nvf1+0] += xyz1[3*atom1+0] - xyz1[3*bonded1[j]+0];
+                averagedBondVector1[3*nvf1+1] += xyz1[3*atom1+1] - xyz1[3*bonded1[j]+1];
+                averagedBondVector1[3*nvf1+2] += xyz1[3*atom1+2] - xyz1[3*bonded1[j]+2];
             }
 #if 0
             if (nbondsatom1==1 && ic1.coordn[bonded1[0]]==3)
@@ -899,7 +899,7 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
                 if (fabs(imptorv)>175.)
                 {
                     //printf("  using oop v1 \n");
-                    planar_cross(&v1a[3*nvf1],a3,bonded3,xyz1);
+                    planar_cross(&averagedBondVector1[3*nvf1],a3,bonded3,xyz1);
                 }
             }
 #endif
@@ -909,7 +909,7 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
                 if (anglev>175.)
                 {
                     //printf("  using ool v1 \n");
-                    linear_right(&v1a[3*nvf1],atom1,bonded1,xyz1);
+                    linear_right(&averagedBondVector1[3*nvf1],atom1,bonded1,xyz1);
                 }
             }
             if (nbondsatom1==3)
@@ -919,21 +919,21 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
                 if (fabs(imptorv)>175.)
                 {
                     //printf("  using oop v1 \n");
-                    planar_cross(&v1a[3*nvf1],atom1,bonded1,xyz1);
+                    planar_cross(&averagedBondVector1[3*nvf1],atom1,bonded1,xyz1);
                     npf1++;
                 }
             }
             if (npf1>1)
             {
-                align_v1(nvf1+1,v1a);
+                align_v1(nvf1+1,averagedBondVector1);
             }
-            double n1 = norm(&v1a[3*nvf1],3);
+            double n1 = norm(&averagedBondVector1[3*nvf1],3);
             for (int j=0;j<3;j++)
-                v1a[3*nvf1+j] = v1a[3*nvf1+j] / n1;
+                averagedBondVector1[3*nvf1+j] = averagedBondVector1[3*nvf1+j] / n1;
 #if 0
-            printf(" v1a(atom1): \n");
+            printf(" averagedBondVector1(atom1): \n");
             for (int j=0;j<3;j++)
-                printf(" %4.3f",v1a[3*nvf1+j]);
+                printf(" %4.3f",averagedBondVector1[3*nvf1+j]);
             printf("\n");
 #endif
 
@@ -943,9 +943,9 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
             //second atom's vector
             for (int j=0;j<nbondsatom2;j++)
             {
-                v1b[3*nvf2+0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
-                v1b[3*nvf2+1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
-                v1b[3*nvf2+2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
+                averagedBondVector2[3*nvf2+0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
+                averagedBondVector2[3*nvf2+1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
+                averagedBondVector2[3*nvf2+2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
             }
             if (nbondsatom2==2)
             {
@@ -953,7 +953,7 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
                 if (anglev>175.)
                 {
                     //printf("  using ool v1 (linear angle found) \n");
-                    linear_right(&v1b[3*nvf2],atom2,bonded2,xyz2);
+                    linear_right(&averagedBondVector2[3*nvf2],atom2,bonded2,xyz2);
                 }
             }
             if (nbondsatom2==3)
@@ -963,21 +963,21 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
                 if (fabs(imptorv)>175.)
                 {
                     //printf("  using oop v1 (planar atom found) \n");
-                    planar_cross(&v1b[3*nvf2],atom2,bonded2,xyz2);
+                    planar_cross(&averagedBondVector2[3*nvf2],atom2,bonded2,xyz2);
                     npf2++;
                 }
             }
             if (npf2>1)
             {
-                align_v1(nvf2+1,v1b);
+                align_v1(nvf2+1,averagedBondVector2);
             }
-            n1 = norm(&v1b[3*nvf2],3);
+            n1 = norm(&averagedBondVector2[3*nvf2],3);
             for (int j=0;j<3;j++)
-                v1b[3*nvf2+j] = v1b[3*nvf2+j] / n1;
+                averagedBondVector2[3*nvf2+j] = averagedBondVector2[3*nvf2+j] / n1;
 #if 0
-            printf(" v1b(atom2): \n");
+            printf(" averagedBondVector2(atom2): \n");
             for (int j=0;j<3;j++)
-                printf(" %4.3f",v1b[3*nvf2+j]);
+                printf(" %4.3f",averagedBondVector2[3*nvf2+j]);
             printf("\n");
 #endif
 
@@ -995,9 +995,9 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
 #if 0
     //CPMZ NOT IMPLEMENTED
     if (npf1>0)
-        point_out(v1a,numOfAtoms1,xyz1);
+        point_out(averagedBondVector1,numOfAtoms1,xyz1);
     if (npf2>0)
-        point_out(v1b,numOfAtoms2,xyz2);
+        point_out(averagedBondVector2,numOfAtoms2,xyz2);
 #endif
 
 
@@ -1007,9 +1007,9 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
     for (int i=0;i<nadd1;i++)
     {
         for (int j=0;j<3;j++)
-            v2[j]   += v1a[3*i+j];
+            v2[j]   += averagedBondVector1[3*i+j];
         for (int j=0;j<3;j++)
-            v2[3+j] += v1b[3*i+j];
+            v2[3+j] += averagedBondVector2[3*i+j];
     }
 
     double n1 = norm(v2,3);
@@ -1303,8 +1303,8 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
     delete [] xyz2a;
 
     delete [] v2;
-    delete [] v1a;
-    delete [] v1b;
+    delete [] averagedBondVector1;
+    delete [] averagedBondVector2;
     delete [] bonded1;
     delete [] bonded2;
     delete [] bonded3;
@@ -1343,10 +1343,10 @@ void Align::shuttle_align(int nadd1, int* add1)
     int natom12 = numOfAtoms1 + numOfAtoms2;
 
     ///get v1's for all add atoms
-    double* v1a = new double[3*nadd1];
-    for (int i=0;i<3*nadd1;i++) v1a[i] = 0.;
-    double* v1b = new double[3*nadd1];
-    for (int i=0;i<3*nadd1;i++) v1b[i] = 0.;
+    double* averagedBondVector1 = new double[3*nadd1];
+    for (int i=0;i<3*nadd1;i++) averagedBondVector1[i] = 0.;
+    double* averagedBondVector2 = new double[3*nadd1];
+    for (int i=0;i<3*nadd1;i++) averagedBondVector2[i] = 0.;
     double* c1 = new double[6]; //center points
 
     string* atomicNames12 = new string[natom12+1];
@@ -1398,9 +1398,9 @@ void Align::shuttle_align(int nadd1, int* add1)
             //first atom's vector
             for (int j=0;j<nbondsatom1;j++)
             {
-                v1a[3*nvf1+0] += xyzAugmented[3*atom1+0] - xyzAugmented[3*bonded1[j]+0];
-                v1a[3*nvf1+1] += xyzAugmented[3*atom1+1] - xyzAugmented[3*bonded1[j]+1];
-                v1a[3*nvf1+2] += xyzAugmented[3*atom1+2] - xyzAugmented[3*bonded1[j]+2];
+                averagedBondVector1[3*nvf1+0] += xyzAugmented[3*atom1+0] - xyzAugmented[3*bonded1[j]+0];
+                averagedBondVector1[3*nvf1+1] += xyzAugmented[3*atom1+1] - xyzAugmented[3*bonded1[j]+1];
+                averagedBondVector1[3*nvf1+2] += xyzAugmented[3*atom1+2] - xyzAugmented[3*bonded1[j]+2];
             }
             if (nbondsatom1==2)
             {
@@ -1408,7 +1408,7 @@ void Align::shuttle_align(int nadd1, int* add1)
                 if (anglev>175.)
                 {
                     //printf("  using ool v1 \n");
-                    linear_right(&v1a[3*nvf1],atom1,bonded1,xyzAugmented);
+                    linear_right(&averagedBondVector1[3*nvf1],atom1,bonded1,xyzAugmented);
                 }
             }
             if (nbondsatom1==3)
@@ -1418,21 +1418,21 @@ void Align::shuttle_align(int nadd1, int* add1)
                 if (fabs(imptorv)>175.)
                 {
                     //printf("  using oop v1 \n");
-                    planar_cross(&v1a[3*nvf1],atom1,bonded1,xyzAugmented);
+                    planar_cross(&averagedBondVector1[3*nvf1],atom1,bonded1,xyzAugmented);
                     npf1++;
                 }
             }
             if (npf1>1)
             {
-                align_v1(nvf1+1,v1a);
+                align_v1(nvf1+1,averagedBondVector1);
             }
-            double n1 = norm(&v1a[3*nvf1],3);
+            double n1 = norm(&averagedBondVector1[3*nvf1],3);
             for (int j=0;j<3;j++)
-                v1a[3*nvf1+j] = v1a[3*nvf1+j] / n1;
+                averagedBondVector1[3*nvf1+j] = averagedBondVector1[3*nvf1+j] / n1;
 #if 0
-            printf(" v1a(atom1): \n");
+            printf(" averagedBondVector1(atom1): \n");
             for (int j=0;j<3;j++)
-                printf(" %4.3f",v1a[3*nvf1+j]);
+                printf(" %4.3f",averagedBondVector1[3*nvf1+j]);
             printf("\n");
 #endif
 
@@ -1442,9 +1442,9 @@ void Align::shuttle_align(int nadd1, int* add1)
             //second atom's vector
             for (int j=0;j<nbondsatom2;j++)
             {
-                v1b[3*nvf2+0] += xyz3[3*atom2+0] - xyz3[3*bonded2[j]+0];
-                v1b[3*nvf2+1] += xyz3[3*atom2+1] - xyz3[3*bonded2[j]+1];
-                v1b[3*nvf2+2] += xyz3[3*atom2+2] - xyz3[3*bonded2[j]+2];
+                averagedBondVector2[3*nvf2+0] += xyz3[3*atom2+0] - xyz3[3*bonded2[j]+0];
+                averagedBondVector2[3*nvf2+1] += xyz3[3*atom2+1] - xyz3[3*bonded2[j]+1];
+                averagedBondVector2[3*nvf2+2] += xyz3[3*atom2+2] - xyz3[3*bonded2[j]+2];
             }
             if (nbondsatom2==2)
             {
@@ -1452,7 +1452,7 @@ void Align::shuttle_align(int nadd1, int* add1)
                 if (anglev>175.)
                 {
                     //printf("  using ool v1 (linear angle found) \n");
-                    linear_right(&v1b[3*nvf2],atom2,bonded2,xyz3);
+                    linear_right(&averagedBondVector2[3*nvf2],atom2,bonded2,xyz3);
                 }
             }
             if (nbondsatom2==3)
@@ -1462,21 +1462,21 @@ void Align::shuttle_align(int nadd1, int* add1)
                 if (fabs(imptorv)>175.)
                 {
                     //printf("  using oop v1 (planar atom found) \n");
-                    planar_cross(&v1b[3*nvf2],atom2,bonded2,xyz3);
+                    planar_cross(&averagedBondVector2[3*nvf2],atom2,bonded2,xyz3);
                     npf2++;
                 }
             }
             if (npf2>1)
             {
-                align_v1(nvf2+1,v1b);
+                align_v1(nvf2+1,averagedBondVector2);
             }
-            n1 = norm(&v1b[3*nvf2],3);
+            n1 = norm(&averagedBondVector2[3*nvf2],3);
             for (int j=0;j<3;j++)
-                v1b[3*nvf2+j] = v1b[3*nvf2+j] / n1;
+                averagedBondVector2[3*nvf2+j] = averagedBondVector2[3*nvf2+j] / n1;
 #if 0
-            printf(" v1b(atom2): \n");
+            printf(" averagedBondVector2(atom2): \n");
             for (int j=0;j<3;j++)
-                printf(" %4.3f",v1b[3*nvf2+j]);
+                printf(" %4.3f",averagedBondVector2[3*nvf2+j]);
             printf("\n");
 #endif
 
@@ -1494,9 +1494,9 @@ void Align::shuttle_align(int nadd1, int* add1)
 #if 0
     //CPMZ NOT IMPLEMENTED
     if (npf1>0)
-        point_out(v1a,numOfAtoms1,xyz1);
+        point_out(averagedBondVector1,numOfAtoms1,xyz1);
     if (npf2>0)
-        point_out(v1b,numOfAtoms2,xyz2);
+        point_out(averagedBondVector2,numOfAtoms2,xyz2);
 #endif
 
 
@@ -1506,9 +1506,9 @@ void Align::shuttle_align(int nadd1, int* add1)
     for (int i=0;i<nadd1;i++)
     {
         for (int j=0;j<3;j++)
-            v2[j]   += v1a[3*i+j];
+            v2[j]   += averagedBondVector1[3*i+j];
         for (int j=0;j<3;j++)
-            v2[3+j] += v1b[3*i+j];
+            v2[3+j] += averagedBondVector2[3*i+j];
     }
 
     double n1 = norm(v2,3);
@@ -1748,8 +1748,8 @@ void Align::shuttle_align(int nadd1, int* add1)
     delete [] xyz3a;
 
     delete [] v2;
-    delete [] v1a;
-    delete [] v1b;
+    delete [] averagedBondVector1;
+    delete [] averagedBondVector2;
     delete [] bonded1;
     delete [] bonded2;
     delete [] bonded3;
