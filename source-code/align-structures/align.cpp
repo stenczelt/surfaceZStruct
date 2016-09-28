@@ -140,7 +140,7 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
     if (sign==-1)
     {
         angles[0] = angles[1] = angles[2] = 0.;
-        angles[0] = 3.14159265;
+        angles[0] = PI;
 
         get_rotation_matrix(rotm,angles);
         applyRotationMatrix(numOfAtoms, xyz1, rotm);
@@ -179,7 +179,7 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
 //void Align::rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz)
 void Align::rotate_around_z(int numOfAtoms2, double torv, double* xyz)
 {
-    std::cout << "@@@@@@@@@@ Angle" << torv * 180./3.1415 << std::endl;
+    std::cout << "@@@@@@@@@@ Angle" << torv * 180./PI << std::endl;
     //printf("  rotating fragment around x axis: %3.2f (degrees) \n",torv);
 
     //int numOfAtoms = numOfAtoms1 + numOfAtoms2;
@@ -194,22 +194,22 @@ void Align::rotate_around_z(int numOfAtoms2, double torv, double* xyz)
     rotm[1] = new double[3];
     rotm[2] = new double[3];
 
-    //angles[0] = torv * 3.1415926/180.;
+    //angles[0] = torv * PI/180.;
     //angles[1] = angles[2] = 0.;
-    //angles[0] = torv * 180./3.1415;
+    //angles[0] = torv * 180./PI;
     //angles[1] = angles[2] = 0.;
     angles[0] = angles[1] = 0.;
     if (torv >= 0)
     {
         // clockwise rotation for positive torv
-        angles[2] = torv * -180./3.1415926;
+        angles[2] = torv * -180./PI;
     }
     else if (torv < 0)
     {
         // counter-clockwise rotation for negative torv
-        angles[2] = torv * 180./3.1415926;
+        angles[2] = torv * 180./PI;
     }
-    //angles[2] = torv * 3.1415926/180.;
+    //angles[2] = torv * PI/180.;
 
     get_rotation_matrix(rotm, angles);
     applyRotationMatrix(numOfAtoms, xyz, rotm);
@@ -649,7 +649,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
         double lengthOf2nd = 1.0; // bc it's X axis
         double cosTheta = dotProduct / (lengthOf1st * lengthOf2nd);
         double angle = acos(cosTheta);
-        std::cout << "%%%%%%%%%%%%%%%%%% angle: " << angle*180/3.14 << "\n";
+        std::cout << "%%%%%%%%%%%%%%%%%% angle: " << angle*180/PI << "\n";
 
         // align surface normal to x
         rotate_around_z(numOfAtoms2, angle, xyz2);

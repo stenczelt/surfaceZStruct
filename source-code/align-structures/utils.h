@@ -38,6 +38,7 @@ int check_array(int size, double* A);
 
 namespace Utils
 {
+    static const double PI = {4*atan(1)};
 
   void normalize_string_step_direc(double** a, int nstring, int LEN);
 
