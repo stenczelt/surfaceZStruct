@@ -47,7 +47,8 @@ class Align
         //void align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames,
         //                int sign, double offset);
         // rotates fragment around X axis
-        void rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz);
+        //void rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz);
+        void rotate_around_z(int numOfAtoms2, double torv, double* xyz);
         void linear_right(double* v1, int atom1, int* bonded, double* xyz, std::string orientationIn);
         void planar_cross(double* v1, int atom1, int* bonded, double* xyz);
         void align_v1(int nvf, double* v1);
@@ -82,6 +83,8 @@ class Align
         void get_rotation_matrix(double** rotMat, double* thetas);
         void print_xyz_gen(int natoms, string* anames, double* coords);
         bool writeToFile(std::string &outFile);
+        //void moveToOrigin(int nadd1, int* add1, int atomIndex2);
+        void moveToOrigin(int atom2, int atomIndex2, int nadd1);
 };
 
 #endif
