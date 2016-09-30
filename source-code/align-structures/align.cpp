@@ -497,25 +497,25 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
         if (!same_frag)
         {
             found = 1;
-            //int nbondsatom1, nbondsatom2;
-            int nbondsatom2 = 0;
+            //int nbondsatom1, numOfBondedToAtom2;
+            int numOfBondedToAtom2 = 0;
             // TODO: we can use this to see if the binding site is available
             //nbondsatom1 = get_bonds(atom1,ic1,bonded1);
-            nbondsatom2 = get_bonds(atom2,ic2,bonded2);
+            numOfBondedToAtom2 = get_bonds(atom2,ic2,bonded2);
 
             //first atom's vector (surface)
             averagedBondVector1[0] = averagedBondVector1[1] = 0.0;
             averagedBondVector1[2] = 1.0;
 
             //second atom's vector
-            for (int j=0;j<nbondsatom2;j++)
+            for (int j=0;j<numOfBondedToAtom2;j++)
             {
                 averagedBondVector2[3*nvf2+0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
                 averagedBondVector2[3*nvf2+1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
                 averagedBondVector2[3*nvf2+2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
             }
 
-            if (nbondsatom2==2)
+            if (numOfBondedToAtom2==2)
             {
                 double anglev = ic2.angle_val(bonded2[0],atom2,bonded2[1]);
                 if (anglev>175.)
@@ -526,7 +526,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
                 }
             }
 
-            if (nbondsatom2==3) //TODO: Does this work for planar molecules like benzene?
+            if (numOfBondedToAtom2==3) //TODO: Does this work for planar molecules like benzene?
             {
                 double improperTorsionAngle = ic2.torsion_val(bonded2[0],atom2,bonded2[1],bonded2[2]);
                 //printf("  improperTorsionAngle: %4.2f \n",improperTorsionAngle);
@@ -586,7 +586,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
         int atom2 = add1[2*(nadd1-1)+1];
         int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; } // swap()
         atom2 -= numOfAtoms1;
-        int nbondsatom2 = get_bonds(atom2,ic2,bonded2);
+        int numOfBondedToAtom2 = get_bonds(atom2,ic2,bonded2);
         linear_right(&v2[3],atom2,bonded2,xyz2);
         n2 = norm(&v2[3],3);
         //    printf(" new norm: %8.6f \n",n2);
@@ -903,9 +903,9 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
         if (!same_frag)
         {
             found = 1;
-            int nbondsatom1, nbondsatom2;
+            int nbondsatom1, numOfBondedToAtom2;
             nbondsatom1 = get_bonds(atom1,ic1,bonded1);
-            nbondsatom2 = get_bonds(atom2,ic2,bonded2);
+            numOfBondedToAtom2 = get_bonds(atom2,ic2,bonded2);
 
             //first atom's vector
             for (int j=0;j<nbondsatom1;j++)
@@ -966,13 +966,13 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
 
 
             //second atom's vector
-            for (int j=0;j<nbondsatom2;j++)
+            for (int j=0;j<numOfBondedToAtom2;j++)
             {
                 averagedBondVector2[3*nvf2+0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
                 averagedBondVector2[3*nvf2+1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
                 averagedBondVector2[3*nvf2+2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
             }
-            if (nbondsatom2==2)
+            if (numOfBondedToAtom2==2)
             {
                 double anglev = ic2.angle_val(bonded2[0],atom2,bonded2[1]);
                 if (anglev>175.)
@@ -981,7 +981,7 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
                     linear_right(&averagedBondVector2[3*nvf2],atom2,bonded2,xyz2);
                 }
             }
-            if (nbondsatom2==3)
+            if (numOfBondedToAtom2==3)
             {
                 double imptorv = ic2.torsion_val(bonded2[0],atom2,bonded2[1],bonded2[2]);
                 //printf("  imptorv: %4.2f \n",imptorv);
@@ -1055,7 +1055,7 @@ int Align::add_align_v(int nadd1, int* add1, int wtm, double* aprv)
         int atom2 = add1[2*(nadd1-1)+1];
         int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; }
         atom2 -= numOfAtoms1;
-        int nbondsatom2 = get_bonds(atom2,ic2,bonded2);
+        int numOfBondedToAtom2 = get_bonds(atom2,ic2,bonded2);
         linear_right(&v2[3],atom2,bonded2,xyz2);
         n2 = norm(&v2[3],3);
         //    printf(" new norm: %8.6f \n",n2);
@@ -1416,9 +1416,9 @@ void Align::shuttle_align(int nadd1, int* add1)
         if (!same_frag)
         {
             found = 1;
-            int nbondsatom1, nbondsatom2;
+            int nbondsatom1, numOfBondedToAtom2;
             nbondsatom1 = get_bonds(atom1,ic1,bonded1);
-            nbondsatom2 = get_bonds(atom2,ic2,bonded2);
+            numOfBondedToAtom2 = get_bonds(atom2,ic2,bonded2);
 
             //first atom's vector
             for (int j=0;j<nbondsatom1;j++)
@@ -1465,13 +1465,13 @@ void Align::shuttle_align(int nadd1, int* add1)
 
 
             //second atom's vector
-            for (int j=0;j<nbondsatom2;j++)
+            for (int j=0;j<numOfBondedToAtom2;j++)
             {
                 averagedBondVector2[3*nvf2+0] += xyz3[3*atom2+0] - xyz3[3*bonded2[j]+0];
                 averagedBondVector2[3*nvf2+1] += xyz3[3*atom2+1] - xyz3[3*bonded2[j]+1];
                 averagedBondVector2[3*nvf2+2] += xyz3[3*atom2+2] - xyz3[3*bonded2[j]+2];
             }
-            if (nbondsatom2==2)
+            if (numOfBondedToAtom2==2)
             {
                 double anglev = ic2.angle_val(bonded2[0],atom2,bonded2[1]);
                 if (anglev>175.)
@@ -1480,7 +1480,7 @@ void Align::shuttle_align(int nadd1, int* add1)
                     linear_right(&averagedBondVector2[3*nvf2],atom2,bonded2,xyz3);
                 }
             }
-            if (nbondsatom2==3)
+            if (numOfBondedToAtom2==3)
             {
                 double imptorv = ic2.torsion_val(bonded2[0],atom2,bonded2[1],bonded2[2]);
                 //printf("  imptorv: %4.2f \n",imptorv);
@@ -1554,7 +1554,7 @@ void Align::shuttle_align(int nadd1, int* add1)
         int atom2 = add1[2*(nadd1-1)+1];
         int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; }
         atom2 -= natom12;
-        int nbondsatom2 = get_bonds(atom2,ic2,bonded2);
+        int numOfBondedToAtom2 = get_bonds(atom2,ic2,bonded2);
         linear_right(&v2[3],atom2,bonded2,xyz3);
         n2 = norm(&v2[3],3);
         //    printf(" new norm: %8.6f \n",n2);
