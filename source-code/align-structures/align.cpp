@@ -179,7 +179,6 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
 //void Align::rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz)
 void Align::rotate_around_z(int numOfAtoms2, double torv, double* xyz)
 {
-    std::cout << "@@@@@@@@@@ Angle" << torv * 180./PI << std::endl;
     //printf("  rotating fragment around x axis: %3.2f (degrees) \n",torv);
 
     //int numOfAtoms = numOfAtoms1 + numOfAtoms2;
@@ -202,12 +201,14 @@ void Align::rotate_around_z(int numOfAtoms2, double torv, double* xyz)
     if (torv >= 0)
     {
         // clockwise rotation for positive torv
-        angles[2] = torv * -180./PI;
+        //angles[2] = torv * -180./PI;
+        angles[2] = -1 * torv;
     }
     else if (torv < 0)
     {
         // counter-clockwise rotation for negative torv
-        angles[2] = torv * 180./PI;
+        //angles[2] = torv * 180./PI;
+        angles[2] = torv;
     }
     //angles[2] = torv * PI/180.;
 
@@ -443,8 +444,9 @@ void Align::align_zero()
 }
 
 //void Align::add_align(int nadd1, int* add1, double zBindingSite)
-void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientaionIn="horiz")
+void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angleSet, std::string orientaionIn="horiz")
 {
+    std::cout << "############### " << angleSet[3] << "\n";
     if (inited==0)
     {
         printf(" WARNING: in add_align, not init'd \n");
@@ -478,10 +480,10 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
 
     std::string orientaion = orientaionIn;
 
-    int npf1 = 0;
+    //int npf1 = 0;
     int npf2 = 0;
-    int nvf1 = 0;
-    int nvf2 = 0;
+    //int nvf1 = 0;
+    //int nvf2 = 0;
     int found = 0;
     for (int i=0;i<nadd1;i++)
     {
@@ -626,10 +628,10 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
     // move atom2 to the origin of Cartesians, then move its attached atoms
     for (int i=0; i<nadd1; i++)
     {
-        //int atom1 = add1[2*i+0];
+        int atom1 = add1[2*i+0];
         int atom2 = add1[2*i+1];
         atom2 -= numOfAtoms1;
-        moveToOrigin(atom2, atomIndex2, nadd1);
+        moveToOrigin(atom2, atomIndex2, i, nadd1);
 
         // assuming atom2 is the central atom. Find the vector from atom2 to one of
         // the attached atoms. Find the cross product of that vector with averagedBondVector2, the 
@@ -648,35 +650,58 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
         double lengthOf1st = sqrt(pow(surfNormal[0], 2) + pow(surfNormal[1], 2) + pow(surfNormal[2], 2));
         double lengthOf2nd = 1.0; // bc it's X axis
         double cosTheta = dotProduct / (lengthOf1st * lengthOf2nd);
-        double angle = acos(cosTheta);
-        std::cout << "%%%%%%%%%%%%%%%%%% angle: " << angle*180/PI << "\n";
+        double angleToX = acos(cosTheta)*180./PI;
 
         // align surface normal to x
-        rotate_around_z(numOfAtoms2, angle, xyz2);
+        rotate_around_z(numOfAtoms2, angleToX, xyz2);
+        double xyz2AtZeroDegree[3*numOfAtoms2] = {};
+        for (int i=0;i<3*numOfAtoms2;i++) xyz2AtZeroDegree[i] = xyz2[i];
+        moveToBindingSite(atom1, atom2, atomIndex2, i, nadd1);
+        std::string outFileName = "alignedStr-0.xyz";
+        this->writeToFile(outFileName);
+
+
+        for (int j=0; j<angleSet.size(); j++)
+        {
+            for (int i=0;i<3*numOfAtoms2;i++) xyz2[i] = xyz2AtZeroDegree[i];
+            //xyzTemp = xyz2
+            //moveToOrigin(atom2, atomIndex2, i, nadd1);
+            rotate_around_z(numOfAtoms2, angleSet[j], xyz2);
+            moveToBindingSite(atom1, atom2, atomIndex2, i, nadd1);
+            std::string outFileName = "alignedStr-" + std::to_string((int)angleSet[j]) + ".xyz";
+            this->writeToFile(outFileName);
+        }
+
+        //rotate_around_z(numOfAtoms2, 90, xyz2);
+        //moveToBindingSite(atom1, atom2, atomIndex2, i, nadd1);
+        //        outFileName = "alignedStr-2.xyz";
+        //        this->writeToFile(outFileName);
     }
 
     //get binding site coordinates and move adsorbate to that site
     // atom1 belongs to surface
-    for (int i=0; i<nadd1; i++)
-    {
-        int atom1 = add1[2*i+0];
-        int atom2 = add1[2*i+1];
-        double SurfaceCenter[3], adsorbateCenter[3], displacement[3] = {0.0, 0.0, 0.0};
-        SurfaceCenter[0] = xyz1[3*atom1+0];
-        SurfaceCenter[1] = xyz1[3*atom1+1];
-        SurfaceCenter[2] = xyz1[3*atom1+2];
+//    for (int i=0; i<nadd1; i++)
+//    {
+//        int atom1 = add1[2*i+0];
+//        int atom2 = add1[2*i+1];
+//        atom2 -= numOfAtoms1;
+//        moveToBindingSite(atom1, atom2, atomIndex2, i, nadd1);
+
+        /*double surfaceCenter[3], adsorbateCenter[3], displacement[3] = {0.0, 0.0, 0.0};
+        surfaceCenter[0] = xyz1[3*atom1+0];
+        surfaceCenter[1] = xyz1[3*atom1+1];
+        surfaceCenter[2] = xyz1[3*atom1+2];
 
         // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
         // == order is preserved
-        atom2 -= numOfAtoms1;
         adsorbateCenter[0] = xyz2[3*atom2+0];
         adsorbateCenter[1] = xyz2[3*atom2+1];
         adsorbateCenter[2] = xyz2[3*atom2+2];
 
         const double DELTA_Z = 0.0;
-        displacement[0] = SurfaceCenter[0] - adsorbateCenter[0];
-        displacement[1] = SurfaceCenter[1] - adsorbateCenter[1];
-        displacement[2] = SurfaceCenter[2] - adsorbateCenter[2] + DELTA_Z;
+        displacement[0] = surfaceCenter[0] - adsorbateCenter[0];
+        displacement[1] = surfaceCenter[1] - adsorbateCenter[1];
+        displacement[2] = surfaceCenter[2] - adsorbateCenter[2] + DELTA_Z;
         // move to binding site
         // assuming we never will have a case with more tham two adsorbate molecules/fragments
         if (i == 0)
@@ -700,9 +725,9 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, std::string orientai
                     xyz2[3*i+j] += displacement[j];
                 }
             }
-        }
+        }*/
 
-    }
+//    }
 
         //face each other at X Angstroms
         //double X = 8.;
@@ -1892,7 +1917,7 @@ bool Align::writeToFile(std::string &outFile)
 }
 
 //void Align::moveToOrigin(int nadd1, int* add1, int atomIndex2)
-void Align::moveToOrigin(int atom2, int atomIndex2, int nadd1)
+void Align::moveToOrigin(int atom2, int atomIndex2, int i, int nadd1)
 {
     // move atom2 to the origin of Cartesians, then move its attached atoms
 //    for (int i=0; i<nadd1; i++) 
@@ -1910,7 +1935,7 @@ void Align::moveToOrigin(int atom2, int atomIndex2, int nadd1)
 
         // assuming we never will have a case with more tham two adsorbate molecules/fragments
         //if (i == 0)
-        if (nadd1 == 0)
+        if (i == 0)
         {    
             for (int i=0;i<numOfAtoms2;i++)
             {    
@@ -1932,4 +1957,47 @@ void Align::moveToOrigin(int atom2, int atomIndex2, int nadd1)
             }    
         }
 //    }
+}
+
+void Align::moveToBindingSite(int atom1, int atom2, int atomIndex2, int i, int nadd1)
+{
+    double surfaceCenter[3], adsorbateCenter[3], displacement[3] = {0.0, 0.0, 0.0};
+    surfaceCenter[0] = xyz1[3*atom1+0];
+    surfaceCenter[1] = xyz1[3*atom1+1];
+    surfaceCenter[2] = xyz1[3*atom1+2];
+
+    // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
+    // == order is preserved
+    adsorbateCenter[0] = xyz2[3*atom2+0];
+    adsorbateCenter[1] = xyz2[3*atom2+1];
+    adsorbateCenter[2] = xyz2[3*atom2+2];
+
+    const double DELTA_Z = 0.0;
+    displacement[0] = surfaceCenter[0] - adsorbateCenter[0];
+    displacement[1] = surfaceCenter[1] - adsorbateCenter[1];
+    displacement[2] = surfaceCenter[2] - adsorbateCenter[2] + DELTA_Z;
+    // move to binding site
+    // assuming we never will have a case with more tham two adsorbate molecules/fragments
+    if (i == 0)
+    {
+        for (int i=0;i<numOfAtoms2;i++)
+        {
+            for (int j=0;j<3;j++)
+            {
+                //xyz2Displaced[3*i+j] = xyz2[3*i+j] + displacement[j];
+                xyz2[3*i+j] += displacement[j];
+            }
+        }
+    }
+    else if (atomIndex2 > 0 && nadd1 > 0)
+    {
+        int index = atomIndex2;
+        for (int i=index;i<numOfAtoms2;i++)
+        {
+            for (int j=0;j<3;j++)
+            {
+                xyz2[3*i+j] += displacement[j];
+            }
+        }
+    }
 }
