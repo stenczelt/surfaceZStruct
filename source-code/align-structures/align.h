@@ -36,6 +36,9 @@ class Align
         string* atomicNames3;
         int* anumbers3;
         double* xyz3;
+        // set of angles being sampled during geometry alignment
+        // TODO: for now max. is 4 angles
+        int angleSet[4] = {};
 
         // checks to see if the atoms to be added are in the same fragment
         int check_frag(int atom1, int atom2);
@@ -71,7 +74,7 @@ class Align
         void add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, double* xyz3i);
         void align_zero();
         //void add_align(int nadd1, int* add1, double zBindingSite);
-        void add_align(int nadd1, int* add1, int atomIndex2, std::string orientationIn);
+        void add_align(int nadd1, int* add1, int atomIndex2, vector<double> angleSet, std::string orientationIn);
         int add_align_v(int nadd1, int* add1, int wtm, double* aprv);
         void shuttle_align(int nadd1, int* add1);
 
@@ -80,11 +83,13 @@ class Align
 
         void freemem();
         double norm(double* x, int size);
-        void get_rotation_matrix(double** rotMat, double* thetas);
+        //void get_rotation_matrix(double** rotMat, double* thetas);
         void print_xyz_gen(int natoms, string* anames, double* coords);
         bool writeToFile(std::string &outFile);
         //void moveToOrigin(int nadd1, int* add1, int atomIndex2);
-        void moveToOrigin(int atom2, int atomIndex2, int nadd1);
+        void moveToOrigin(int atom2, int atomIndex2, int i, int nadd1);
+        void moveToBindingSite(int atom1, int atom2, int atomIndex2, int i, int nadd1);
+        void applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix);
 };
 
 #endif

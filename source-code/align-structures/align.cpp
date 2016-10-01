@@ -55,7 +55,7 @@ int Align::get_bonds(int atom1, ICoord ic1, int* bonded)
     return nfound;
 }
 
-void applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix)
+void Align::applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix)
 {
     double* xyzTemp = new double[3*numOfAtoms];
     for (int i=0;i<3*numOfAtoms;i++) xyzTemp[i] = 0.;
@@ -108,7 +108,7 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
     angles[1] = acos(u1[2]);
     if (u1[2]<0.) angles[1] = angles[1] * -1;
 
-    get_rotation_matrix(rotm,angles);
+    Utils::get_rotation_matrix(rotm,angles);
 
     applyRotationMatrix(numOfAtoms, xyz1, rotm);
 
@@ -133,7 +133,7 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
     angles[0] = angles[1] = angles[2] = 0.;
     angles[0] = acos(u1[2]); //Mina
 
-    get_rotation_matrix(rotm,angles);
+    Utils::get_rotation_matrix(rotm,angles);
     applyRotationMatrix(numOfAtoms, xyz1, rotm);
 
 
@@ -142,7 +142,7 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
         angles[0] = angles[1] = angles[2] = 0.;
         angles[0] = PI;
 
-        get_rotation_matrix(rotm,angles);
+        Utils::get_rotation_matrix(rotm,angles);
         applyRotationMatrix(numOfAtoms, xyz1, rotm);
 
     }
@@ -212,8 +212,17 @@ void Align::rotate_around_z(int numOfAtoms2, double torv, double* xyz)
     }
     //angles[2] = torv * PI/180.;
 
-    get_rotation_matrix(rotm, angles);
+    Utils::get_rotation_matrix(rotm, angles);
     applyRotationMatrix(numOfAtoms, xyz, rotm);
+
+//std::cout << "ROT MAT:\n";
+//std::cout << angles[2] << "\n";
+//  for (int i=0; i<3; i++) 
+//  {
+//      for (int j=0; j<3; j++) 
+//          std::cout << rotm[i][j] << "        ";
+//      std::cout << "\n";
+//  }
 
     /*for (int i=0;i<3*numOfAtoms;i++) xyzTemp[i] = 0.;
     for (int i=0;i<numOfAtoms2;i++)
@@ -446,7 +455,6 @@ void Align::align_zero()
 //void Align::add_align(int nadd1, int* add1, double zBindingSite)
 void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angleSet, std::string orientaionIn="horiz")
 {
-    std::cout << "############### " << angleSet[3] << "\n";
     if (inited==0)
     {
         printf(" WARNING: in add_align, not init'd \n");
@@ -483,7 +491,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
     //int npf1 = 0;
     int npf2 = 0;
     //int nvf1 = 0;
-    //int nvf2 = 0;
+    int nvf2 = 0;
     int found = 0;
     for (int i=0;i<nadd1;i++)
     {
@@ -508,12 +516,23 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
             averagedBondVector1[2] = 1.0;
 
             //second atom's vector
+            //Move atom2 to origin so the calculated vector will start from origin
+            //Other way is to calculate the vector first and then add its coordinates
+            //to the coordinates of atom3
+            moveToOrigin(atom2, atomIndex2, i, nadd1);
+            for (int i=0;i<3*nadd1;i++) averagedBondVector2[i] = 0.; //TODO, not sure if this line should be here
+            std::cout << " # BONDED: " << numOfBondedToAtom2 << "\n";
             for (int j=0;j<numOfBondedToAtom2;j++)
             {
-                averagedBondVector2[3*nvf2+0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
-                averagedBondVector2[3*nvf2+1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
-                averagedBondVector2[3*nvf2+2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
+                averagedBondVector2[0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
+                averagedBondVector2[1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
+                averagedBondVector2[2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
             }
+            std::cout << "Vector 1: " << xyz2[3*atom2+0] - xyz2[3*bonded2[0]+0] << " " << xyz2[3*atom2+1] - xyz2[3*bonded2[0]+1]
+                << " " << xyz2[3*atom2+2] - xyz2[3*bonded2[0]+2] << "\n";
+            std::cout << "Vector 2: " << xyz2[3*atom2+0] - xyz2[3*bonded2[1]+0] << " " << xyz2[3*atom2+1] - xyz2[3*bonded2[1]+1]
+                << " " << xyz2[3*atom2+2] - xyz2[3*bonded2[1]+2] << "\n";
+            std::cout << averagedBondVector2[0] << "    " << averagedBondVector2[1] <<  "   " << averagedBondVector2[2] << "\n";
 
             if (numOfBondedToAtom2==2)
             {
@@ -539,11 +558,12 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
             }
             if (npf2>1)
             {
-                align_v1(nvf2+1,averagedBondVector2);
+                align_v1(nvf2+1,averagedBondVector2); //TODO: what does this do?
             }
-            double n1 = norm(&averagedBondVector2[3*nvf2],3);
+            //TODO double n1 = norm(&averagedBondVector2[3*nvf2],3);
+            double n1 = norm(&averagedBondVector2[0],3);
             for (int j=0;j<3;j++)
-                averagedBondVector2[3*nvf2+j] = averagedBondVector2[3*nvf2+j] / n1;
+                averagedBondVector2[3*nvf2+j] = averagedBondVector2[3*nvf2+j] / n1; // TODO: not sure if this does anything
 
             nvf2++;
 
@@ -559,12 +579,14 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
     //averaging over averagedBondVector1 and averagedBondVector2 to get v2
     double* v2 = new double[6];
     for (int i=0;i<6;i++) v2[i] = 0.;
-    for (int i=0;i<nadd1;i++) // why averaging over all adds ??
+    for (int i=0;i<nadd1;i++) //TODO: why averaging over all adds ??
     {
         for (int j=0;j<3;j++)
         {
-            v2[j]   += averagedBondVector1[3*i+j];
-            v2[3+j] += averagedBondVector2[3*i+j];
+            //v2[j]   += averagedBondVector1[3*i+j];
+            v2[j]   = averagedBondVector1[3*i+j];
+            //v2[3+j] += averagedBondVector2[3*i+j];
+            v2[3+j] = averagedBondVector2[3*i+j]; //TODO: changed += to =, nothing changed for one add
         }
     }
 
@@ -584,7 +606,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
     {
         int atom1 = add1[2*(nadd1-1)+0];
         int atom2 = add1[2*(nadd1-1)+1];
-        int tmp = atom1; if (atom1>atom2) { atom1 = atom2; atom2 = tmp; } // swap()
+        if (atom1>atom2) {std::swap(atom1, atom2);}
         atom2 -= numOfAtoms1;
         int numOfBondedToAtom2 = get_bonds(atom2,ic2,bonded2);
         linear_right(&v2[3],atom2,bonded2,xyz2);
@@ -593,6 +615,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
     }
     //for (int i=0;i<3;i++)
     //    v2[i] = v2[i] / n1;
+    // normalize v2
     for (int i=3;i<6;i++)
         v2[i] = v2[i] / n2;
 
@@ -617,6 +640,8 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
     xyz2a[3*(numOfAtoms2+1)+1] = v2[4];
     xyz2a[3*(numOfAtoms2+1)+2] = v2[5];
 
+    std::cout << "~~~~~~~~~~~~~~~~~ " << v2[3] << " " << v2[4] << " " << v2[5] << "\n";
+
     // align to Z
     int t1 = numOfAtoms2;
     int t2 = numOfAtoms2+1;
@@ -625,7 +650,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
     for (int i=0;i<3*numOfAtoms2;i++)
         xyz2[i] = xyz2a[i];
 
-    // move atom2 to the origin of Cartesians, then move its attached atoms
+    // move atom2 to the origin of Cartesians, and obviously move its attached atoms too!
     for (int i=0; i<nadd1; i++)
     {
         int atom1 = add1[2*i+0];
@@ -648,12 +673,17 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
         double xAxis[3] = {1., 0., 0.};
         double dotProduct = surfNormal[0] * xAxis[0] + surfNormal[1] * xAxis[1] + surfNormal[2] * xAxis[2];
         double lengthOf1st = sqrt(pow(surfNormal[0], 2) + pow(surfNormal[1], 2) + pow(surfNormal[2], 2));
-        double lengthOf2nd = 1.0; // bc it's X axis
+        double lengthOf2nd = 1.0; // bc it's a unit vector along X axis
         double cosTheta = dotProduct / (lengthOf1st * lengthOf2nd);
         double angleToX = acos(cosTheta)*180./PI;
 
         // align surface normal to x
         rotate_around_z(numOfAtoms2, angleToX, xyz2);
+
+        std::cout << "^^^^^^^^^^^^\n";
+        for (int k=0; k<numOfAtoms2; k++)
+            std::cout << xyz2[3*k+0] << "   " << xyz2[3*k+1] << "   " << xyz2[3*k+2] << "\n";
+
         double xyz2AtZeroDegree[3*numOfAtoms2] = {};
         for (int i=0;i<3*numOfAtoms2;i++) xyz2AtZeroDegree[i] = xyz2[i];
         moveToBindingSite(atom1, atom2, atomIndex2, i, nadd1);
@@ -664,9 +694,15 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
         for (int j=0; j<angleSet.size(); j++)
         {
             for (int i=0;i<3*numOfAtoms2;i++) xyz2[i] = xyz2AtZeroDegree[i];
+            std::cout << "2222222222222\n";
+            for (int k=0; k<numOfAtoms2; k++)
+                std::cout << xyz2[3*k+0] << "   " << xyz2[3*k+1] << "   " << xyz2[3*k+2] << "\n";
             //xyzTemp = xyz2
             //moveToOrigin(atom2, atomIndex2, i, nadd1);
-            rotate_around_z(numOfAtoms2, angleSet[j], xyz2);
+            rotate_around_z(numOfAtoms2, angleSet[j]*PI/180., xyz2);
+            std::cout << "33333333333\n";
+            for (int k=0; k<numOfAtoms2; k++)
+                std::cout << xyz2[3*k+0] << "   " << xyz2[3*k+1] << "   " << xyz2[3*k+2] << "\n";
             moveToBindingSite(atom1, atom2, atomIndex2, i, nadd1);
             std::string outFileName = "alignedStr-" + std::to_string((int)angleSet[j]) + ".xyz";
             this->writeToFile(outFileName);
@@ -1863,9 +1899,9 @@ double Align::norm(double* x, int size)
   return val; 
 }
 
-void Align::get_rotation_matrix(double** rotMat, double* thetas)
+/*void Align::get_rotation_matrix(double** rotMat, double* thetas)
 {
-  double x=thetas[0]; double y=thetas[1]; double z=thetas[2];
+//  double x=thetas[0]; double y=thetas[1]; double z=thetas[2];
   rotMat[0][0] = cos(y)*cos(z);
   rotMat[0][1] = -cos(y)*sin(z);
   rotMat[0][2] = sin(y);
@@ -1874,8 +1910,19 @@ void Align::get_rotation_matrix(double** rotMat, double* thetas)
   rotMat[1][2] = -sin(x)*cos(y);
   rotMat[2][0] = -cos(x)*sin(y)*cos(z)+sin(x)*sin(z);
   rotMat[2][1] = cos(x)*sin(y)*sin(z)+sin(x)*cos(z);
+  rotMat[2][2] = cos(x)*cos(y);//
+
+  double x=thetas[0]; double y=thetas[1]; double z=thetas[2];
+  rotMat[0][0] = cos(y)*cos(z);
+  rotMat[0][1] = cos(z)*sin(x)*sin(y)-cos(x)*sin(z);
+  rotMat[0][2] = cos(x)*cos(z)*sin(y)+sin(x)*sin(z);
+  rotMat[1][0] = cos(y)*sin(z);
+  rotMat[1][1] = cos(x)*cos(z)+sin(x)*sin(y)*sin(z);
+  rotMat[1][2] = cos(x)*sin(y)*sin(z)-cos(z)*sin(x);
+  rotMat[2][0] = -sin(y);
+  rotMat[2][1] = cos(y)*sin(x);
   rotMat[2][2] = cos(x)*cos(y);
-}
+}*/
 
 void Align::print_xyz_gen(int natoms, string* anames, double* coords)
 {
@@ -1924,7 +1971,7 @@ void Align::moveToOrigin(int atom2, int atomIndex2, int i, int nadd1)
 //    { 
         //int atom1 = add1[2*i+0];
 //        int atom2 = add1[2*i+1];
-        double adsorbateCenter[3] = {0.0, 0.0, 0.0};
+        double adsorbateCenter[3] = {};
 
         // TODO: with the assumption that the second atom in add move ALWAYS comes from the second fragment
         // == order is preserved
