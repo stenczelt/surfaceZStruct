@@ -631,6 +631,14 @@ void Utils::get_rotation_matrix(double** rotMat, double* thetas){
   rotMat[2][0] = -cos(x)*sin(y)*cos(z)+sin(x)*sin(z);
   rotMat[2][1] = cos(x)*sin(y)*sin(z)+sin(x)*cos(z);
   rotMat[2][2] = cos(x)*cos(y);*/
+  std::cout << "$$$ in utils ROTATION MAT:\n";
+  std::cout << thetas[0] << thetas[1] << thetas[2] << "\n";
+  for (int i=0; i<3; i++)
+  {
+      for (int j=0; j<3; j++)
+          std::cout << rotMat[i][j] << "        ";
+      std::cout << "\n";
+  }
 }
 
 void Utils::Rotate_structure(double** RotMat, double* structure, int natoms){
