@@ -352,8 +352,8 @@ void Align::init(int numOfAtoms1i, string* atomicNames1i, int* anumbers1i, doubl
     anumbers2 = new int[numOfAtoms2];
     xyz1 = new double[3*numOfAtoms1];
     xyz2 = new double[3*numOfAtoms2];
-    xyz1s = new double[3*numOfAtoms1];
-    xyz2s = new double[3*numOfAtoms2];
+    //xyz1s = new double[3*numOfAtoms1];
+    //xyz2s = new double[3*numOfAtoms2];
     xyzAugmented = new double[3*(numOfAtoms1+numOfAtoms2)];
 
     for (int i=0;i<numOfAtoms1;i++)
@@ -367,9 +367,11 @@ void Align::init(int numOfAtoms1i, string* atomicNames1i, int* anumbers1i, doubl
         anumbers2[i] = anumbers2i[i];
     }
     for (int i=0;i<3*numOfAtoms1;i++)
-        xyz1s[i] = xyz1[i] = xyz1i[i];
+        xyz1[i] = xyz1i[i];
+        //xyz1s[i] = xyz1[i] = xyz1i[i];
     for (int i=0;i<3*numOfAtoms2;i++)
-        xyz2s[i] = xyz2[i] = xyz2i[i];
+        xyz2[i] = xyz2i[i];
+        //xyz2s[i] = xyz2[i] = xyz2i[i];
     for (int i=0;i<3*numOfAtoms1;i++)
         xyzAugmented[i] = xyz1i[i];
     for (int i=0;i<3*numOfAtoms2;i++)
@@ -500,13 +502,13 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
             //Move atom2 to origin so the calculated vector will start from origin
             //Other way is to calculate the vector first and then add its coordinates
             //to the coordinates of atom3
-            moveToOrigin(atom2, atomIndex2, i, nadd1);
-            for (int i=0;i<3*nadd1;i++) averagedBondVector2[i] = 0.; //TODO, not sure if this line should be here
+            //moveToOrigin(atom2, atomIndex2, i, nadd1);
+            //for (int i=0;i<3*nadd1;i++) averagedBondVector2[i] = 0.; //TODO, added this here, not sure if this line should be here
             for (int j=0;j<numOfBondedToAtom2;j++)
             {
-                averagedBondVector2[0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
-                averagedBondVector2[1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
-                averagedBondVector2[2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
+                averagedBondVector2[3*nvf2+0] += xyz2[3*atom2+0] - xyz2[3*bonded2[j]+0];
+                averagedBondVector2[3*nvf2+1] += xyz2[3*atom2+1] - xyz2[3*bonded2[j]+1];
+                averagedBondVector2[3*nvf2+2] += xyz2[3*atom2+2] - xyz2[3*bonded2[j]+2];
             }
 
             if (numOfBondedToAtom2==2)
@@ -559,9 +561,9 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
         for (int j=0;j<3;j++)
         {
             //v2[j]   += averagedBondVector1[3*i+j];
-            v2[j]   = averagedBondVector1[3*i+j];
+            v2[j] += averagedBondVector1[3*i+j];
             //v2[3+j] += averagedBondVector2[3*i+j];
-            v2[3+j] = averagedBondVector2[3*i+j]; //TODO: changed += to =, nothing changed for one add
+            v2[3+j] += averagedBondVector2[3*i+j]; //TODO: changed += to =, nothing changed for one add
         }
     }
 
@@ -595,7 +597,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
         v2[i] = v2[i] / n2;
 
     // get ready for rotation
-    double* xyz2a = new double[3*(numOfAtoms2+2)]; // TODO: +2 ??
+    double* xyz2a = new double[3*(numOfAtoms2+2)]; // +2 : coordinates of origin and head of v2 vector
     string* atomicNames2a = new string[numOfAtoms2+2];
     for (int i=0;i<numOfAtoms2;i++) atomicNames2a[i] = atomicNames2[i];
     atomicNames2a[numOfAtoms2] = "X";
@@ -621,13 +623,13 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
     for (int i=0;i<3*numOfAtoms2;i++)
         xyz2[i] = xyz2a[i];
 
-    // move atom2 to the origin of Cartesians, and obviously move its attached atoms too!
+    // move atom2 to the origin of Cartesians
     for (int i=0; i<nadd1; i++)
     {
         int atom1 = add1[2*i+0];
         int atom2 = add1[2*i+1];
         atom2 -= numOfAtoms1;
-        moveToOrigin(atom2, atomIndex2, i, nadd1);
+        //moveToOrigin(atom2, atomIndex2, i, nadd1); TODO: is necessary?
 
         // assuming atom2 is the central atom. Find the vector from atom2 to one of
         // the attached atoms. Find the cross product of that vector with averagedBondVector2, the 
@@ -646,7 +648,7 @@ void Align::add_align(int nadd1, int* add1, int atomIndex2, vector<double> angle
         double lengthOf1st = sqrt(pow(surfNormal[0], 2) + pow(surfNormal[1], 2) + pow(surfNormal[2], 2));
         double lengthOf2nd = 1.0; // bc it's a unit vector along X axis
         double cosTheta = dotProduct / (lengthOf1st * lengthOf2nd);
-        double angleToX = acos(cosTheta)*180./PI;
+        double angleToX = acos(cosTheta);
 
         // align surface normal to x
         rotate_around_z(numOfAtoms2, angleToX, xyz2);
@@ -1940,7 +1942,7 @@ void Align::moveToBindingSite(int atom1, int atom2, int atomIndex2, int i, int n
             }
         }
     }
-    else if (atomIndex2 > 0 && nadd1 > 0)
+    if (atomIndex2 > 0 && nadd1 > 1)
     {
         int index = atomIndex2;
         for (int i=index;i<numOfAtoms2;i++)

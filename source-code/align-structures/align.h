@@ -25,10 +25,10 @@ class Align
         // Atomic numbers of the fragments
         int* anumbers1;
         int* anumbers2;
-        // Cartesian coordinates of the fragments
-        double* xyz1s;
-        double* xyz2s;
         // ???
+        //double* xyz1s;
+        //double* xyz2s;
+        // Cartesian coordinates of the fragments
         double* xyz1;
         double* xyz2;
         // ???
@@ -36,9 +36,6 @@ class Align
         string* atomicNames3;
         int* anumbers3;
         double* xyz3;
-        // set of angles being sampled during geometry alignment
-        // TODO: for now max. is 4 angles
-        int angleSet[4] = {};
 
         // checks to see if the atoms to be added are in the same fragment
         int check_frag(int atom1, int atom2);
