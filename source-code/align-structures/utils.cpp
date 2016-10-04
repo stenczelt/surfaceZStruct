@@ -611,7 +611,9 @@ void Utils::copy_2D_array(double** pointer1, double** pointer2, int LEN1, int LE
 }
 
 
-void Utils::get_rotation_matrix(double** rotMat, double* thetas){
+void Utils::get_rotation_matrix(double** rotMat, double* thetas)
+{
+  //The rotation angles (thetas) should be in radians
   double x=thetas[0]; double y=thetas[1]; double z=thetas[2];
   rotMat[0][0] = cos(y)*cos(z);
   rotMat[0][1] = cos(z)*sin(x)*sin(y)-cos(x)*sin(z);
