@@ -19,7 +19,8 @@
 
 bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
                  std::string* inSymbols);
-bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray, int &secondStructureIndex);
+bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray,
+                  int &secondStructureIndex, std::vector<double> &angles);
 
 int main(int argc, char* argv[])
 {
@@ -69,23 +70,28 @@ int main(int argc, char* argv[])
         aSurface.writeToFile(outFName);
     } 
 
-    ICoord ic1, ic2;
-    ic1.init(outFName);
+    ICoord slab, adsorbate1;
+    slab.init(outFName);
     //ic1.init(argv[1]);
-    ic2.init(argv[2]);
+    adsorbate1.init(argv[2]);
 
-    Align alignObj;
-    alignObj.init(ic1.natoms,ic1.anames,ic1.anumbers,ic1.coords,ic2.natoms,ic2.anames,ic2.anumbers,ic2.coords);
+    std::vector<ICoord> adsorbates;
+    adsorbates.push_back(adsorbate1);
+    Align totalSystem(slab, adsorbates);
+//    alignObj.init(ic1.natoms,ic1.anames,ic1.anumbers,ic1.coords,ic2.natoms,ic2.anames,ic2.anumbers,ic2.coords);
 
     int numOfAdd = 0;
     int addArray[4] = {};
     int secondStructureIndex = 0;
-    readFromFile("INPUT", numOfAdd, addArray, secondStructureIndex);
-    std::string orientationIn = "vertical";
-    alignObj.add_align(numOfAdd, addArray, secondStructureIndex, orientationIn);
-    std::string outFileName = "alignedStr.xyz";
-    alignObj.writeToFile(outFileName);
-    std::cout << "Output is written to aligned.xyz file\n";
+    std::vector<double> angleSet;
+    std::string orientationIn = "horiz";
+    readFromFile("INPUT", numOfAdd, addArray, secondStructureIndex, angleSet);
+    totalSystem.add_align(numOfAdd, addArray, secondStructureIndex, angleSet, orientationIn/*default is horiz*/);
+//    std::string outFileName = "alignedStr.xyz";
+//    alignObj.writeToFile(outFileName);
+    std::cout << "\n***********************************\n";
+    std::cout << "\nOutput is written to aligned.xyz file\n";
+    std::cout << "\n***********************************\n";
     
     delete [] slabCartesianCoords;
     delete [] slabAtomicSymbols;
@@ -122,7 +128,8 @@ bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int 
     return (success);
 }
 
-bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray, int &secondStructureIndex)
+bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray,
+                  int &secondStructureIndex, std::vector<double> &angles)
 {
     bool success = false;
     //int numOfAdd = numOfAddIn;
@@ -140,7 +147,7 @@ bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray, int &sec
 
     std::stringstream ss(*inputFile.begin());
     std::string unwanted = "";
-    std::string temp[5] = {};
+    std::string temp[6] = {};
     //if (ss.peek() != "#")
     ss >> unwanted >> numOfAdd;
     if (numOfAdd == 1)
@@ -156,6 +163,16 @@ bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray, int &sec
         ss.str(*(inputFile.begin()+2));
         ss >> unwanted >> temp[3];
         secondStructureIndex = std::stoi(temp[3]);
+
+        ss.str("");
+        ss.clear();
+        ss.str(*(inputFile.begin()+3));
+        ss >> unwanted >> temp[4];
+        for(int i=0; i<std::stoi(temp[4]); i++)
+        {
+            ss >> temp[5];
+            angles.push_back(std::stod(temp[5]));
+        }
         success = true;
     }
     else if (numOfAdd == 2)
