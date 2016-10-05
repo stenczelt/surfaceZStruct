@@ -44,7 +44,12 @@ class Align
         // a vector containing adsorbate molecuels
         std::vector<ICoord> mAdsorbates;
         // keep track of adsorbate 1 or 2
-        int adsorbateNum = 0;
+        int mAdsorbateNum = 0;
+        
+        int mNumOfAtomsCombined = 0;
+        std::string* mAtomicNamesCombined;
+        int* mAtomicNumbersCombined;
+        double* mCoordinatesCombined;
 
         // checks to see if the atoms to be added are in the same fragment
         int check_frag(int atom1, int atom2);
@@ -57,18 +62,19 @@ class Align
         //                int sign, double offset);
         // rotates fragment around X axis
         //void rotate_around_z(int numOfAtoms1, int numOfAtoms2, double torv, double* xyz);
-        void rotate_around_z(int numOfAtoms2, double torv, double* xyz);
+        void rotate_around_z(int numOfAtoms2, double torv, double* xyz, int numAdsorbate);
         void linear_right(double* v1, int atom1, int* bonded, double* xyz, std::string orientationIn);
         void planar_cross(double* v1, int atom1, int* bonded, double* xyz);
         void align_v1(int nvf, double* v1);
         // not implemented!
 //        void point_out(double* v1, int numOfAtoms, double* xyz);
-        void vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp);
+        void vdw_vector_opt(double* v1, ICoord icp);
         //void vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp, int atom1, int atom2);
+        void unifyStructures();
 
     public:
         int inited;
-        double* xyzAugmented;
+        //double* xyzAugmented;
         //double* xyzAugmented3;
         //int numOfAtoms1;
         //int numOfAtoms2;
@@ -82,7 +88,7 @@ class Align
 //        void add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, double* xyz3i);
 //        void align_zero();
         //void add_align(int nadd1, int* add1, double zBindingSite);
-        void add_align(int nadd1, int* add1, int atomIndex2, vector<double> angleSet, std::string orientationIn);
+        void add_align(int nadd1, int* add1, vector<double> angleSet, std::string orientationIn);
 //        int add_align_v(int nadd1, int* add1, int wtm, double* aprv);
 //        void shuttle_align(int nadd1, int* add1);
 
@@ -93,10 +99,10 @@ class Align
         double norm(double* x, int size);
         //void get_rotation_matrix(double** rotMat, double* thetas);
         void print_xyz_gen(int natoms, string* anames, double* coords);
-        bool writeToFile(std::string &outFile, const int &numOfAdd);
+        bool writeToFile(std::string &outFile);
         //void moveToOrigin(int nadd1, int* add1, int atomIndex2);
         void moveToOrigin(int atom2, int atomIndex2, int i, int nadd1);
-        void moveToBindingSite(int atom1, int atom2, int atomIndex2, int i, int nadd1);
+        void moveToBindingSite(int atom1, int atom2, int numAdsorbate, int i, int nadd1);
         void applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix);
 };
 
