@@ -70,6 +70,7 @@ int main(int argc, char* argv[])
     // create objects from input structures
     ICoord slab, adsorbate1, adsorbate2;
     std::vector<ICoord> adsorbates;
+    std::cout << "iIn main: HEREEEEEEEEE  11\n";
     if (argc == 3)
     {
         slab.init(outFName);
@@ -84,6 +85,7 @@ int main(int argc, char* argv[])
         adsorbates.push_back(adsorbate1);
         adsorbates.push_back(adsorbate2);
     }
+    std::cout << "iIn main: HEREEEEEEEEE\n";
     Align totalSystem(slab, adsorbates);
 
     // read parameters from INPUT file

@@ -17,7 +17,7 @@ Align::Align(ICoord slab, std::vector<ICoord> adsorbates)
     mSlab = slab;
 //    mAdsorbates = adsorbates;
     inited = 1;
-    for(int i=0; i<adsorbates.size(); i++)
+    for(unsigned int i=0; i<adsorbates.size(); i++)
     {
         mAdsorbates.push_back(adsorbates[i]);
     }
@@ -312,7 +312,7 @@ void Align::vdw_vector_opt(double* v1, ICoord icp)
         if (Energy<energyMin) energyMin = Energy;
         if (Energy>potentialE+THRESH && Energy>energyMin) break;
 
-        for (int l=0; l<mAdsorbates.size(); l++)
+        for (unsigned int l=0; l<mAdsorbates.size(); l++)
         {
             for (int j=0;j<mAdsorbates[l].natoms;j++)
                 for (int k=0;k<3;k++)
@@ -453,7 +453,7 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
     mSlab.bond_frags();
 
     // make frags for adsorbate 1 and 2
-    for (int i=0; i<mAdsorbates.size(); i++)
+    for (unsigned int i=0; i<mAdsorbates.size(); i++)
     {
         mAdsorbates[i].make_frags();
         mAdsorbates[i].bond_frags();
@@ -504,6 +504,9 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
             //Move atom2 to origin so the calculated vector will start from origin
             //Other way is to calculate the vector first and then add its coordinates
             //to the coordinates of atom3
+            int atomIndex2 = 0;
+            moveToOrigin(atom2, atomIndex2, i, nadd1); //TODO no need for this
+            print_xyz();
             for (int j=0;j<numOfBondedToAtom2;j++)
             {
                 averagedBondVector2[3*nvf2+0] += mAdsorbates[mAdsorbateNum].coords[3*atom2+0] 
@@ -606,6 +609,16 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
         v2[i] = v2[i] / n2;
     */
 
+    double xyz2AtZeroDegree[3*mAdsorbates[0].natoms] = {};
+    double xyz3AtZeroDegree[3*mAdsorbates[1].natoms] = {};
+    //double* xyz3AtZeroDegree;
+    //if (mAdsorbates.size() == 2) // if more than one adsorbate
+    //{
+        //std::cout << "GGGGGGGGG " << mAdsorbates.size() << " !!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+        //xyz3AtZeroDegree = new double [3*mAdsorbates[1].natoms]; // = {};
+    //}
+    std::cout << "Before : \n";
+    print_xyz();
     for (int i=0; i<nadd1; i++)
     {
         int atom1 = add1[2*i+0];
@@ -622,11 +635,13 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
             mAdsorbateNum = 0;
         }
 
+        std::cout << "mAdsorbateNum : " << mAdsorbateNum << "\n";
         // START ALIGNMENT
         // get ready for rotation
         double* xyz2a = new double[3*(mAdsorbates[mAdsorbateNum].natoms+2)]; // +2 : coordinates of origin and head of v2 vector
         string* atomicNames2a = new string[mAdsorbates[mAdsorbateNum].natoms+2];
-        for (int i=0;i<mAdsorbates[mAdsorbateNum].natoms;i++) atomicNames2a[i] = mAdsorbates[mAdsorbateNum].anames[i];
+        for (int i=0;i<mAdsorbates[mAdsorbateNum].natoms;i++) 
+            atomicNames2a[i] = mAdsorbates[mAdsorbateNum].anames[i];
         atomicNames2a[mAdsorbates[mAdsorbateNum].natoms] = "X";
         atomicNames2a[mAdsorbates[mAdsorbateNum].natoms+1] = "X";
 
@@ -650,11 +665,17 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
 
         for (int i=0;i<3*mAdsorbates[mAdsorbateNum].natoms;i++)
             mAdsorbates[mAdsorbateNum].coords[i] = xyz2a[i];
+        std::cout << "After : " << i << " \n";
+        //print_xyz();
+        moveToBindingSite(atom1, atom2, mAdsorbateNum);
+        //print_xyz();
+        //break;
 
         // Align adsorbate to X direction and move to binding site
         // assuming atom2 is the central atom. Find the vector from atom2 to one of
         // the attached atoms. Find the cross product of that vector with averagedBondVector2, the 
         // result should equal the surface normal
+        /*
         double surfNormal[3] = {};
         double bondVector[3] = {};
         // TODO if bonded[0] exists, if not?
@@ -673,12 +694,17 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
         double angleToX = acos(cosTheta);
 
         // align surface normal to X axis
-        rotate_around_z(mAdsorbates[mAdsorbateNum].natoms, angleToX, mAdsorbates[mAdsorbateNum].coords, mAdsorbateNum);
+        rotate_around_z(mAdsorbates[mAdsorbateNum].natoms, angleToX, 
+                        mAdsorbates[mAdsorbateNum].coords, mAdsorbateNum);
+        //moveToBindingSite(atom1, atom2, mAdsorbateNum);
 
-        double xyz2AtZeroDegree[3*mAdsorbates[mAdsorbateNum].natoms] = {};
-        for (int i=0;i<3*mAdsorbates[mAdsorbateNum].natoms;i++) xyz2AtZeroDegree[i] = mAdsorbates[mAdsorbateNum].coords[i];
-        moveToBindingSite(atom1, atom2, mAdsorbateNum, i, nadd1);
+        //double xyz2AtZeroDegree[3*mAdsorbates[mAdsorbateNum].natoms] = {};
+        //for (int i=0;i<3*mAdsorbates[mAdsorbateNum].natoms;i++) 
+        //    xyz2AtZeroDegree[i] = mAdsorbates[mAdsorbateNum].coords[i]; //TODO
+        moveToBindingSite(atom1, atom2, mAdsorbateNum);
+        //print_xyz();
 
+        
         // vdw optimization 
         // TODO: make a function vvvvv
         unifyStructures();
@@ -695,17 +721,52 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
         {
             mCoordinatesCombined[l] = icp.coords[l];
         }
+        //icp.freemem();
         // TODO: make a function ^^^^^
-        std::string outFileName = "alignedStr-0.xyz";
-        writeToFile(outFileName);
 
-        for (int j=0; j<angleSet.size(); j++)
+        */
+    }
+    unifyStructures();
+    std::string outFileName = "alignedStr-0.xyz";
+    writeToFile(outFileName);
+    for (int i=0;i<3*mAdsorbates[0].natoms;i++) 
+        xyz2AtZeroDegree[i] = mAdsorbates[0].coords[i];
+    //if (mAdsorbates.size() == 2)
+    //{
+        for (int i=0;i<3*mAdsorbates[1].natoms;i++) 
+            xyz3AtZeroDegree[i] = mAdsorbates[1].coords[i];
+    //}
+        /*
+    for (int i=0; i<nadd1; i++)
+    {
+        int atom1 = add1[2*i+0];
+        int atom2 = add1[2*i+1];
+        if (atom2 >= (mSlab.natoms+mAdsorbates[0].natoms)) // >= bc zero indexed
         {
-            for (int i=0;i<3*mAdsorbates[mAdsorbateNum].natoms;i++) mAdsorbates[mAdsorbateNum].coords[i] = xyz2AtZeroDegree[i];
+            //atom2 belongs to adsorbate2 == mAdsorbates[1]
+            atom2 = atom2 - (mSlab.natoms + mAdsorbates[0].natoms);
+            mAdsorbateNum = 1;
+        }
+        else
+        {
+            atom2 -= mSlab.natoms;
+            mAdsorbateNum = 0;
+        }
+
+        for (unsigned int j=0; j<angleSet.size(); j++)
+        {
+            for (int i=0;i<3*mAdsorbates[0].natoms;i++) 
+                mAdsorbates[0].coords[i] = xyz2AtZeroDegree[i];
+            if (mAdsorbates.size() == 2)
+            {
+                for (int k=0;k<3*mAdsorbates[1].natoms;k++) 
+                    mAdsorbates[1].coords[k] = xyz3AtZeroDegree[k];
+            }
             //xyzTemp = xyz2
             //moveToOrigin(atom2, atomIndex2, i, nadd1);
-            rotate_around_z(mAdsorbates[mAdsorbateNum].natoms, angleSet[j]*PI/180., mAdsorbates[mAdsorbateNum].coords, mAdsorbateNum);
-            moveToBindingSite(atom1, atom2, mAdsorbateNum, i, nadd1);
+            rotate_around_z(mAdsorbates[mAdsorbateNum].natoms, angleSet[j]*PI/180., 
+                            mAdsorbates[mAdsorbateNum].coords, mAdsorbateNum);
+            moveToBindingSite(atom1, atom2, mAdsorbateNum);
             // TODO: make a function vvvvv
             unifyStructures();
             ICoord icp;
@@ -713,7 +774,7 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
             double* vx = new double[3];
             vx[0] = vx[1] = 0.;
             vx[2] = 1.0;
-            // Suppose atom1tmp is always a surface atom
+            //van der waals optimization
             vdw_vector_opt(vx, icp);
             delete [] vx;
             // copying back optimized structures to mSlab and mAdsorbates
@@ -722,10 +783,15 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
                 mCoordinatesCombined[l] = icp.coords[l];
             }
             // TODO: make a function ^^^^^
-            std::string outFileName = "alignedStr-" + std::to_string((int)angleSet[j]) + ".xyz";
+            std::string outFileName = "alignedStr-" + std::to_string(mAdsorbateNum) + "-" + std::to_string((int)angleSet[j]) + ".xyz";
             writeToFile(outFileName);
+            //icp.freemem();
         }
     }
+    */
+        //unifyStructures();
+        //std::string outFileName = "alignedStr-0.xyz";
+        //writeToFile(outFileName);
 
 
     int badgeom = 0;
@@ -1722,7 +1788,10 @@ void Align::shuttle_align(int nadd1, int* add1)
 
 void Align::print_xyz()
 {
-    printf(" %2i \n\n",mSlab.natoms+mAdsorbates[0].natoms);
+    if (mAdsorbates.size() == 1)
+        printf(" %2i \n\n",mSlab.natoms+mAdsorbates[0].natoms);
+    else if (mAdsorbates.size() == 2)
+        printf(" %2i \n\n",mSlab.natoms+mAdsorbates[0].natoms + mAdsorbates[1].natoms);
     for (int i=0;i<mSlab.natoms;i++)
         printf(" %s %9.6f %9.6f %9.6f \n",mSlab.anames[i].c_str(),\
                 mSlab.coords[3*i+0],mSlab.coords[3*i+1],mSlab.coords[3*i+2]);
@@ -1734,6 +1803,7 @@ void Align::print_xyz()
         for (int i=0;i<mAdsorbates[1].natoms;i++)
             printf(" %s %9.6f %9.6f %9.6f \n",mAdsorbates[1].anames[i].c_str(),\
                     mAdsorbates[1].coords[3*i+0],mAdsorbates[1].coords[3*i+1],mAdsorbates[1].coords[3*i+2]);
+        std::cout << "HEREEEEEEEEEEEEEEEEEEEEEE\n";
     }
     printf("\n");
 
@@ -1851,7 +1921,7 @@ bool Align::writeToFile(std::string &outFile)
         ofs << std::to_string(mNumOfAtomsCombined) << "\n";
         ofs << "\n";
         ofs << std::fixed << std::setprecision(15);
-        for (unsigned int i=0; i<mNumOfAtomsCombined; i++)
+        for (int i=0; i<mNumOfAtomsCombined; i++)
         {
             ofs << mAtomicNamesCombined[i] << "         " << mCoordinatesCombined[3*i+0] << "           " 
                 << mCoordinatesCombined[3*i+1] << "            " << mCoordinatesCombined[3*i+2] << "\n";
@@ -1938,7 +2008,7 @@ void Align::moveToOrigin(int atom2, int atomIndex2, int i, int nadd1) //TODO no 
 //    }
 }
 
-void Align::moveToBindingSite(int atom1, int atom2, int numAdsorbate, int i, int nadd1)
+void Align::moveToBindingSite(int atom1, int atom2, int numAdsorbate)
 {
     double surfaceCenter[3], adsorbateCenter[3], displacement[3] = {0.0, 0.0, 0.0};
     surfaceCenter[0] = mSlab.coords[3*atom1+0];
@@ -1969,7 +2039,7 @@ void Align::moveToBindingSite(int atom1, int atom2, int numAdsorbate, int i, int
 void Align::unifyStructures()
 {
     mNumOfAtomsCombined = mSlab.natoms;
-    for (int i=0; i<mAdsorbates.size(); i++)
+    for (unsigned int i=0; i<mAdsorbates.size(); i++)
     {
         mNumOfAtomsCombined += mAdsorbates[i].natoms;
     }

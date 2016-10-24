@@ -104,6 +104,7 @@ int PTable::atom_number(string &aname){
 	   << " at line: "<< __LINE__<< endl;
       cout << "Failed to find atom named : " << aname << endl;
       exit(-1);
+      return -1;
    }
 }
 

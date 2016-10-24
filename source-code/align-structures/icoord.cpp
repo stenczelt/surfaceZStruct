@@ -287,7 +287,7 @@ void ICoord::linear_ties()
     } //if !bond_exists
 
     int found;
-    int b1,b2;
+    //int b1,b2;
     for (int j=0;j<m[i];j++)
     for (int k=0;k<j;k++) 
     {
@@ -1581,7 +1581,7 @@ void ICoord::structure_read(string xyzfile){
   bool success=true;
   success=static_cast<bool>(getline(infile, line));
   if (success){
-    int length=StringTools::cleanstring(line);
+    //int length=StringTools::cleanstring(line);
     natoms=atoi(line.c_str());
   }
   cout <<"  natoms: " << natoms << endl;
@@ -1598,7 +1598,7 @@ void ICoord::structure_read(string xyzfile){
   //cout <<"  -Reading the atomic names...";
   for (int i=0;i<natoms;i++){
     success=static_cast<bool>(getline(infile, line));
-    int length=StringTools::cleanstring(line);
+    //int length=StringTools::cleanstring(line);
     vector<string> tok_line = StringTools::tokenize(line, " \t");
     anames[i]=tok_line[0];
     anumbers[i]=PTable::atom_number(anames[i]);
@@ -1626,7 +1626,7 @@ void ICoord::structure_read(string xyzfile){
     success=static_cast<bool>(getline(infile, line));
     for (int j=0;j<natoms;j++){
       success=static_cast<bool>(getline(infile, line));
-      int length=StringTools::cleanstring(line);
+      //int length=StringTools::cleanstring(line);
       vector<string> tok_line = StringTools::tokenize(line, " \t");
       coords[3*j+0]=atof(tok_line[1].c_str());
       coords[3*j+1]=atof(tok_line[2].c_str());
@@ -1832,7 +1832,7 @@ void ICoord::freemem(){
  delete [] bonds;
  delete [] bondd;
 
- int max_bonds_tm = 25;
+ //int max_bonds_tm = 25;
  /*
  for (int i=0;i<max_bonds_tm;i++)
    delete [] bondstm[i];

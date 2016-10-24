@@ -42,8 +42,8 @@ int check_array(int size, double* A)
 int mat_times_mat(double* C, double* A, double* B, int M, int N, int K)
 {
   //printf(" in mat_times_mat M/N/K: %i %i %i  \n",M,N,K);
-  char TA = 'N';
-  char TB = 'N';
+  //char TA = 'N';
+  //char TB = 'N';
 
 #if 1
   int LDA = K; //rules in LAPACK documentation opposite due to RowMajor (CBlas only)
@@ -80,8 +80,8 @@ int mat_times_mat(double* C, double* A, double* B, int M, int N, int K)
 int mat_times_mat_bt(double* C, double* A, double* B, int M, int N, int K)
 {
   //printf(" in mat_times_mat_bt M/N/K: %i %i %i  \n",M,N,K);
-  char TA = 'N';
-  char TB = 'Y';
+  //char TA = 'N';
+  //char TB = 'Y';
 
 #if 1
 //rules in LAPACK documentation opposite due to RowMajor (only CBlas)
@@ -118,8 +118,8 @@ int mat_times_mat_bt(double* C, double* A, double* B, int M, int N, int K)
 
 int mat_times_mat(double* C, double* A, double* B, int size)
 {
-  char TA = 'N';
-  char TB = 'N';
+  //char TA = 'N';
+  //char TB = 'N';
 
   int M = size;
   int N = size;
@@ -153,8 +153,8 @@ int mat_times_mat(double* C, double* A, double* B, int size)
 
 int mat_times_mat_bt(double* C, double* A, double* B, int size)
 {
-  char TA = 'N';
-  char TB = 'Y';
+  //char TA = 'N';
+  //char TB = 'Y';
 
   int M = size;
   int N = size;
@@ -188,8 +188,8 @@ int mat_times_mat_bt(double* C, double* A, double* B, int size)
 
 int mat_times_mat_at_bt(double* C, double* A, double* B, int size)
 {
-  char TA = 'Y';
-  char TB = 'Y';
+  //char TA = 'Y';
+  //char TB = 'Y';
 
   int M = size;
   int N = size;
@@ -776,8 +776,8 @@ void Utils::diagonalize3x3(double** hmwc, double** smwc,
 			   double* w2, int ndiag){
 			   
   int test;
-  double temp;
-  double diff, tolerance, relerror, evalue;
+  //double temp;
+  double diff, tolerance, relerror; //, evalue;
 
 #if 0
   double** x = new double*[3];
@@ -1072,7 +1072,7 @@ double Utils::det3x3(double A[1+3][1+3]){
 
 void Utils::adjoint3x3(double A[4][4], double Aadj[4][4]){
   double a[1+2][1+2];
-  double m, temp;
+  double m; //, temp;
   
   for(int i=0;i<3;i++){
     for(int l=0;l<3;l++){

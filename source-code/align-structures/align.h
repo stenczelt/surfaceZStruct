@@ -102,7 +102,7 @@ class Align
         bool writeToFile(std::string &outFile);
         //void moveToOrigin(int nadd1, int* add1, int atomIndex2);
         void moveToOrigin(int atom2, int atomIndex2, int i, int nadd1);
-        void moveToBindingSite(int atom1, int atom2, int numAdsorbate, int i, int nadd1);
+        void moveToBindingSite(int atom1, int atom2, int numAdsorbate);
         void applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix);
 };
 
