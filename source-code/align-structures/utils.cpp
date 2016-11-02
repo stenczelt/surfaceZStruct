@@ -615,7 +615,7 @@ void Utils::get_rotation_matrix(double** rotMat, double* thetas)
 {
   //The rotation angles (thetas) should be in radians
   double x=thetas[0]; double y=thetas[1]; double z=thetas[2];
-  rotMat[0][0] = cos(y)*cos(z);
+  /*rotMat[0][0] = cos(y)*cos(z);
   rotMat[0][1] = cos(z)*sin(x)*sin(y)-cos(x)*sin(z);
   rotMat[0][2] = cos(x)*cos(z)*sin(y)+sin(x)*sin(z);
   rotMat[1][0] = cos(y)*sin(z);
@@ -623,8 +623,8 @@ void Utils::get_rotation_matrix(double** rotMat, double* thetas)
   rotMat[1][2] = cos(x)*sin(y)*sin(z)-cos(z)*sin(x);
   rotMat[2][0] = -sin(y);
   rotMat[2][1] = cos(y)*sin(x);
-  rotMat[2][2] = cos(x)*cos(y);
-  /*rotMat[0][0] = cos(y)*cos(z);
+  rotMat[2][2] = cos(x)*cos(y);*/
+  rotMat[0][0] = cos(y)*cos(z);
   rotMat[0][1] = -cos(y)*sin(z);
   rotMat[0][2] = sin(y);
   rotMat[1][0] = sin(x)*sin(y)*cos(z)+cos(x)*sin(z);
@@ -632,7 +632,7 @@ void Utils::get_rotation_matrix(double** rotMat, double* thetas)
   rotMat[1][2] = -sin(x)*cos(y);
   rotMat[2][0] = -cos(x)*sin(y)*cos(z)+sin(x)*sin(z);
   rotMat[2][1] = cos(x)*sin(y)*sin(z)+sin(x)*cos(z);
-  rotMat[2][2] = cos(x)*cos(y);*/
+  rotMat[2][2] = cos(x)*cos(y);
 }
 
 void Utils::Rotate_structure(double** RotMat, double* structure, int natoms){
