@@ -2,3 +2,6 @@
 *.o
 tmp/*
 INPUT
+eigen/*
+*.exe
+*.out
