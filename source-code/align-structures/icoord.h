@@ -16,6 +16,8 @@ class ICoord {
         //    double* charge;               //array of MM atomic charges
         //    string comment;
         double* dxm1;
+        // angles to be sampled
+        std::vector<double> mAnglesToSample;
         //stepsize controllers
         double dEpre; 
         double smag; 
@@ -293,6 +295,7 @@ class ICoord {
         void read_hessp(string filename);
         void read_hessxyz(string filename, int write);
         double mm_energy();
+        std::vector<double> getAngleSet();
         //double mm_energy(int atom1, int atom2);
 };
 

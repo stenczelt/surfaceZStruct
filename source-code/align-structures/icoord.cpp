@@ -1,6 +1,7 @@
 // Internal coordinate class for surface reactions
 #include "icoord.h"
 #include "utils.h"
+#include <string>
 using namespace std;
 
 #define MAX_FRAG_DIST 12.0
@@ -1587,9 +1588,19 @@ void ICoord::structure_read(string xyzfile){
   cout <<"  natoms: " << natoms << endl;
   
   success=static_cast<bool>(getline(infile, line));
-//  if (success){  
-//    comment=line;
-//  }
+  if (success){  
+    //comment=line;
+      std::vector<string> anglesToSample = StringTools::tokenize(line, " \t");
+      for (int i=0; i<anglesToSample.size(); i++)
+      {
+          if (std::stoi(anglesToSample[i]) < 0 || std::stoi(anglesToSample[i]) > 360)
+          {
+              std::cout << "ERROR: Invalid angle value!\n";
+              return;
+          }
+          mAnglesToSample.push_back(std::stod(anglesToSample[i]));
+      }
+  }
   
   anumbers = new int[1+natoms];
   amasses = new double[1+natoms];
@@ -1935,4 +1946,9 @@ void ICoord::alloc_mem(){
  ffepsilon = new double[natoms];
 
  return;
+}
+
+std::vector<double> ICoord::getAngleSet()
+{
+    return mAnglesToSample;
 }

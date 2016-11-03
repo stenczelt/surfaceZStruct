@@ -460,7 +460,8 @@ void Align::add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, 
 }*/
 
 //void Align::add_align(int nadd1, int* add1, double zBindingSite)
-void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string orientaionIn="horiz")
+//void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string orientaionIn="horiz")
+void Align::add_align(int nadd1, int* add1, std::string orientaionIn="horiz")
 {
     if (inited==0)
     {
@@ -535,8 +536,7 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
             //Move atom2 to origin so the calculated vector will start from origin
             //Other way is to calculate the vector first and then add its coordinates
             //to the coordinates of atom3
-            int atomIndex2 = 0;
-            moveToOrigin(atom2, atomIndex2, i, nadd1);
+            moveToOrigin(atom2);
             for (int j=0;j<numOfBondedToAtom2;j++)
             {
                 averagedBondVector2[3*nvf2+0] += mAdsorbates[mAdsorbateNum].coords[3*atom2+0] 
@@ -847,6 +847,9 @@ void Align::add_align(int nadd1, int* add1, vector<double> angleSet, std::string
             mAdsorbateNum = 0;
         }
 
+        std::vector<double> angleSet = mAdsorbates[mAdsorbateNum].getAngleSet();
+        if (angleSet.size() == 0)
+            std::cout << "WARNING: No angle to sample. Is this what you want?\n";
         for (unsigned int j=0; j<angleSet.size(); j++)
         {
             for (int i=0;i<3*mAdsorbates[0].natoms;i++) 
@@ -2060,7 +2063,7 @@ bool Align::writeToFile(std::string &outFile)
 }
 
 //void Align::moveToOrigin(int nadd1, int* add1, int atomIndex2)
-void Align::moveToOrigin(int atom2, int atomIndex2, int i, int nadd1) //TODO no need for this
+void Align::moveToOrigin(int atom2) //TODO no need for this
 {
     // move atom2 to the origin of Cartesians, then move its attached atoms
 //    for (int i=0; i<nadd1; i++) 

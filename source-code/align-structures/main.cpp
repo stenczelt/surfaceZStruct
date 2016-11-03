@@ -8,7 +8,6 @@
 #include <vector>
 #include <cstring>
 #include <string>
-#include <string>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -19,8 +18,8 @@
 
 bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
                  std::string* inSymbols);
-bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray,
-                  std::vector<double> &angles);
+bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray);
+//                  std::vector<double> &angles);
 
 int main(int argc, char* argv[])
 {
@@ -91,11 +90,13 @@ int main(int argc, char* argv[])
     // read parameters from INPUT file
     int numOfAdd = 0;
     int addArray[4] = {};
-    std::vector<double> angleSet;
+    //std::vector<double> angleSet;
     std::string orientationIn = "horiz";
 
-    readFromFile("INPUT", numOfAdd, addArray, angleSet);
-    totalSystem.add_align(numOfAdd, addArray, angleSet, orientationIn/*default is horiz*/);
+    //readFromFile("INPUT", numOfAdd, addArray, angleSet);
+    readFromFile("INPUT", numOfAdd, addArray);
+    //totalSystem.add_align(numOfAdd, addArray, angleSet, orientationIn/*default is horiz*/);
+    totalSystem.add_align(numOfAdd, addArray, orientationIn/*default is horiz*/);
     std::cout << "\n***************************************\n";
     std::cout << "\nOutput is written to aligned-*.xyz file\n";
     std::cout << "\n***************************************\n";
@@ -138,8 +139,9 @@ bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int 
     return (success);
 }
 
-bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray,
-                  std::vector<double> &angles)
+//bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray,
+//                  std::vector<double> &angles)
+bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray)
 {
     bool success = false;
     //int numOfAdd = numOfAddIn;
@@ -169,7 +171,7 @@ bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray,
         addArray[0] = std::stoi(temp[0]);
         addArray[1] = std::stoi(temp[1]);
 
-        ss.str("");
+        /*ss.str("");
         ss.clear();
         ss.str(*(inputFile.begin()+2));
         ss >> unwanted >> temp[0];
@@ -178,7 +180,7 @@ bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray,
             ss >> temp[1];
             angles.push_back(std::stod(temp[1]));
         }
-        success = true;
+        success = true;*/
     }
     else if (numOfAdd == 2)
     {
@@ -195,7 +197,7 @@ bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray,
         addArray[2] = std::stoi(temp[0]);
         addArray[3] = std::stoi(temp[1]);
 
-        ss.str("");
+        /*ss.str("");
         ss.clear();
         ss.str(*(inputFile.begin()+3));
         ss >> unwanted >> temp[0];
@@ -203,7 +205,7 @@ bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray,
         {
             ss >> temp[1];
             angles.push_back(std::stod(temp[1]));
-        }
+        }*/
         success = true;
     }
 

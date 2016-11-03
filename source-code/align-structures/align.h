@@ -88,7 +88,8 @@ class Align
 //        void add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, double* xyz3i);
 //        void align_zero();
         //void add_align(int nadd1, int* add1, double zBindingSite);
-        void add_align(int nadd1, int* add1, vector<double> angleSet, std::string orientationIn);
+        //void add_align(int nadd1, int* add1, vector<double> angleSet, std::string orientationIn);
+        void add_align(int nadd1, int* add1, std::string orientationIn);
 //        int add_align_v(int nadd1, int* add1, int wtm, double* aprv);
 //        void shuttle_align(int nadd1, int* add1);
 
@@ -101,7 +102,7 @@ class Align
         void print_xyz_gen(int natoms, string* anames, double* coords);
         bool writeToFile(std::string &outFile);
         //void moveToOrigin(int nadd1, int* add1, int atomIndex2);
-        void moveToOrigin(int atom2, int atomIndex2, int i, int nadd1);
+        void moveToOrigin(int atom2);
         void moveToBindingSite(int atom1, int atom2, int numAdsorbate);
         void applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix);
 };
