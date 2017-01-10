@@ -31,8 +31,6 @@ int main(int argc, char* argv[])
 {
     //if (argc < 3 || argc > 4)
 
-    // list of adsorbate and slab indices
-    int addArray[4] = {};
 
     if (argc != 1)
     {   
@@ -58,37 +56,47 @@ int main(int argc, char* argv[])
         returnVal = readFromFile("INPUT", numOfAdsorbates, slabIndices, radius, adsorbateFiles, 
                      adsorbateIndices, reactiveIndex1, reactiveIndex2,
                      numOfAdd, numOfBreak);
+        int addArray[4] = {};
         if (returnVal == 0)
         {
-        // create objects from input structures
-        ICoord slab, adsorbate1, adsorbate2;
-        std::vector<ICoord> adsorbates;
+            // create objects from input structures
+            ICoord slab, adsorbate1, adsorbate2;
+            std::vector<ICoord> adsorbates;
 
-        slab.init("bindingSites.xyz");
-        adsorbate1.init(adsorbateFiles[0]);
-        adsorbates.push_back(adsorbate1);
-        if (numOfAdsorbates == 2)
-        {
-            adsorbate2.init(adsorbateFiles[1]);
-            adsorbates.push_back(adsorbate2);
-        }
+            slab.init("bindingSites.xyz");
+            adsorbate1.init(adsorbateFiles[0]);
+            adsorbates.push_back(adsorbate1);
+            // list of adsorbate and slab indices
+            addArray[0] = slabIndices[0] -1 ;
+            addArray[1] = adsorbateIndices[0] + slab.natoms - 1;
+            if (numOfAdsorbates == 2)
+            {
+                adsorbate2.init(adsorbateFiles[1]);
+                adsorbates.push_back(adsorbate2);
+                //addArray[0] = slabIndices[0];
+                //addArray[1] = adsorbateIndices[0];
+                addArray[2] = slabIndices[1] - 1;
+                addArray[3] = adsorbateIndices[1] + slab.natoms + adsorbate1.natoms - 1;
+                std::cout << "*********** " << addArray[0] << " " <<addArray[1] << "    " << addArray[2] << "    "
+                    << addArray[3] << std::endl;
+            }
 
-    Align totalSystem(slab, adsorbates);
+            Align totalSystem(slab, adsorbates);
 
-    // read parameters from INPUT file
-    //std::string orientationIn = "horiz";
-    // numOfAdsorbates = numOfAdd passed to add_align
-//    totalSystem.add_align(numOfAdsorbates, addArray); /*orientationIn//default is horiz*/
-//    std::cout << "\n***************************************\n";
-//    std::cout << "\nOutput is written to Aligned-*.xyz file\n";
-//    std::cout << "\n***************************************\n";
+            // read parameters from INPUT file
+            //std::string orientationIn = "horiz";
+            // numOfAdsorbates = numOfAdd passed to add_align
+            totalSystem.add_align(numOfAdsorbates, addArray, radius); /*orientationIn//default is horiz*/
+            std::cout << "\n***************************************\n";
+            std::cout << "\nOutput is written to output-*.xyz file\n";
+            std::cout << "\n***************************************\n";
         }
     }
     return (0);
 }
 
 bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,
-                 std::string* inSymbols)
+        std::string* inSymbols)
 {
     bool success = true;
     int k = 0;

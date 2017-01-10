@@ -1,7 +1,7 @@
 *.xyz
 *.o
 tmp/*
-INPUT
 eigen/*
 *.exe
 *.out
+tags

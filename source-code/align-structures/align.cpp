@@ -429,7 +429,7 @@ void Align::add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, 
   return;
 }*/
 
-void Align::add_align(int nadd1, int* add1) /*std::string orientaionIn="horiz"*/
+void Align::add_align(int nadd1, int* add1, double* radius) /*std::string orientaionIn="horiz"*/
 {
     if (inited==0)
     {
@@ -713,7 +713,7 @@ void Align::add_align(int nadd1, int* add1) /*std::string orientaionIn="horiz"*/
 
     }
     unifyStructures();
-    std::string outFileName = "alignedStr-0.xyz";
+    std::string outFileName = "output-0.xyz";
     writeToFile(outFileName);
     for (int i=0;i<3*mAdsorbates[0].natoms;i++) 
         xyz2AtZeroDegree[i] = mAdsorbates[0].coords[i];
@@ -772,7 +772,7 @@ void Align::add_align(int nadd1, int* add1) /*std::string orientaionIn="horiz"*/
                 mCoordinatesCombined[l] = icp.coords[l];
             }
             // TODO: make a function ^^^^^
-            std::string outFileName = "alignedStr-" + std::to_string(mAdsorbateNum) + "-" + std::to_string((int)angleSet[j]) + ".xyz";
+            std::string outFileName = "output-" + std::to_string(mAdsorbateNum) + "-" + std::to_string((int)angleSet[j]) + ".xyz";
             writeToFile(outFileName);
             //icp.freemem();
         }

@@ -1,0 +1,17 @@
+find-sites          0               #0/1
+slab-file           surface.xyz        #name of slab file
+numOfAdsorbates     2               #number of adsorbate fragments to be added to slab
+index#1             36              #index of the first binding site
+radius1             1.0             #search radius for the first fragment
+adsorbate-file      nh3.xyz         #name of first adsorbate file
+adsIndex#1          1               #index of the atom to be added to surface
+reactiveAtomIndex   1               #atoms to undergo combination search
+---------------------------------------------------------------------------------------
+index#2             37              #index of the second binding site
+radius2             1.5             #search radius for the second fragment
+adsorbate-file      h2o.xyz         #name of second adsorbate file
+adsIndex#2          1               #index of the atom to be added
+reactiveAtomIndex   3 2             #blah blah
+---------------------------------------------------------------------------------------
+add                 1               #number of add moves
+break               0               #number of break moves
