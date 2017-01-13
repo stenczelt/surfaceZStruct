@@ -755,11 +755,15 @@ int SurfaceClass::findBridge()
     return (0);
 } // findBridge
 
-void SurfaceClass::findNearbySites(const int atomIndex, const double radius, 
+std::vector<int> SurfaceClass::findNearbySites(const int atomIndex, const double radius, 
                                    const std::string siteType)
 {
+    std::vector<int> swap1;
+    mSelectedBSIndices.swap(swap1);
+    /*
     if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
     {
+            std::cout << "33333 Im here %%%%%%%%%%%%%%%\n";
         // TODO if (findHollow() != 0) {ERROR}
         findHollow();
         findAtop();
@@ -783,31 +787,44 @@ void SurfaceClass::findNearbySites(const int atomIndex, const double radius,
     {
         std::cout << "ERROR: not a supported surface type" << std::endl;
     }
+    */
     // here, we have the mBindingSites vector with all the binding sites
     int numOfSites = mBindingSites.size();
+            std::cout << mBindingSites.size() << "  number of binding sites found Im here %%%%%%%%%%%%%%%\n";
     for (int i=0; i<numOfSites; ++i)
     {
-        if (mBindingSites[i].getType() == siteType || siteType == "all")
+            //std::cout << "1111 Im here %%%%%%%%%%%%%%%\n";
+        std::cout << "`````````````` Atom Index " << atomIndex << std::endl;
+        std::cout << "`````````````` coordinate size " << mCoordinates.size() << std::endl;
+        if ( (mBindingSites[i].getType() == siteType || siteType == "all") && 
+                atomIndex <= (mCoordinates.size()+mBindingSites.size()) )
         {
-            double refX = mCoordinates[atomIndex-1][0];
-            double refY = mCoordinates[atomIndex-1][1];
+            //std::cout << "Im here %%%%%%%%%%%%%%%\n";
+            //double refX = mCoordinates[atomIndex-1][0];
+            //double refY = mCoordinates[atomIndex-1][1];
+            double refX = mBindingSites[atomIndex - mCoordinates.size() - 1].getX();
+            double refY = mBindingSites[atomIndex - mCoordinates.size() - 1].getY();
             double testX = mBindingSites[i].getX();
             double testY = mBindingSites[i].getY();
-            if ((testX <= refX+radius && testX >= refX-radius) &&
+            /*if ((testX <= refX+radius && testX >= refX-radius) &&
                 (testY <= refY+radius && testY >= refY-radius) &&
                !(testX <= refX+0.1 && testX >= refX-0.1 &&
-                 testY <= refY+0.1 && testY >= refY-0.1) )
+                 testY <= refY+0.1 && testY >= refY-0.1) )*/
+            // compare euclidean distance
+            if ( sqrt( pow(refX-testX, 2) + pow(refY-testY, 2) ) < radius )
             {
                 // the site is in the range
                 mSelectedBindingSites.push_back(mBindingSites[i]);
-                std::cout << "This site IS within the specified radius/type" << std::endl;
+                mSelectedBSIndices.push_back(i); // save index of binding sites
+                //std::cout << "This site IS within the specified radius/type" << std::endl;
             }
             else
             {
-                std::cout << "ERROR: This site is NOT within the specified radius/type" << std::endl;
+                //std::cout << "ERROR: This site is NOT within the specified radius/type" << std::endl;
             }
         }
     }
+    return (mSelectedBSIndices);
 }
 
 void SurfaceClass::findAllSites()
@@ -838,12 +855,13 @@ void SurfaceClass::findAllSites()
         std::cout << "ERROR: not a supported surface type" << std::endl;
     }
     // here, we have the mBindingSites vector with all the binding sites
-    int numOfSites = mBindingSites.size();
+/*    int numOfSites = mBindingSites.size();
     for (int i=0; i<numOfSites; ++i)
     {
         mSelectedBindingSites.push_back(mBindingSites[i]);
         //std::cout << "This site IS within the specified radius/type" << std::endl;
     }
+    */
 }
 
 bool SurfaceClass::writeToFile(std::string &outFile)

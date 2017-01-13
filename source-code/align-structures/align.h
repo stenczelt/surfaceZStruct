@@ -5,6 +5,7 @@
 #include "icoord.h"
 //#include "stringtools.h"
 #include "utils.h"
+#include "BindingSiteClass.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -57,7 +58,7 @@ class Align
         Align(ICoord slab, std::vector<ICoord> adsorbates);
         //void add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, double* xyz3i);
         //void align_zero();
-        void add_align(int nadd1, int* add1, double* radius); /*std::string orientationIn*/
+        void add_align(int numOfAdd, int* addArray); //, std::vector<BindingSiteClass> allSites); /*std::string orientationIn*/
         //int add_align_v(int nadd1, int* add1, int wtm, double* aprv);
         //void shuttle_align(int nadd1, int* add1);
         void print_xyz();

@@ -9,6 +9,7 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/LU>
 #include "align.h"
+#include <fenv.h> // for NaN debugging
 
 using namespace std;
 //TODO: implement point_out function for planes
@@ -429,14 +430,13 @@ void Align::add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, 
   return;
 }*/
 
-void Align::add_align(int nadd1, int* add1, double* radius) /*std::string orientaionIn="horiz"*/
+void Align::add_align(int nadd1, int* add1) //, std::vector<BindingSiteClass> allSites) /*std::string orientaionIn="horiz"*/
 {
     if (inited==0)
     {
         printf(" WARNING: in add_align, not init'd \n");
         return;
     }
-
 
     //get averageBondVector for all add atoms
     // multiply by 3: x, y, z
@@ -457,15 +457,30 @@ void Align::add_align(int nadd1, int* add1, double* radius) /*std::string orient
     //std::string orientaion = orientaionIn;
 
     //int numOfPlanarVecs1 = 0;
-    int numOfPlanarVecs2 = 0; //TODO: what are these?
+    int numOfPlanarVecs2 = 0;
     //int numOfAlignedVecFound1 = 0;
     int numOfAlignedVecFound2 = 0;
     int found = 0;
     int numOfBondedToAtom2 = 0;
+
+    // loop finding aligment vectors
     for (int i=0;i<nadd1;i++)
     {
         int atom1 = add1[2*i+0];
         int atom2 = add1[2*i+1];
+        //TODO TODO TODO
+        /*int atom2 = 0;
+        for (int n=-1; n<allSites.size(); n++)
+        {
+            if (n==-1)
+                atom2 = add1[2*i+1];
+            else
+            {
+                //atom2 = allSites[n];
+            }
+
+        }*/
+        //TODO TODO TODO
         if (atom1>atom2) {std::swap(atom1, atom2);}
 
         int same_frag = check_frag(atom1,atom2);
@@ -525,6 +540,7 @@ void Align::add_align(int nadd1, int* add1, double* radius) /*std::string orient
             }
             if (numOfBondedToAtom2==2)
             {
+                std::cout << "DEBUG: " << bonded2[0] << "  " << atom2 << " " << bonded2[1] << std::endl;
                 double anglev = mAdsorbates[mAdsorbateNum].angle_val(bonded2[0],atom2,bonded2[1]);
                 if (anglev>175.)
                 {
@@ -611,6 +627,7 @@ void Align::add_align(int nadd1, int* add1, double* radius) /*std::string orient
     {
         xyz3AtZeroDegree = new double [3*mAdsorbates[1].natoms]; // = {};
     }
+    // loop aligning structures
     for (int i=0; i<nadd1; i++)
     {
         int atom1 = add1[2*i+0];
@@ -706,14 +723,20 @@ void Align::add_align(int nadd1, int* add1, double* radius) /*std::string orient
         // copying back optimized structures
         for (int l=0; l<mNumOfAtomsCombined; l++)
         {
+            //std::cout << "~~~~~~~   mCoordinatesCombined " << l << "  " 
+            //    <<  mCoordinatesCombined[l] << std::endl;
             mCoordinatesCombined[l] = icp.coords[l];
+            //std::cout << "~~~~~~~ After mCoordinatesCombined " << l << "  " 
+            //    <<  mCoordinatesCombined[l] << std::endl;
         }
         //icp.freemem();
         // TODO: make a function ^^^^^
 
     }
+
+    // writing aligned structures to output files
     unifyStructures();
-    std::string outFileName = "output-0.xyz";
+    std::string outFileName = "output-0-" + std::to_string(add1[0]+1) + "-" + std::to_string(add1[2]+1) + ".xyz";
     writeToFile(outFileName);
     for (int i=0;i<3*mAdsorbates[0].natoms;i++) 
         xyz2AtZeroDegree[i] = mAdsorbates[0].coords[i];
@@ -724,6 +747,8 @@ void Align::add_align(int nadd1, int* add1, double* radius) /*std::string orient
             xyz3AtZeroDegree[i] = mAdsorbates[1].coords[i];
     }
 
+    //TODO if atom indices outside range, give error
+    // sample input angles
     for (int i=0; i<nadd1; i++)
     {
         int atom1 = add1[2*i+0];
@@ -772,7 +797,12 @@ void Align::add_align(int nadd1, int* add1, double* radius) /*std::string orient
                 mCoordinatesCombined[l] = icp.coords[l];
             }
             // TODO: make a function ^^^^^
-            std::string outFileName = "output-" + std::to_string(mAdsorbateNum) + "-" + std::to_string((int)angleSet[j]) + ".xyz";
+            std::string outFileName = "output-" + std::to_string(add1[2*i]+1) + "-" + 
+                std::to_string(add1[2*i+1]+1) + "-" + std::to_string(mAdsorbateNum) + "-" + 
+                std::to_string((int)angleSet[j]) + ".xyz";
+
+            std::cout << "+++++++++++++++++++++++++++++ IN ADD_ALIGN\n";
+            std::cout << "+++++++++++++++++++++++++++++ " << outFileName << std::endl;
             writeToFile(outFileName);
             //icp.freemem();
         }
@@ -1895,6 +1925,10 @@ bool Align::writeToFile(std::string &outFile)
     {
         ofs << mAtomicNamesCombined[i] << "         " << mCoordinatesCombined[3*i+0] << "           " 
             << mCoordinatesCombined[3*i+1] << "            " << mCoordinatesCombined[3*i+2] << "\n";
+
+        std::cout << "~~~~~~~   in func mCoordinatesCombined " << i << "  "  << 
+            mCoordinatesCombined[3*i+0] << " " <<  mCoordinatesCombined[3*i+1] 
+            << "  " << mCoordinatesCombined[3*i+2] << std::endl;
     }
     ofs.close();
     success = true;

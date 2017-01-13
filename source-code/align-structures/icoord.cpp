@@ -1260,6 +1260,7 @@ double ICoord::angle_val(int i, int j, int k)
    double D2 = distance(j,k);
    double D3 = distance(i,k);
    
+   std::cout << "ICoord: " << D1 << "   " << D2 << "    " << D3 << std::endl;
    double cos = ( D1*D1 + D2*D2 - D3*D3 ) / ( 2*D1*D2);
  
    if (cos > 1) cos = 1;

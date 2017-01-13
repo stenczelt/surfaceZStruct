@@ -54,6 +54,8 @@ class SurfaceClass
         void resetGeometry();
 
     public:
+        // vector to store indices within a given radius. BS: binding site
+        std::vector<int> mSelectedBSIndices;
         // getter functions
         std::string getSurfaceType() const;
         int getNumOfAtoms() const;
@@ -77,7 +79,7 @@ class SurfaceClass
         int findBridge(); //TODO shallow and deep bridge(bcc111)
         // finds sites within the given radius of the specified atom(atomIndex)
         // and the binding type. Atom indexing starts from one.
-        void findNearbySites(const int atomIndex, const double range, 
+        std::vector<int> findNearbySites(const int atomIndex, const double range, 
                              const std::string siteType);
         void findAllSites();
         bool writeToFile(std::string &outFile);
