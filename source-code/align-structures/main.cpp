@@ -35,7 +35,6 @@ int main(int argc, char* argv[])
     //feenableexcept(FE_INVALID | FE_OVERFLOW); // for nan debugging
     //if (argc < 3 || argc > 4)
 
-
     if (argc != 1)
     {   
         std::cout << "ERROR - wrong number of parameters" << std::endl;
@@ -64,21 +63,21 @@ int main(int argc, char* argv[])
         int addArray[4] = {};
         if (returnVal == 0)
         {
-//            SurfaceClass aSurface;
-//            readSlabFile(slabFileName, aSurface);
-//            aSurface.findAllSites();
+            SurfaceClass aSurface;
+            readSlabFile(slabFileName, aSurface);
+            aSurface.findAllSites();
 
-            // returns all sites including the input index
-//            std::vector<int> allSites1 = 
-//                aSurface.findNearbySites(slabIndices[0], radius[0], "all");
+          // returns all sites including the input index
+            std::vector<int> allSites1 = 
+                aSurface.findNearbySites(slabIndices[0], radius[0], "all");
 
-            std::cout << " slab index 0 " << slabIndices[0] << std::endl;
-            std::cout << " slab index 1 " << slabIndices[1] << std::endl;
+          std::cout << " slab index 0 " << slabIndices[0] << std::endl;
+          std::cout << " slab index 1 " << slabIndices[1] << std::endl;
 
 
-            // removes the element that equals the input index
-//            allSites1.erase(std::remove(allSites1.begin(), allSites1.end(), 
-//                        slabIndices[0]-aSurface.getNumOfAtoms()-1), allSites1.end());
+          // removes the element that equals the input index
+            //allSites1.erase(std::remove(allSites1.begin(), allSites1.end(), 
+            //            slabIndices[0]-aSurface.getNumOfAtoms()-1), allSites1.end());
                 //aSurface.findNearbySites(slabIndices[0] - aSurface.getNumOfAtoms(), radius[0], "all");
 
             // create objects from input structures
@@ -143,7 +142,11 @@ int main(int argc, char* argv[])
                     std::cout << "```````````*********** add array " << addArray[0] << " " <<addArray[1] 
                         << "    " << addArray[2] << "    " << addArray[3] << " " << numOfAdds << std::endl;
 
-            totalSystem.add_align(numOfAdds, addArray); //, allSitesCombined); /*orientationIn//default is horiz*/
+                    /*
+            totalSystem.add_align(numOfAdds, addArray); //, allSitesCombined); //orientationIn//default is horiz
+                    std::cout << "TTTSSS " << addArray[0] << std::endl;
+                    std::cout << "TTTSSS " << addArray[0] << std::endl;
+                    */
 
 //            int outerLoopMax = std::min(allSites1.size(), allSites2.size());
 //            int innerLoopMax = std::max(allSites1.size(), allSites2.size());
@@ -162,6 +165,19 @@ int main(int argc, char* argv[])
 //                    totalSystem.add_align(numOfAdds, addArray);
 //                }
 //            }
+
+                for (int l = 0; l < allSites1.size() ; l++)
+                {
+                  //Align totalSystem(slab, adsorbates);
+                    //std::cout << "#####  k: " << k << "  l: " << l << std::endl;
+                  // TODO match iterator with sites1 or 2
+                  // TODO match iterator with index input by the user
+                    addArray[0] = allSites1[l] + aSurface.getNumOfAtoms(); 
+                    std::cout << "TTTSSS " << addArray[0] << std::endl;
+                    std::cout << "TTTSSS " << addArray[1] << std::endl;
+                    totalSystem.add_align(numOfAdds, addArray);
+                }
+
             std::cout << "\n***************************************\n";
             std::cout << "\nOutput is written to output-*.xyz file\n";
             std::cout << "\n***************************************\n";
