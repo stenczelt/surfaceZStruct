@@ -84,6 +84,7 @@ void Align::applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMa
 
 void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames)
 {
+    assert(xyz != NULL);
     // xyz1 temporary Cartesian coordinates of vectors pointing from 
     // the arbitrary origin to each atom
     double* xyz1 = new double[3*numOfAtoms];
@@ -117,36 +118,40 @@ void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atom
     double n1 = sqrt(x1[0]*x1[0]+x1[1]*x1[1]); // hypotenuse
 
     if (n1>0.) // != 0
+    {
         for (int i=0;i<3;i++) u1[i] = x1[i]/n1; // x1[0]/n1 = cos
 
-    rotm[0][0] = -1 * x1[0] / n1;
-    rotm[0][1] = -1 * x1[1] / n1;
-    rotm[0][2] = 0.0;
-    rotm[1][0] = x1[1] / n1;
-    rotm[1][1] = -1 * x1[0] / n1;
-    rotm[1][2] = 0.0;
-    rotm[2][0] = 0.0;
-    rotm[2][1] = 0.0;
-    rotm[2][2] = -1.0;
+        rotm[0][0] = -1 * x1[0] / n1;
+        rotm[0][1] = -1 * x1[1] / n1;
+        rotm[0][2] = 0.0;
+        rotm[1][0] = x1[1] / n1;
+        rotm[1][1] = -1 * x1[0] / n1;
+        rotm[1][2] = 0.0;
+        rotm[2][0] = 0.0;
+        rotm[2][1] = 0.0;
+        rotm[2][2] = -1.0;
 
-    applyRotationMatrix(numOfAtoms, xyz1, rotm);
+        applyRotationMatrix(numOfAtoms, xyz1, rotm);
+    }
 
     //start second rotation
     // length of averagedBondVector
     double n2 = sqrt(x1[0]*x1[0] + x1[1]*x1[1] + x1[2]*x1[2]);
-    if (n1>0.0)
-        for (int i=0;i<3;i++) u1[i] = x1[i]/n1;
+    if (n2>0.0)
+    {
+        for (int i=0;i<3;i++) u1[i] = x1[i]/n2;
 
-    rotm[0][0] = x1[2] / n2;
-    rotm[0][1] = 0.0;
-    rotm[0][2] = -1 * n1 / n2;
-    rotm[1][0] = 0.0;
-    rotm[1][1] = 1.0;
-    rotm[1][2] = 0.0;
-    rotm[2][0] = n1/ n2;
-    rotm[2][1] = 0.0;
-    rotm[2][2] = x1[2] / n2;
-    applyRotationMatrix(numOfAtoms, xyz1, rotm);
+        rotm[0][0] = x1[2] / n2;
+        rotm[0][1] = 0.0;
+        rotm[0][2] = -1 * n1 / n2;
+        rotm[1][0] = 0.0;
+        rotm[1][1] = 1.0;
+        rotm[1][2] = 0.0;
+        rotm[2][0] = n1/ n2;
+        rotm[2][1] = 0.0;
+        rotm[2][2] = x1[2] / n2;
+        applyRotationMatrix(numOfAtoms, xyz1, rotm);
+    }
 
 #if 0
     //checking final geom
@@ -714,17 +719,17 @@ void Align::add_align(int nadd1, int* add1) //, std::vector<BindingSiteClass> al
         unifyStructures();
         ICoord icp;
         icp.init(mNumOfAtomsCombined, mAtomicNamesCombined, mAtomicNumbersCombined, mCoordinatesCombined);
-        double* vx = new double[3];
-        vx[0] = vx[1] = 0.;
-        vx[2] = 1.0;
+      double* vx = new double[3];
+      vx[0] = vx[1] = 0.;
+      vx[2] = 1.0;
 
         vdw_vector_opt(vx, icp);
-        delete [] vx;
-        // copying back optimized structures
-        for (int l=0; l<mNumOfAtomsCombined; l++)
-        {
-            //std::cout << "~~~~~~~   mCoordinatesCombined " << l << "  " 
-            //    <<  mCoordinatesCombined[l] << std::endl;
+      delete [] vx;
+      // copying back optimized structures
+      for (int l=0; l<mNumOfAtomsCombined; l++)
+      {
+          //std::cout << "~~~~~~~   mCoordinatesCombined " << l << "  " 
+          //    <<  mCoordinatesCombined[l] << std::endl;
             mCoordinatesCombined[l] = icp.coords[l];
             //std::cout << "~~~~~~~ After mCoordinatesCombined " << l << "  " 
             //    <<  mCoordinatesCombined[l] << std::endl;
@@ -736,7 +741,7 @@ void Align::add_align(int nadd1, int* add1) //, std::vector<BindingSiteClass> al
 
     // writing aligned structures to output files
     unifyStructures();
-    std::string outFileName = "output-0-" + std::to_string(add1[0]+1) + "-" + std::to_string(add1[2]+1) + ".xyz";
+    std::string outFileName = "output-" + std::to_string(add1[0]) + "-" + std::to_string(add1[2]) + "-0.xyz";
     writeToFile(outFileName);
     for (int i=0;i<3*mAdsorbates[0].natoms;i++) 
         xyz2AtZeroDegree[i] = mAdsorbates[0].coords[i];
@@ -797,8 +802,8 @@ void Align::add_align(int nadd1, int* add1) //, std::vector<BindingSiteClass> al
                 mCoordinatesCombined[l] = icp.coords[l];
             }
             // TODO: make a function ^^^^^
-            std::string outFileName = "output-" + std::to_string(add1[2*i]+1) + "-" + 
-                std::to_string(add1[2*i+1]+1) + "-" + std::to_string(mAdsorbateNum) + "-" + 
+            std::string outFileName = "output-" + std::to_string(add1[0]) + "-" + 
+                std::to_string(add1[2]) + "-" + std::to_string(mAdsorbateNum) + "-" + 
                 std::to_string((int)angleSet[j]) + ".xyz";
 
             std::cout << "+++++++++++++++++++++++++++++ IN ADD_ALIGN\n";
@@ -1926,9 +1931,9 @@ bool Align::writeToFile(std::string &outFile)
         ofs << mAtomicNamesCombined[i] << "         " << mCoordinatesCombined[3*i+0] << "           " 
             << mCoordinatesCombined[3*i+1] << "            " << mCoordinatesCombined[3*i+2] << "\n";
 
-        std::cout << "~~~~~~~   in func mCoordinatesCombined " << i << "  "  << 
-            mCoordinatesCombined[3*i+0] << " " <<  mCoordinatesCombined[3*i+1] 
-            << "  " << mCoordinatesCombined[3*i+2] << std::endl;
+        //std::cout << "~~~~~~~   in func mCoordinatesCombined " << i << "  "  << 
+        //    mCoordinatesCombined[3*i+0] << " " <<  mCoordinatesCombined[3*i+1] 
+        //    << "  " << mCoordinatesCombined[3*i+2] << std::endl;
     }
     ofs.close();
     success = true;
@@ -1952,8 +1957,11 @@ void Align::moveToOrigin(int atom2)
     }    
 }
 
+//Moves atom2 to where atom1 is
 void Align::moveToBindingSite(int atom1, int atom2, int numAdsorbate)
 {
+    assert (numAdsorbate == 0 or numAdsorbate == 1);
+
     double surfaceCenter[3], adsorbateCenter[3], displacement[3] = {0.0, 0.0, 0.0};
     surfaceCenter[0] = mSlab.coords[3*atom1+0];
     surfaceCenter[1] = mSlab.coords[3*atom1+1];
@@ -1968,7 +1976,7 @@ void Align::moveToBindingSite(int atom1, int atom2, int numAdsorbate)
     displacement[1] = surfaceCenter[1] - adsorbateCenter[1];
     displacement[2] = surfaceCenter[2] - adsorbateCenter[2] + DELTA_Z;
     // move to binding site
-    // assuming we never will have a case with more tham two adsorbate molecules/fragments
+    // assuming we never will have a case with more than two adsorbate molecules/fragments
     for (int i=0;i<mAdsorbates[numAdsorbate].natoms;i++)
     {
         for (int j=0;j<3;j++)
@@ -2016,6 +2024,8 @@ void Align::unifyStructures()
             mAtomicNumbersCombined[mSlab.natoms+mAdsorbates[0].natoms+i] = mAdsorbates[1].anumbers[i];
         }
         for (int i=0;i<3*mAdsorbates[1].natoms;i++)
+        {
             mCoordinatesCombined[3*(mSlab.natoms+mAdsorbates[0].natoms)+i] = mAdsorbates[1].coords[i];
+        }
     }
 }
