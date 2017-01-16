@@ -896,20 +896,23 @@ void ICoord::make_bonds()
   nbonds = 0;
   nxyzic = 0;
   for (int i=0;i<natoms;i++)
-    for (int j=0;j<i;j++)
-    {
-       MAX_BOND_DIST = (getR(i) + getR(j))/2;
-       if (farBond>1.0) MAX_BOND_DIST *= farBond;
-       double d = distance(i,j);
-       if (d<MAX_BOND_DIST)
-       {
-          //printf(" found bond: %2i %2i dist: %f \n",i+1,j+1,d);
-          bonds[nbonds][0]=i;
-          bonds[nbonds][1]=j;
-          bondd[nbonds]=d;
-          nbonds++;
-       }
-    }
+  {
+      for (int j=0;j<i;j++)
+      {
+          MAX_BOND_DIST = (getR(i) + getR(j))/2;
+          if (farBond>1.0) MAX_BOND_DIST *= farBond;
+          double d = distance(i,j);
+          // X is the binding site, does not need bonds
+          if (d<MAX_BOND_DIST and this->anames[i] != "X" and this->anames[j] != "X" ) 
+          {
+              //printf(" found bond: %2i %2i dist: %f \n",i+1,j+1,d);
+              bonds[nbonds][0]=i;
+              bonds[nbonds][1]=j;
+              bondd[nbonds]=d;
+              nbonds++;
+          }
+      }
+  }
 
 }
 
@@ -1256,12 +1259,14 @@ double ICoord::torsion_val(int i, int j, int k, int l)
 
 double ICoord::angle_val(int i, int j, int k)
 {
+    //TODO what should happen if i==j or j==k or i==k? 
+    //Respectively, the distance becomes zero and it can cause problems
    double D1 = distance(i,j);
    double D2 = distance(j,k);
    double D3 = distance(i,k);
    
-   std::cout << "ICoord: " << D1 << "   " << D2 << "    " << D3 << std::endl;
-   double cos = ( D1*D1 + D2*D2 - D3*D3 ) / ( 2*D1*D2);
+   assert (D1 != 0 and D2 != 0); //TODO is assert a reasonable thing here?
+   double cos = ( D1*D1 + D2*D2 - D3*D3 ) / ( 2*D1*D2); // angle between D1 and D2
  
    if (cos > 1) cos = 1;
    if (cos < -1) cos = -1;
@@ -1353,7 +1358,7 @@ double ICoord::getR(int i){
   double value;
  
   int an = anumbers[i];
-  if      (an==0) value = 1.0;
+  if      (an==0) value = 1.0; //TODO Ask Paul what this is
   else if (an==1) value = 1.3;
   else if (an==3) value = 2.65; //PT
   else if (an==4) value = 2.0; //PT
