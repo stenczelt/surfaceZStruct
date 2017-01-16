@@ -2,6 +2,9 @@
 #include "icoord.h"
 #include "utils.h"
 #include <string>
+#include <cassert>
+
+
 using namespace std;
 
 #define MAX_FRAG_DIST 12.0

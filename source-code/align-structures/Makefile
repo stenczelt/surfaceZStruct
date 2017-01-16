@@ -43,7 +43,15 @@ $(CMD) : $(OBJECTS)
 	$(FC) $(DEBUG_FLAGS) $(OFLAGS) $(LINKERFLAGS) $(OBJECTS)  -o ./$(CMD)
 
 clean:
-	/bin/rm -f *.o *.i *.mod *.exe a.out make.log
+	/bin/rm -f *.o *.i *.mod *.exe output-* a.out make.log
+	
+all: clean build
+
+build: $(OBJECTS)
+	$(FC) $(DEBUG_FLAGS) $(OFLAGS) $(LINKERFLAGS) $(OBJECTS)  -o ./$(CMD)
+
+run:
+	./$(CMD)
 
 cleano:
 	rm -f *.o *.i

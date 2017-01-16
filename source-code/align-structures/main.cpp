@@ -19,22 +19,15 @@
 
 bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
                  std::string* inSymbols);
-//bool readFromFile(std::string inFileName, int &numOfAdd, int* addArray);
-//bool readFromFile(std::string inFileName, vector<std::string>& xyzFileSlab);
-//bool readFromFile(std::string inFileName);
 int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices, double* radius,
                   std::string* adsorbateFiles, int* adsorbateIndices, int* reactiveIndex1,
                   int* reactiveIndex2, int &numOfAdd, int &numOfBreak, std::string &slabFileName);
 
-//bool readSlabFile(std::string slabFileName, vector<std::string>& xyzFileSlab)
 bool readSlabFileAndWrite(std::string &slabFileName);
 bool readSlabFile(std::string &slabFileName, SurfaceClass &aSurface);
 
 int main(int argc, char* argv[])
 {
-    //feenableexcept(FE_INVALID | FE_OVERFLOW); // for nan debugging
-    //if (argc < 3 || argc > 4)
-
     if (argc != 1)
     {   
         std::cout << "ERROR - wrong number of parameters" << std::endl;
@@ -95,88 +88,30 @@ int main(int argc, char* argv[])
 
             if (numOfAdsorbates == 2)
             {
-//                allSites2 = 
-//                    aSurface.findNearbySites(slabIndices[1], radius[1], "all");
-                // removes the element that equals the input index
-//                allSites2.erase(std::remove(allSites2.begin(), allSites2.end(), 
-//                            slabIndices[1]-aSurface.getNumOfAtoms()-1), allSites2.end());
-                    //aSurface.findNearbySites(slabIndices[1] - aSurface.getNumOfAtoms(), radius[1], "all");
-//                std::cout << "input index  " << slabIndices[1] - aSurface.getNumOfAtoms() << std::endl;
+                allSites2 = 
+                    aSurface.findNearbySites(slabIndices[1], radius[1], "all");
                 adsorbate2.init(adsorbateFiles[1]);
                 adsorbates.push_back(adsorbate2);
-                //addArray[0] = slabIndices[0];
-                //addArray[1] = adsorbateIndices[0];
                 addArray[2] = slabIndices[1] - 1;
                 addArray[3] = adsorbateIndices[1] + slab.natoms + adsorbate1.natoms - 1;
-                // http://stackoverflow.com/questions/3177241/what-is-the-best-way-to-concatenate-two-vectors
-                //allSitesCombined.reserve( allSites1.size() + allSites2.size() );
-                //allSitesCombined.insert( allSitesCombined.end(), allSites1.begin(), allSites1.end() );
-                //allSitesCombined.insert( allSitesCombined.end(), allSites2.begin(), allSites2.end() );
-                std::cout << "*********** " << addArray[0] << " " <<addArray[1] << "    " << addArray[2] << "    "
-                    << addArray[3] << std::endl;
             }
-//            std::cout << " before ~~~~~~~~~~@@@@@@@ vector " << allSites1.size() << std::endl;
-//            std::cout << " before ~~~~~~~~~~@@@@@@@ vector " << allSites2.size() << std::endl;
-//            for (int i=0; i<allSites1.size(); i++)
-//            {
-//                std::cout << allSites1[i]+aSurface.getNumOfAtoms() << "   \n";
-//                std::cout << allSites2[i]+aSurface.getNumOfAtoms() << "   \n";
-//            }
 
             Align totalSystem(slab, adsorbates);
 
-            // read parameters from INPUT file
             //std::string orientationIn = "horiz";
             // numOfAdsorbates = numOfAdd passed to add_align
             int numOfAdds = numOfAdsorbates;
-//            std::cout << "after ~~~~~~~~~~@@@@@@@ vector " << allSites1.size() << std::endl;
-            //std::cout << "~~~~~~~~~~@@@@@@@ size " << allSitesCombined.size() << std::endl;
-//            for (int i=0; i<allSites1.size(); i++)
-//            {
-                //std::cout << allSites1[i]+slab.natoms << "   ";
-//                std::cout << "allSites1 " <<  allSites1[i]+aSurface.getNumOfAtoms() << "   ";
-//                std::cout << "allSites2 " <<  allSites2[i]+aSurface.getNumOfAtoms() << "   ";
-                //std::cout << "slab.natoms " << slab.natoms << std::endl;
-//            }
-//            std::cout << std::endl;
-                    std::cout << "```````````*********** add array " << addArray[0] << " " <<addArray[1] 
-                        << "    " << addArray[2] << "    " << addArray[3] << " " << numOfAdds << std::endl;
 
-                    /*
-            totalSystem.add_align(numOfAdds, addArray); //, allSitesCombined); //orientationIn//default is horiz
-                    std::cout << "TTTSSS " << addArray[0] << std::endl;
-                    std::cout << "TTTSSS " << addArray[0] << std::endl;
-                    */
-
-//            int outerLoopMax = std::min(allSites1.size(), allSites2.size());
-//            int innerLoopMax = std::max(allSites1.size(), allSites2.size());
-//            for (int k=0; k<outerLoopMax; k++)
-//            {
-//                for (int l=0; l<innerLoopMax; l++)
-//                {
-                    //Align totalSystem(slab, adsorbates);
-//                    std::cout << "#####  k: " << k << "  l: " << l << std::endl;
-                    // TODO match iterator with sites1 or 2
-                    // TODO match iterator with index input by the user
-//                    addArray[0] = allSites1[k] + aSurface.getNumOfAtoms(); //TODO do we need -1?
-//                    addArray[2] = allSites2[l] + aSurface.getNumOfAtoms(); //TODO if numOfAdds > 1
-//                    std::cout << "```````````*********** add array " << addArray[0] << " " <<addArray[1] 
-//                        << "    " << addArray[2] << "    " << addArray[3] << " " << numOfAdds << std::endl;
-//                    totalSystem.add_align(numOfAdds, addArray);
-//                }
-//            }
-
-                for (int l = 0; l < allSites1.size() ; l++)
+            // Sample all the binding sites within a given index and radiu
+            for (int l = 0; l < allSites1.size() ; l++)
+            {
+                for (int k = 0; k < allSites2.size(); k++)
                 {
-                  //Align totalSystem(slab, adsorbates);
-                    //std::cout << "#####  k: " << k << "  l: " << l << std::endl;
-                  // TODO match iterator with sites1 or 2
-                  // TODO match iterator with index input by the user
                     addArray[0] = allSites1[l] + aSurface.getNumOfAtoms(); 
-                    std::cout << "TTTSSS " << addArray[0] << std::endl;
-                    std::cout << "TTTSSS " << addArray[1] << std::endl;
+                    addArray[2] = allSites2[k] + aSurface.getNumOfAtoms(); 
                     totalSystem.add_align(numOfAdds, addArray);
                 }
+            }
 
             std::cout << "\n***************************************\n";
             std::cout << "\nOutput is written to output-*.xyz file\n";

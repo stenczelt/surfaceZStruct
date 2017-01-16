@@ -794,8 +794,6 @@ std::vector<int> SurfaceClass::findNearbySites(const int atomIndex, const double
     for (int i=0; i<numOfSites; ++i)
     {
             //std::cout << "1111 Im here %%%%%%%%%%%%%%%\n";
-        std::cout << "`````````````` Atom Index " << atomIndex << std::endl;
-        std::cout << "`````````````` coordinate size " << mCoordinates.size() << std::endl;
         if ( (mBindingSites[i].getType() == siteType || siteType == "all") && 
                 atomIndex <= (mCoordinates.size()+mBindingSites.size()) )
         {
