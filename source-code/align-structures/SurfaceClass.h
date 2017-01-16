@@ -79,7 +79,7 @@ class SurfaceClass
         int findBridge(); //TODO shallow and deep bridge(bcc111)
         // finds sites within the given radius of the specified atom(atomIndex)
         // and the binding type. Atom indexing starts from one.
-        std::vector<int> findNearbySites(const int atomIndex, const double range, 
+        std::vector<int> findNearbySites(const unsigned int atomIndex, const double range, 
                              const std::string siteType);
         void findAllSites();
         bool writeToFile(std::string &outFile);

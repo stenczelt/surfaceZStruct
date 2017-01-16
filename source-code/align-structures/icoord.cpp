@@ -22,7 +22,7 @@ int ICoord::init(string xyzfile){
  alloc_mem();
  // printf(" done allocating memory\n");
 
- int done = ic_create();
+ ic_create();
 
  printf(" initializing MM parameters \n");
  mm_init();
@@ -66,7 +66,7 @@ int ICoord::init(int nat, string* anam, int* anum, double* xyz){
 
  alloc_mem();
 
- int done = ic_create();
+ ic_create();
 
 // printf(" initializing MM parameters \n");
  mm_init();
@@ -1600,7 +1600,7 @@ void ICoord::structure_read(string xyzfile){
   if (success){  
     //comment=line;
       std::vector<string> anglesToSample = StringTools::tokenize(line, " \t");
-      for (int i=0; i<anglesToSample.size(); i++)
+      for (unsigned int i=0; i<anglesToSample.size(); i++)
       {
           if (std::stoi(anglesToSample[i]) < 0 || std::stoi(anglesToSample[i]) > 360)
           {
@@ -1705,11 +1705,12 @@ int ICoord::read_ics(string filename)
   bool success=true;
   int type = 1;
   success=static_cast<bool>(getline(infile, line));
+  assert (success);
   while (!infile.eof())
   {
     success=static_cast<bool>(getline(infile, line));
     //cout << "RR0: " << line << endl;
-    int length=StringTools::cleanstring(line);
+    StringTools::cleanstring(line);
     vector<string> tok_line = StringTools::tokenize(line, " \t");
     if (tok_line.size()>0)
     {
@@ -1726,7 +1727,7 @@ int ICoord::read_ics(string filename)
         {
           success=static_cast<bool>(getline(infile, line));
           //cout << "RR: " << line << endl;
-          length=StringTools::cleanstring(line);
+          StringTools::cleanstring(line);
           tok_line = StringTools::tokenize(line, " \t");
           bonds[i][0] = atoi(tok_line[0].c_str());
           bonds[i][1] = atoi(tok_line[1].c_str());
@@ -1748,7 +1749,7 @@ int ICoord::read_ics(string filename)
         {
           success=static_cast<bool>(getline(infile, line));
           //cout << "RR: " << line << endl;
-          length=StringTools::cleanstring(line);
+          StringTools::cleanstring(line);
           tok_line = StringTools::tokenize(line, " \t");
           angles[i][0] = atoi(tok_line[0].c_str());
           angles[i][1] = atoi(tok_line[1].c_str());
@@ -1771,7 +1772,7 @@ int ICoord::read_ics(string filename)
         {
           success=static_cast<bool>(getline(infile, line));
           //cout << "RR: " << line << endl;
-          length=StringTools::cleanstring(line);
+          StringTools::cleanstring(line);
           tok_line = StringTools::tokenize(line, " \t");
           torsions[i][0] = atoi(tok_line[0].c_str());
           torsions[i][1] = atoi(tok_line[1].c_str());

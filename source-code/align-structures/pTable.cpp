@@ -106,6 +106,7 @@ int PTable::atom_number(string &aname){
       exit(-1);
       return -1;
    }
+   return -1;
 }
 
 

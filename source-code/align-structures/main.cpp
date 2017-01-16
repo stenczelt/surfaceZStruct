@@ -44,8 +44,8 @@ int main(int argc, char* argv[])
         double radius[2] = {};
         std::string adsorbateFiles[2] = {};
         int adsorbateIndices[2] = {};
-        int reactiveIndex1[4] = {0, 0, 0, 0}; //maximum of 4 reactive atoms on each atom
-        int reactiveIndex2[4] = {0, 0, 0, 0};
+        int reactiveIndex1[2] = {0, 0}; //maximum of 2 reactive atoms on each atom
+        int reactiveIndex2[2] = {0, 0};
         int numOfAdd = 0;
         int numOfBreak = 0;
 
@@ -103,9 +103,9 @@ int main(int argc, char* argv[])
             int numOfAdds = numOfAdsorbates;
 
             // Sample all the binding sites within a given index and radiu
-            for (int l = 0; l < allSites1.size() ; l++)
+            for (unsigned int l = 0; l < allSites1.size() ; l++)
             {
-                for (int k = 0; k < allSites2.size(); k++)
+                for (unsigned int k = 0; k < allSites2.size(); k++)
                 {
                     addArray[0] = allSites1[l] + aSurface.getNumOfAtoms(); 
                     addArray[2] = allSites2[k] + aSurface.getNumOfAtoms(); 
@@ -116,6 +116,11 @@ int main(int argc, char* argv[])
             std::cout << "\n***************************************\n";
             std::cout << "\nOutput is written to output-*.xyz file\n";
             std::cout << "\n***************************************\n";
+        }
+        else if (returnVal < 0)
+        {
+            std::cout << "\n Bad INPUT file.";
+            return 1;
         }
     }
     return (0);
@@ -215,8 +220,10 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
         adsorbateIndices[0] = std::stoi(temp[0]); // TODO + num of slab atoms
         // line 8
         ss.str(*(inputFile.begin()+7));
-        ss >> unwanted >> temp[0] >> unwanted;
+        ss >> unwanted >> temp[0] >> temp[1] >> unwanted;
         reactiveIndex1[0] = std::stoi(temp[0]);
+        reactiveIndex1[1] = std::stoi(temp[1]);
+
 
         if (numOfAdsorbates == 2)
         {
@@ -252,6 +259,8 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
             << "    " << numOfBreak << "   " << reactiveIndex1[0] << "     " << reactiveIndex2[0] << std::endl;
         return 0;
     }
+
+    return -1;
 }
 
 bool readSlabFileAndWrite(std::string &slabFileName)

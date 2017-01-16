@@ -233,7 +233,8 @@ string StringTools::newCleanString(string line){
    string::size_type sbegin, send;
    const string delims(" \t,.;");
    const char *commentchar("#");
-   int istart, iend, length;
+   int istart, iend;
+   unsigned length;
   
    // find size of string
    length=line.length();
@@ -258,7 +259,8 @@ int StringTools::cleanstring(string& line){
    string::size_type sbegin, send;
    const string delims(" \t,.;");
    const char *commentchar("#");
-   int istart, iend, length;
+   int istart, iend;
+   unsigned  length;
   
    // find size of string
    length=line.length();
@@ -313,7 +315,7 @@ vector<string> StringTools::tokenize(string str, string delims)
 
 // checks whether s1 contains s2 as a substring
 bool StringTools::contains(string s1, string s2){
-   int s2pos=s1.find(s2);
+   unsigned int s2pos=s1.find(s2);
    bool contains_string=true;
    if (s2pos==string::npos) contains_string=false;
    return contains_string;

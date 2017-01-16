@@ -755,7 +755,7 @@ int SurfaceClass::findBridge()
     return (0);
 } // findBridge
 
-std::vector<int> SurfaceClass::findNearbySites(const int atomIndex, const double radius, 
+std::vector<int> SurfaceClass::findNearbySites(const unsigned int atomIndex, const double radius, 
                                    const std::string siteType)
 {
     std::vector<int> swap1;
