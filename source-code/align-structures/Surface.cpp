@@ -1,38 +1,38 @@
 // Mina Jafari
 // 12-14-2015
 
-#include "SurfaceClass.h"
+#include "Surface.h"
 #include <iostream>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 
-std::string SurfaceClass::getSurfaceType() const
+SLAB_TYPE Surface::getSurfaceType() const
 {
     return (mSurfaceType);
 }
 
-int SurfaceClass::getNumOfAtoms() const
+int Surface::getNumOfAtoms() const
 {
     return (mNumOfSurfAtoms);
 }
 
-int SurfaceClass::getSurfaceWidth() const
+int Surface::getSurfaceWidth() const
 {
     return (mSlabSize[0]);
 }
 
-int SurfaceClass::getSurfaceLength() const
+int Surface::getSurfaceLength() const
 {
     return (mSlabSize[1]);
 }
 
-int SurfaceClass::getSurfaceHeight() const
+int Surface::getSurfaceHeight() const
 {
     return (mSlabSize[2]);
 }
 
-const BindingSiteClass* SurfaceClass::getBindingSite(unsigned int index) const //zero indexed
+const BindingSite* Surface::getBindingSite(unsigned int index) const //zero indexed
 {
     if (index <= mBindingSites.size() && index >= 0)
     {
@@ -45,20 +45,12 @@ const BindingSiteClass* SurfaceClass::getBindingSite(unsigned int index) const /
     }
 }
 
-bool SurfaceClass::setSurfaceType(std::string inSurface)
+void Surface::setSurfaceType(SLAB_TYPE inSurface)
 {
-    bool isSet = false;
-    if (inSurface == "fcc100" || inSurface == "fcc110" || inSurface == "fcc111" ||
-        inSurface == "bcc100" || inSurface == "bcc110" || inSurface == "bcc111" ||
-        inSurface == "hcp0001")
-    {
-        mSurfaceType = inSurface;
-        isSet = true;;
-    }
-    return (isSet);
+    mSurfaceType = inSurface;
 }
 
-bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicSymbols)
+bool Surface::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicSymbols)
 {
     resetGeometry();
     bool isSet = true;
@@ -104,26 +96,26 @@ bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* at
         mNthMinusOneAtom[2] = mCoordinates[mNumOfSurfAtoms-2][2];
         mDeltaX = mNthAtom[0] - mNthMinusOneAtom[0];
         mDeltaY = mNthAtom[1] - mNthMinusOneAtom[1];
-        if (mSurfaceType == "fcc111" || mSurfaceType == "bcc111" || mSurfaceType == "hcp0001")
+        if (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001)
         {
             mDistance = std::sqrt(3)/2 * mDeltaX;
         }
-        else if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
+        else if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
         {
             mDistance = mDeltaX;
         }
-        else if (mSurfaceType == "fcc110")
+        else if (mSurfaceType == FCC110)
         {
             mDistance = mDeltaX / std::sqrt(2);
         }
-        else if (mSurfaceType == "bcc110")
+        else if (mSurfaceType == BCC110)
         {
             mDistance = std::sqrt(2)/2 * mDeltaX;
         }
         // setting mStarAtom & mStarMinusOneAtom
         // n-1 to n vector intersects w/ Y axis
         if (std::abs(mDeltaX) > std::abs(mDeltaY) && 
-           (mSurfaceType == "fcc100" || mSurfaceType == "bcc100" || mSurfaceType == "fcc110"))
+           (mSurfaceType == FCC100 || mSurfaceType == BCC100 || mSurfaceType == FCC110))
         {
             mStarAtom[0] = mNthAtom[0]; // x component
             mStarAtom[1] = mNthAtom[1] - mDistance; // y component
@@ -133,7 +125,7 @@ bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* at
             mStarMinusOneAtom[2] = mNthMinusOneAtom[2]; // z component
         }
         else if (std::abs(mDeltaX) > std::abs(mDeltaY) && 
-                (mSurfaceType == "fcc111" || mSurfaceType == "bcc111" || mSurfaceType == "hcp0001" || mSurfaceType == "bcc110"))
+                (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001 || mSurfaceType == BCC110))
         {
             mStarAtom[0] = mNthAtom[0] - mDeltaX/2; // x component
             mStarAtom[1] = mNthAtom[1] - mDistance; // y component
@@ -183,7 +175,7 @@ bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* at
     return (isSet);
 }
 
-bool SurfaceClass::setSlabSize()
+bool Surface::setSlabSize()
 {
     bool isSet = true;
     const double tolerance = 0.15;
@@ -220,7 +212,7 @@ bool SurfaceClass::setSlabSize()
     return (isSet);
 }
 
-bool SurfaceClass::isFound(const double &inX, const double &inY, const double &inZ)
+bool Surface::isFound(const double &inX, const double &inY, const double &inZ)
 {
     const double tolerance = 0.15;
     for (unsigned int i=0; i<mCoordinates.size(); ++i)
@@ -235,10 +227,10 @@ bool SurfaceClass::isFound(const double &inX, const double &inY, const double &i
     return (false);
 }
 
-int SurfaceClass::findHollow()
+int Surface::findHollow()
 {
     double m_DELTA_Z = 1.5;
-    if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
+    if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
     {
         for (int i=0; i<mSlabSize[0]-1; ++i)
         {
@@ -251,13 +243,13 @@ int SurfaceClass::findHollow()
                 double hollowZ = mNthAtom[2] + m_DELTA_Z;
                 if (hollowX >= -0.05 && hollowY >= -0.05)
                 {   
-                    BindingSiteClass aSite("hollow", hollowX, hollowY, hollowZ);
+                    BindingSite aSite(HOLLOW, hollowX, hollowY, hollowZ);
                     mBindingSites.push_back(aSite);
                 }   
             }
         }
     }
-    else if (mSurfaceType == "fcc110")
+    else if (mSurfaceType == FCC110)
     {
         for (int i=0; i<mSlabSize[0]-1; ++i)
         {
@@ -270,13 +262,13 @@ int SurfaceClass::findHollow()
                 double hollowZ = mNthAtom[2] + m_DELTA_Z;
                 if (hollowX >= -0.05 && hollowY >= -0.05)
                 {   
-                    BindingSiteClass aSite("hollow", hollowX, hollowY, hollowZ);
+                    BindingSite aSite(HOLLOW, hollowX, hollowY, hollowZ);
                     mBindingSites.push_back(aSite);
                 }
             }
         }
     }
-    else if (mSurfaceType == "bcc110")
+    else if (mSurfaceType == BCC110)
     {
         double limit = mSlabSize[0];
         double prevI = 0.5;
@@ -299,7 +291,7 @@ int SurfaceClass::findHollow()
                 double hollowZ = mNthAtom[2] + m_DELTA_Z;
                 if (hollowX >= -0.05 && hollowY >= -0.05)
                 {   
-                    BindingSiteClass aSite("hollow", hollowX, hollowY, hollowZ);
+                    BindingSite aSite(HOLLOW, hollowX, hollowY, hollowZ);
                     mBindingSites.push_back(aSite);
                 }
             }
@@ -315,14 +307,14 @@ int SurfaceClass::findHollow()
     return (0);
 }
 
-int SurfaceClass::findHcp()
+int Surface::findHcp()
 {
     double m_DELTA_Z = 2.0;
     double prevI_1 = 1.0;
     double limit_1 = mSlabSize[0]-1;
     double prevI_2 = 1.5;
     double limit_2 = mSlabSize[0];
-    if (mSurfaceType == "fcc111" || mSurfaceType == "hcp0001")
+    if (mSurfaceType == FCC111 || mSurfaceType == HCP0001)
     {
         for (int j=0; j<mSlabSize[1]; ++j)
         {
@@ -335,7 +327,7 @@ int SurfaceClass::findHcp()
                 double hcpZ = mNthAtom[2] + m_DELTA_Z;
                 if (hcpX >= -0.05 && hcpY >= -0.05)
                 {
-                    BindingSiteClass aSite("hcp", hcpX, hcpY, hcpZ);
+                    BindingSite aSite(HCP, hcpX, hcpY, hcpZ);
                     mBindingSites.push_back(aSite);
                 }
             }
@@ -343,7 +335,7 @@ int SurfaceClass::findHcp()
             limit_1 += 0.5;
         }
     }
-    else if (mSurfaceType == "bcc111")
+    else if (mSurfaceType == BCC111)
     {
         if (mSlabSize[2] < 3)
         {
@@ -362,7 +354,7 @@ int SurfaceClass::findHcp()
                     double hcpZ = mNthAtom[2] + m_DELTA_Z;
                     if (hcpX >= -0.05 && hcpY >= -0.05)
                     {
-                        BindingSiteClass aSite("hcp", hcpX, hcpY, hcpZ);
+                        BindingSite aSite(HCP, hcpX, hcpY, hcpZ);
                         mBindingSites.push_back(aSite);
                     }
                 }
@@ -376,7 +368,7 @@ int SurfaceClass::findHcp()
         std::cout << "ERROR: The HCP binding site is not defined for this surface type" << std::endl;
         return (1210);
     }
-    if (mSurfaceType == "bcc111")
+    if (mSurfaceType == BCC111)
     {
         for (int j=0; j<1; ++j)
         {
@@ -393,7 +385,7 @@ int SurfaceClass::findHcp()
                     {
                         if (hcpX >= -0.05 && hcpY >= -0.05)
                         {
-                            BindingSiteClass aSite("hcp", hcpX, hcpY, hcpZ);
+                            BindingSite aSite(HCP, hcpX, hcpY, hcpZ);
                             mBindingSites.push_back(aSite);
                         }
                     }
@@ -404,10 +396,10 @@ int SurfaceClass::findHcp()
     return (0);
 } // findHcp
 
-int SurfaceClass::findFcc()
+int Surface::findFcc()
 {
     double m_DELTA_Z = 2.0;
-    if (mSurfaceType == "fcc111" || mSurfaceType == "bcc111" || mSurfaceType == "hcp0001")
+    if (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001)
     {
         double prevI = 0.5;
         double limit = mSlabSize[0]-1;
@@ -422,7 +414,7 @@ int SurfaceClass::findFcc()
                 double fccZ = mNthAtom[2] + m_DELTA_Z;
                 if (isFound(fccX, fccY, mSecondLayerZ))
                 {
-                    BindingSiteClass aSite("fcc", fccX, fccY, fccZ);
+                    BindingSite aSite(FCC, fccX, fccY, fccZ);
                     mBindingSites.push_back(aSite);
                 }
                 else
@@ -439,7 +431,7 @@ int SurfaceClass::findFcc()
         std::cout << "ERROR: The FCC binding site is not defined for this surface type" << std::endl;
         return (1220);
     }
-    if (mSurfaceType == "bcc111")
+    if (mSurfaceType == BCC111)
     {
         for (int j=0; j<1; ++j)
         {
@@ -456,7 +448,7 @@ int SurfaceClass::findFcc()
                     {
                         if (fccX >= -0.05 && fccY >= -0.05)
                         {
-                            BindingSiteClass aSite("fcc", fccX, fccY, fccZ);
+                            BindingSite aSite(FCC, fccX, fccY, fccZ);
                             mBindingSites.push_back(aSite);
                         }
                     }
@@ -467,7 +459,7 @@ int SurfaceClass::findFcc()
     return (0);
 } // findFcc
 
-int SurfaceClass::findAtop()
+int Surface::findAtop()
 {
     double m_DELTA_Z = 2.5;
     for (int i=0; i<mSlabSize[0]; ++i) // i is the X offset
@@ -475,22 +467,22 @@ int SurfaceClass::findAtop()
         for (int j=0; j<mSlabSize[1]; ++j) // j is the Y offset
         {
             double offX, offY, atopX, atopY, atopZ = 0.0;
-            if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
+            if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
             {
                 offX = i * mDeltaX;
                 offY = j * mDeltaX;
             }
-            else if (mSurfaceType == "fcc111" || mSurfaceType == "bcc111" || mSurfaceType == "hcp0001")
+            else if (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001)
             {
                 offX = (i * mDeltaX) + (j * mDeltaX/2);
                 offY = j * mDistance;
             }
-            else if (mSurfaceType == "fcc110")
+            else if (mSurfaceType == FCC110)
             {
                 offX = i * mDeltaX;
                 offY = j * mDistance;
             }
-            else if (mSurfaceType == "bcc110")
+            else if (mSurfaceType == BCC110)
             {
                 if (j == 0)
                 {   
@@ -513,7 +505,7 @@ int SurfaceClass::findAtop()
 
             if (atopX >= -0.05 && atopY >= -0.05)
             {
-                BindingSiteClass aSite("atop", atopX, atopY, atopZ);
+                BindingSite aSite(ATOP, atopX, atopY, atopZ);
                 mBindingSites.push_back(aSite);
             }
         } // inner for (j)
@@ -521,11 +513,11 @@ int SurfaceClass::findAtop()
     return (0);
 } // findAtop
 
-int SurfaceClass::findLongBridge()
+int Surface::findLongBridge()
 {
     double m_DELTA_Z = 2.0;
     double offX, offY, LbrgX, LbrgY, LbrgZ = 0.0;
-    if (mSurfaceType == "fcc110")
+    if (mSurfaceType == FCC110)
     {
         for (int i=0; i<mSlabSize[0]; ++i) // i is the X offset
         {
@@ -539,13 +531,13 @@ int SurfaceClass::findLongBridge()
                 LbrgZ = mNthAtom[2] + m_DELTA_Z;
                 if (LbrgX >= -0.05 && LbrgY >= -0.05)
                 {
-                    BindingSiteClass aSite("long-bridge", LbrgX, LbrgY, LbrgZ);
+                    BindingSite aSite(LONG_BRIDGE, LbrgX, LbrgY, LbrgZ);
                     mBindingSites.push_back(aSite);
                 }
             }
         }
     }
-    else if (mSurfaceType == "bcc110")
+    else if (mSurfaceType == BCC110)
     {
         double prevI_1 = 0.5;
         int prevI_2 = 1;
@@ -565,7 +557,7 @@ int SurfaceClass::findLongBridge()
                     LbrgZ = mNthAtom[2] + m_DELTA_Z;
                     if (LbrgX >= -0.05 && LbrgY >= -0.05)
                     {
-                        BindingSiteClass aSite("long-bridge", LbrgX, LbrgY, LbrgZ);
+                        BindingSite aSite(LONG_BRIDGE, LbrgX, LbrgY, LbrgZ);
                         mBindingSites.push_back(aSite);
                     }
                 }
@@ -584,7 +576,7 @@ int SurfaceClass::findLongBridge()
                     LbrgZ = mNthAtom[2] + m_DELTA_Z;
                     if (LbrgX >= -0.05 && LbrgY >= -0.05)
                     {
-                        BindingSiteClass aSite("long-bridge", LbrgX, LbrgY, LbrgZ);
+                        BindingSite aSite(LONG_BRIDGE, LbrgX, LbrgY, LbrgZ);
                         mBindingSites.push_back(aSite);
                     }
                 }
@@ -601,11 +593,11 @@ int SurfaceClass::findLongBridge()
     return (0);
 } // findLongBridge
 
-int SurfaceClass::findShortBridge()
+int Surface::findShortBridge()
 {
     double m_DELTA_Z = 2.0;
     double offX, offY, SbrgX, SbrgY, SbrgZ = 0.0;
-    if (mSurfaceType == "fcc110")
+    if (mSurfaceType == FCC110)
     {
         for (int i=0; i<mSlabSize[0]; ++i) // i is the X offset
         {
@@ -620,13 +612,13 @@ int SurfaceClass::findShortBridge()
 
                 if (SbrgX >= -0.05 || SbrgY > -0.05)
                 {
-                    BindingSiteClass aSite("short-bridge", SbrgX, SbrgY, SbrgZ);
+                    BindingSite aSite(SHORT_BRIDGE, SbrgX, SbrgY, SbrgZ);
                     mBindingSites.push_back(aSite);
                 }
             }
         }
     }
-    else if (mSurfaceType == "bcc110")
+    else if (mSurfaceType == BCC110)
     {
         double prevI = 0.25;
         double limit = mSlabSize[0]-1+0.25;
@@ -643,7 +635,7 @@ int SurfaceClass::findShortBridge()
 
                 if (SbrgX >= -0.05 || SbrgY > -0.05)
                 {
-                    BindingSiteClass aSite("short-bridge", SbrgX, SbrgY, SbrgZ);
+                    BindingSite aSite(SHORT_BRIDGE, SbrgX, SbrgY, SbrgZ);
                     mBindingSites.push_back(aSite);
                 }
             }
@@ -659,12 +651,12 @@ int SurfaceClass::findShortBridge()
     return (0);
 } // findShortBridge
 
-int SurfaceClass::findBridge()
+int Surface::findBridge()
 {
     double m_DELTA_Z = 2.0;
     double offX, offY, brgX, brgY = 0.0;
     double brgZ = mNthAtom[2] + m_DELTA_Z;
-    if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
+    if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
     {
         for (double i=0.0; i<=mSlabSize[0]; i=i+0.5) // i is the X offset
         {
@@ -678,14 +670,14 @@ int SurfaceClass::findBridge()
                     brgY = mNthAtom[1] - offY;
                     if (brgX >= -0.05 && brgY >= -0.05)
                     {
-                        BindingSiteClass aSite("bridge", brgX, brgY, brgZ);
+                        BindingSite aSite(BRIDGE, brgX, brgY, brgZ);
                         mBindingSites.push_back(aSite);
                     }
                 }
             }
         }
     }
-    else if (mSurfaceType == "fcc111" || mSurfaceType == "hcp0001")
+    else if (mSurfaceType == FCC111 || mSurfaceType == HCP0001)
     {
         double prevI_1 = 0.5;
         double prevI_2 = 0.5;
@@ -706,7 +698,7 @@ int SurfaceClass::findBridge()
                         brgY = mNthAtom[1] - offY;
                         if ((brgX >= -0.05 && brgY >= -0.05) && (brgX <= mNthAtom[0]-k/2*mDeltaX && brgY <= mNthAtom[1]))
                         {
-                            BindingSiteClass aSite("bridge", brgX, brgY, brgZ);
+                            BindingSite aSite(BRIDGE, brgX, brgY, brgZ);
                             mBindingSites.push_back(aSite);
                         }
                     }
@@ -722,7 +714,7 @@ int SurfaceClass::findBridge()
                         brgY = mNthAtom[1] - offY;
                         if ((brgX >= -0.05 && brgY >= -0.05) && (brgX <= mNthAtom[0]-(k+1)/2*mDeltaX && brgY <= mNthAtom[1]))
                         {
-                            BindingSiteClass aSite("bridge", brgX, brgY, brgZ);
+                            BindingSite aSite(BRIDGE, brgX, brgY, brgZ);
                             mBindingSites.push_back(aSite);
                         }
                     }
@@ -739,7 +731,7 @@ int SurfaceClass::findBridge()
                     brgY = mNthAtom[1] - offY;
                     if ((brgX >= -0.05 && brgY >= -0.05) && (brgX <= mNthAtom[0]-i*mDeltaX && brgY <= mNthAtom[1]))
                     {
-                        BindingSiteClass aSite("bridge", brgX, brgY, brgZ);
+                        BindingSite aSite(BRIDGE, brgX, brgY, brgZ);
                         mBindingSites.push_back(aSite);
                     }
                 }
@@ -755,13 +747,13 @@ int SurfaceClass::findBridge()
     return (0);
 } // findBridge
 
-std::vector<int> SurfaceClass::findNearbySites(const unsigned int atomIndex, const double radius, 
-                                   const std::string siteType)
+std::vector<int> Surface::findNearbySites(const unsigned int atomIndex, const double radius, 
+        const BINDING_SITE_TYPE siteType)
 {
     std::vector<int> swap1;
     mSelectedBSIndices.swap(swap1);
     /*
-    if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
+    if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
     {
             std::cout << "33333 Im here %%%%%%%%%%%%%%%\n";
         // TODO if (findHollow() != 0) {ERROR}
@@ -769,14 +761,14 @@ std::vector<int> SurfaceClass::findNearbySites(const unsigned int atomIndex, con
         findAtop();
         findBridge();
     }
-    else if (mSurfaceType == "fcc111" || mSurfaceType == "bcc111" || mSurfaceType == "hcp0001")
+    else if (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001)
     {
         findHcp();
         findFcc();
         findAtop();
         findBridge();
     }
-    else if (mSurfaceType == "fcc110" || mSurfaceType == "bcc110")
+    else if (mSurfaceType == FCC110 || mSurfaceType == BCC110)
     {
         findHollow();
         findAtop();
@@ -794,16 +786,16 @@ std::vector<int> SurfaceClass::findNearbySites(const unsigned int atomIndex, con
     for (int i=0; i<numOfSites; ++i)
     {
             //std::cout << "1111 Im here %%%%%%%%%%%%%%%\n";
-        if ( (mBindingSites[i].getType() == siteType || siteType == "all") && 
+        if ( (mBindingSites[i].getType() == siteType || siteType == ALL) && 
                 atomIndex <= (mCoordinates.size()+mBindingSites.size()) )
         {
             //std::cout << "Im here %%%%%%%%%%%%%%%\n";
             //double refX = mCoordinates[atomIndex-1][0];
             //double refY = mCoordinates[atomIndex-1][1];
-            double refX = mBindingSites[atomIndex - mCoordinates.size() - 1].getX();
-            double refY = mBindingSites[atomIndex - mCoordinates.size() - 1].getY();
-            double testX = mBindingSites[i].getX();
-            double testY = mBindingSites[i].getY();
+            double refX = mBindingSites[atomIndex - mCoordinates.size() - 1].coordinates().x();
+            double refY = mBindingSites[atomIndex - mCoordinates.size() - 1].coordinates().y();
+            double testX = mBindingSites[i].coordinates().x();
+            double testY = mBindingSites[i].coordinates().y();
             /*if ((testX <= refX+radius && testX >= refX-radius) &&
                 (testY <= refY+radius && testY >= refY-radius) &&
                !(testX <= refX+0.1 && testX >= refX-0.1 &&
@@ -825,23 +817,23 @@ std::vector<int> SurfaceClass::findNearbySites(const unsigned int atomIndex, con
     return (mSelectedBSIndices);
 }
 
-void SurfaceClass::findAllSites()
+void Surface::findAllSites()
 {
-    if (mSurfaceType == "fcc100" || mSurfaceType == "bcc100")
+    if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
     {
         // TODO if (findHollow() != 0) {ERROR}
         findHollow();
         findAtop();
         findBridge();
     }
-    else if (mSurfaceType == "fcc111" || mSurfaceType == "bcc111" || mSurfaceType == "hcp0001")
+    else if (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001)
     {
         findHcp();
         findFcc();
         findAtop();
         findBridge();
     }
-    else if (mSurfaceType == "fcc110" || mSurfaceType == "bcc110")
+    else if (mSurfaceType == FCC110 || mSurfaceType == BCC110)
     {
         findHollow();
         findAtop();
@@ -862,7 +854,7 @@ void SurfaceClass::findAllSites()
     */
 }
 
-bool SurfaceClass::writeToFile(std::string &outFile)
+bool Surface::writeToFile(std::string &outFile)
 {
     bool success = false;
     std::ofstream ofs;
@@ -886,19 +878,19 @@ bool SurfaceClass::writeToFile(std::string &outFile)
     for (unsigned int j=0; j<mSelectedBindingSites.size(); ++j)
     {
         ofs << "X             ";
-        ofs << mSelectedBindingSites[j].getX() << "            ";
-        ofs << mSelectedBindingSites[j].getY() << "            ";
-        ofs << mSelectedBindingSites[j].getZ() << "\n";
+        ofs << mSelectedBindingSites[j].coordinates().x() << "            ";
+        ofs << mSelectedBindingSites[j].coordinates().y() << "            ";
+        ofs << mSelectedBindingSites[j].coordinates().z() << "\n";
     }
     ofs.close();
     success = true;
     return (success);
 }
 
-void SurfaceClass::resetGeometry()
+void Surface::resetGeometry()
 {
 //    mSurfaceSymbols.clear();
-    std::vector<BindingSiteClass> swap1;
+    std::vector<BindingSite> swap1;
     mBindingSites.swap(swap1);
     mSelectedBindingSites.swap(swap1);
     std::vector<std::string> swap2;
@@ -907,4 +899,24 @@ void SurfaceClass::resetGeometry()
     std::vector< std::vector<double> > swap3;
     mCoordinates.swap(swap3);
     mAdsorbateCoord.swap(swap3);
+}
+
+const SLAB_TYPE stringToSlabType(std::string in)
+{
+    if (in == "fcc100")
+        return FCC100;
+    else if (in == "fcc110")
+        return FCC110;
+    else if (in == "fcc111")
+        return FCC111;
+    else if (in == "bcc100")
+        return BCC100;
+    else if (in == "bcc110")
+        return BCC110;
+    else if (in == "bcc111")
+        return BCC111;
+    else if (in == "hcp0001")
+        return HCP0001;
+    else
+        throw std::exception();
 }

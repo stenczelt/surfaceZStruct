@@ -2,8 +2,8 @@
 #include "align.h"
 #include "icoord.h"
 #include "utils.h"
-#include "BindingSiteClass.h"
-#include "SurfaceClass.h"
+#include "BindingSite.h"
+#include "Surface.h"
 #include <sstream>
 #include <vector>
 #include <cstring>
@@ -24,7 +24,7 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
                   int* reactiveIndex2, int &numOfAdd, int &numOfBreak, std::string &slabFileName);
 
 bool readSlabFileAndWrite(std::string &slabFileName);
-bool readSlabFile(std::string &slabFileName, SurfaceClass &aSurface);
+bool readSlabFile(std::string &slabFileName, Surface &aSurface);
 
 int main(int argc, char* argv[])
 {
@@ -56,13 +56,13 @@ int main(int argc, char* argv[])
         int addArray[4] = {};
         if (returnVal == 0)
         {
-            SurfaceClass aSurface;
+            Surface aSurface;
             readSlabFile(slabFileName, aSurface);
             aSurface.findAllSites();
 
           // returns all sites including the input index
             std::vector<int> allSites1 = 
-                aSurface.findNearbySites(slabIndices[0], radius[0], "all");
+                aSurface.findNearbySites(slabIndices[0], radius[0], ALL);
 
           std::cout << " slab index 0 " << slabIndices[0] << std::endl;
           std::cout << " slab index 1 " << slabIndices[1] << std::endl;
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
             if (numOfAdsorbates == 2)
             {
                 allSites2 = 
-                    aSurface.findNearbySites(slabIndices[1], radius[1], "all");
+                    aSurface.findNearbySites(slabIndices[1], radius[1], ALL);
                 adsorbate2.init(adsorbateFiles[1]);
                 adsorbates.push_back(adsorbate2);
                 addArray[2] = slabIndices[1] - 1;
@@ -265,7 +265,6 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
 
 bool readSlabFileAndWrite(std::string &slabFileName)
 {
-    bool success = false;
     std::vector<std::string> xyzFileSlab; // vector to store the input file
     std::ifstream inFile;
     inFile.open(slabFileName);
@@ -280,7 +279,17 @@ bool readSlabFileAndWrite(std::string &slabFileName)
     }   
 
     int numOfSlabAtoms = std::stoi(*(xyzFileSlab.begin()));
-    std::string surfaceType = xyzFileSlab[1];
+    //std::string surfaceType = xyzFileSlab[1];
+    SLAB_TYPE slabType ;
+    try
+    {
+        slabType = stringToSlabType(xyzFileSlab[1]);
+    }
+    catch(...)
+    {
+        return false;
+    }
+
     if (xyzFileSlab[1].empty())
     {   
         std::cout << "ERROR: Set surface type in the input file" << std::endl;
@@ -291,29 +300,26 @@ bool readSlabFileAndWrite(std::string &slabFileName)
     std::string* slabAtomicSymbols = new std::string[numOfSlabAtoms];
 
     populateArrayFromVector(xyzFileSlab, slabCartesianCoords, numOfSlabAtoms, slabAtomicSymbols);
-    SurfaceClass aSurface;
+    Surface aSurface;
     std::string outFName = "bindingSites.xyz";
-    if (aSurface.setSurfaceType(surfaceType))
+    aSurface.setSurfaceType(slabType);
+    
+    if (!aSurface.setAtoms(numOfSlabAtoms, slabCartesianCoords, slabAtomicSymbols))
     {   
-        if (!aSurface.setAtoms(numOfSlabAtoms, slabCartesianCoords, slabAtomicSymbols))
-        {   
-            std::cout << "ERROR: " << std::endl;
-            return (2);
-        }   
-        aSurface.findAllSites();
+        std::cout << "ERROR: " << std::endl;
+        return false;
+    }   
+    aSurface.findAllSites();
         aSurface.writeToFile(outFName);
-        success = true;
-    }
 
     delete [] slabCartesianCoords;
     delete [] slabAtomicSymbols;
 
-    return success;
+    return true;
 }
 
-bool readSlabFile(std::string &slabFileName, SurfaceClass &aSurface)
+bool readSlabFile(std::string &slabFileName, Surface &aSurface)
 {
-    bool success = false;
     std::vector<std::string> xyzFileSlab; // vector to store the input file
     std::ifstream inFile;
     inFile.open(slabFileName);
@@ -328,7 +334,18 @@ bool readSlabFile(std::string &slabFileName, SurfaceClass &aSurface)
     }   
 
     int numOfSlabAtoms = std::stoi(*(xyzFileSlab.begin()));
-    std::string surfaceType = xyzFileSlab[1];
+    //std::string surfaceType = xyzFileSlab[1];
+    SLAB_TYPE slabType; 
+    try
+    {
+        slabType = stringToSlabType (xyzFileSlab[1]);
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+
     if (xyzFileSlab[1].empty())
     {   
         std::cout << "ERROR: Set surface type in the input file" << std::endl;
@@ -339,21 +356,19 @@ bool readSlabFile(std::string &slabFileName, SurfaceClass &aSurface)
     std::string* slabAtomicSymbols = new std::string[numOfSlabAtoms];
 
     populateArrayFromVector(xyzFileSlab, slabCartesianCoords, numOfSlabAtoms, slabAtomicSymbols);
-    if (aSurface.setSurfaceType(surfaceType))
+    aSurface.setSurfaceType(slabType);
+
+    if (!aSurface.setAtoms(numOfSlabAtoms, slabCartesianCoords, slabAtomicSymbols))
     {   
-        if (!aSurface.setAtoms(numOfSlabAtoms, slabCartesianCoords, slabAtomicSymbols))
-        {   
-            std::cout << "ERROR: " << std::endl;
-            return (2);
-        }   
-        //aSurface.findAllSites();
-        success = true;
-    }
+        std::cout << "ERROR: " << std::endl;
+        return false;
+    }   
+    //aSurface.findAllSites();
 
     delete [] slabCartesianCoords;
     delete [] slabAtomicSymbols;
 
-    return success;
+    return true;
 }
 
 

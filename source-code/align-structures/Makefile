@@ -37,7 +37,7 @@ LINKERFLAGS =  -Wl,--no-as-needed -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmk
 .cpp.o:
 	$(FC) -c -g $(DFLAGS) $<
 
-OBJECTS = main.o icoord.o pTable.o stringtools.o utils.o  mm_grad.o align.o  SurfaceClass.o BindingSiteClass.o
+OBJECTS = main.o icoord.o pTable.o stringtools.o utils.o  mm_grad.o align.o  Surface.o BindingSite.o Atom.o Molecule.o Coordinates.o
 
 $(CMD) : $(OBJECTS)
 	$(FC) $(DEBUG_FLAGS) $(OFLAGS) $(LINKERFLAGS) $(OBJECTS)  -o ./$(CMD)
@@ -67,5 +67,8 @@ mm_grad.o: mm_grad.cpp icoord.h
 pTable.o: pTable.cpp pTable.h
 stringtools.o: stringtools.cpp stringtools.h
 utils.o: utils.cpp utils.h
-SurfaceClass.o: SurfaceClass.cpp SurfaceClass.h 
-BindingSiteClass.o: BindingSiteClass.cpp BindingSiteClass.h
+Surface.o: Surface.cpp Surface.h 
+BindingSite.o: BindingSite.cpp BindingSite.h
+Atom.o: Atom.cpp Atom.h
+Molecule.o: Molecule.cpp Molecule.h
+Coordinates.o: Coordinates.cpp Coordinates.h
