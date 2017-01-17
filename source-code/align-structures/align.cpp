@@ -6,10 +6,9 @@
 #include <assert.h>
 #include <math.h>
 #include <algorithm>
-#include <eigen3/Eigen/Dense>
-#include <eigen3/Eigen/LU>
+#include <sys/types.h>
+#include <dirent.h>
 #include "align.h"
-#include <fenv.h> // for NaN debugging
 
 using namespace std;
 //TODO: implement point_out function for planes
@@ -741,7 +740,23 @@ void Align::add_align(int nadd1, int* add1) //, std::vector<BindingSiteClass> al
 
     // writing aligned structures to output files
     unifyStructures();
-    std::string outFileName = "output-" + std::to_string(add1[0]) + "-" + std::to_string(add1[2]) + "-0.xyz";
+    //boost::filesystem::path dir("./aligned-structures");
+    //boost::filesystem::create_directory(dir);
+    // check if directory exists
+    DIR* dir = opendir("./aligned-structures");
+    if (dir)
+    {
+            // directory exists
+            closedir(dir);
+    }
+    else if (ENOENT == errno)
+    {
+        std::cout << "*** ERROR: Directory 'aligned-string' does not exist and should "
+            << "be created by the user." << std::endl;
+        exit(-1);
+    }
+
+    std::string outFileName = "./aligned-structures/output-" + std::to_string(add1[0]) + "-" + std::to_string(add1[2]) + "-0-0.xyz";
     writeToFile(outFileName);
     for (int i=0;i<3*mAdsorbates[0].natoms;i++) 
         xyz2AtZeroDegree[i] = mAdsorbates[0].coords[i];
@@ -802,7 +817,7 @@ void Align::add_align(int nadd1, int* add1) //, std::vector<BindingSiteClass> al
                 mCoordinatesCombined[l] = icp.coords[l];
             }
             // TODO: make a function ^^^^^
-            std::string outFileName = "output-" + std::to_string(add1[0]) + "-" + 
+            std::string outFileName = "./aligned-structures/output-" + std::to_string(add1[0]) + "-" + 
                 std::to_string(add1[2]) + "-" + std::to_string(mAdsorbateNum) + "-" + 
                 std::to_string((int)angleSet[j]) + ".xyz";
 

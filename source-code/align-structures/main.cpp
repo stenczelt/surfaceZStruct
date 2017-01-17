@@ -54,7 +54,15 @@ int main(int argc, char* argv[])
                      adsorbateIndices, reactiveIndex1, reactiveIndex2,
                      numOfAdd, numOfBreak, slabFileName);
         int addArray[4] = {};
-        if (returnVal == 0)
+        if (returnVal == 1)
+        {
+            readSlabFileAndWrite(slabFileName);
+            std::cout << "\n****************************************************************\n";
+            std::cout << "  Output written to bindingSites.xyz and slabBindingSites.xyz" << std::endl;;
+            std::cout << "\n****************************************************************\n";
+            return 0;
+        }
+        else if (returnVal == 0)
         {
             Surface aSurface;
             readSlabFile(slabFileName, aSurface);
@@ -77,7 +85,7 @@ int main(int argc, char* argv[])
             ICoord slab, adsorbate1, adsorbate2;
             std::vector<ICoord> adsorbates;
 
-            slab.init("bindingSites.xyz");
+            slab.init("slabBindingSites.xyz");
             adsorbate1.init(adsorbateFiles[0]);
             adsorbates.push_back(adsorbate1);
             // list of adsorbate and slab indices
@@ -183,10 +191,10 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
     {
         // stage 1: find binding sites
         std::cout << "** Finding binding sites" << std::endl;
+        ss.clear();
         ss.str(*(inputFile.begin()+1));
-        std::string name = "";
         ss >> unwanted >> slabFileName >> unwanted;
-        readSlabFileAndWrite(slabFileName);
+        //readSlabFileAndWrite(slabFileName);
         return 1;
     }
     else if (std::stoi(findSites) == 0)
@@ -252,11 +260,11 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
         ss >> unwanted >> temp[0] >> unwanted;
         numOfBreak = std::stoi(temp[0]);
 
-        std::cout << slabFileName << "--" << numOfAdsorbates << "   " << slabIndices[0] << "    " << slabIndices[1] 
+        /*std::cout << slabFileName << "--" << numOfAdsorbates << "   " << slabIndices[0] << "    " << slabIndices[1] 
             << "    " << radius[0] << "     " << radius[1] << "     " << adsorbateFiles[0]
             << "    " << adsorbateFiles[1] << " " << adsorbateIndices[0] << "   " <<
             adsorbateIndices[1] << "    " << numOfAdd
-            << "    " << numOfBreak << "   " << reactiveIndex1[0] << "     " << reactiveIndex2[0] << std::endl;
+            << "    " << numOfBreak << "   " << reactiveIndex1[0] << "     " << reactiveIndex2[0] << std::endl;*/
         return 0;
     }
 
@@ -301,7 +309,8 @@ bool readSlabFileAndWrite(std::string &slabFileName)
 
     populateArrayFromVector(xyzFileSlab, slabCartesianCoords, numOfSlabAtoms, slabAtomicSymbols);
     Surface aSurface;
-    std::string outFName = "bindingSites.xyz";
+    std::string outFName = "slabBindingSites.xyz";
+    std::string outFName2 = "bindingSites.xyz";
     aSurface.setSurfaceType(slabType);
     
     if (!aSurface.setAtoms(numOfSlabAtoms, slabCartesianCoords, slabAtomicSymbols))
@@ -310,7 +319,8 @@ bool readSlabFileAndWrite(std::string &slabFileName)
         return false;
     }   
     aSurface.findAllSites();
-        aSurface.writeToFile(outFName);
+    aSurface.writeToFile(outFName);
+    aSurface.writeBSToFile(outFName2);
 
     delete [] slabCartesianCoords;
     delete [] slabAtomicSymbols;

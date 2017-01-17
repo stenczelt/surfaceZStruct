@@ -2,13 +2,13 @@
 
 Atom::Atom(
         std::string name, 
-        unsigned int atomicNumber,
+        //unsigned int atomicNumber,
         double x,
         double y,
         double z)
 :
     mName(name),
-    mAtomicNumber(atomicNumber),
+    //mAtomicNumber(atomicNumber),
     mCoordinates(x, y, z)
 {
 }

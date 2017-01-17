@@ -49,18 +49,19 @@ class Surface
         std::vector<BindingSite> mBindingSites; 
         // a vector to store only the sites within a range and atom
         // a vector to store atomic sybmols
+        /*
         std::vector<std::string> mSurfaceSymbols;
         std::vector<std::string> mAdsorbateSymbols;
+        */
 
-        /*
-        // Vector of slab atoms (Cus for instance)
+        // Vector of slab atoms (Cu's for instance)
         std::vector<Atom> mSlabAtoms;
         // Vector of adsorbates (NH3 for instance), set to 2 for now
         std::vector<Molecule> mAdsorbates;
-        */
+        
 
         // a 2D vector to store atomic coordinates
-        std::vector< std::vector<double> > mCoordinates;
+        //std::vector< std::vector<double> > mCoordinates;
         std::vector< std::vector<double> > mAdsorbateCoord;
         // some parameters
         double mDeltaX = 0.0;
@@ -106,6 +107,7 @@ class Surface
                 const BINDING_SITE_TYPE siteType);
         void findAllSites();
         bool writeToFile(std::string &outFile);
+        bool writeBSToFile(std::string &outFile);
 };
 
 const SLAB_TYPE stringToSlabType(std::string in);

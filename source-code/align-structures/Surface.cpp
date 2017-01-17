@@ -54,46 +54,43 @@ bool Surface::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicS
 {
     resetGeometry();
     bool isSet = true;
-    int k = 0;
-    int numOfSurfAtoms = 0;
-    int numOfAdsorbateAtoms = 0;
     std::string surfaceAtom = atomicSymbols[0];
     for (int i=0; i<numOfAtoms; ++i)
     {
-        if (atomicSymbols[k] == surfaceAtom) //TODO: you have duplicated code here. Fix it
+        if (atomicSymbols[i] == surfaceAtom)
         {
-            std::vector<double> temp;
-            temp.push_back(coordinates[3*k]); //TODO: replace k with i
-            temp.push_back(coordinates[3*k+1]);
-            temp.push_back(coordinates[3*k+2]);
-            mCoordinates.push_back(temp);
-            mSurfaceSymbols.push_back(atomicSymbols[k]);
-            ++numOfSurfAtoms;
+            Atom anAtom(atomicSymbols[i], coordinates[3*i], coordinates[3*i+1], coordinates[3*i+2]);
+            mSlabAtoms.push_back(anAtom);
         }
         else
         {
-            std::vector<double> temp;
+            std::cout << "ERROR: Reading surfaces with adsorbates not implemented" << std::endl;
+            //Atom anAtom(atomicSymbols[i], coordinates[3*i], coordinates[3*i+1], coordinates[3*i+2]);
+            //create Molecule
+            //mAdsorbates.push_back(anAtom); //push back molecules
+            /*std::vector<double> temp;
             temp.push_back(coordinates[3*k]);
             temp.push_back(coordinates[3*k+1]);
             temp.push_back(coordinates[3*k+2]);
             mAdsorbateCoord.push_back(temp);
             mAdsorbateSymbols.push_back(atomicSymbols[k]);
-            ++numOfAdsorbateAtoms;
+            ++numOfAdsorbateAtoms;*/
+            isSet = false;
         }
-        ++k;
     }
-    mNumOfSurfAtoms = numOfSurfAtoms;
-    mNumOfAdsorbateAtoms = numOfAdsorbateAtoms;
+    mNumOfSurfAtoms = mSlabAtoms.size();
+    //mNumOfAdsorbateAtoms = numOfAdsorbateAtoms;
+    mNumOfAdsorbateAtoms = 0;
 
     if (setSlabSize())
     {
         // setting mNthAtom & mNumOfSurfAtoms
-        mNthAtom[0] = mCoordinates[mNumOfSurfAtoms-1][0];
-        mNthAtom[1] = mCoordinates[mNumOfSurfAtoms-1][1];
-        mNthAtom[2] = mCoordinates[mNumOfSurfAtoms-1][2];
-        mNthMinusOneAtom[0] = mCoordinates[mNumOfSurfAtoms-2][0];
-        mNthMinusOneAtom[1] = mCoordinates[mNumOfSurfAtoms-2][1];
-        mNthMinusOneAtom[2] = mCoordinates[mNumOfSurfAtoms-2][2];
+        mNthAtom[0] = mSlabAtoms[mNumOfSurfAtoms-1].coordinates().x();
+        mNthAtom[1] = mSlabAtoms[mNumOfSurfAtoms-1].coordinates().y();
+        mNthAtom[2] = mSlabAtoms[mNumOfSurfAtoms-1].coordinates().z();
+        mNthMinusOneAtom[0] = mSlabAtoms[mNumOfSurfAtoms-2].coordinates().x();
+        mNthMinusOneAtom[1] = mSlabAtoms[mNumOfSurfAtoms-2].coordinates().y();
+        mNthMinusOneAtom[2] = mSlabAtoms[mNumOfSurfAtoms-2].coordinates().z();
         mDeltaX = mNthAtom[0] - mNthMinusOneAtom[0];
         mDeltaY = mNthAtom[1] - mNthMinusOneAtom[1];
         if (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001)
@@ -151,19 +148,19 @@ bool Surface::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicS
         }   
 
         const double tolerance = 0.20;
-        for (int j=(mCoordinates.size()-1); j>-1; j--)
+        for (int j=(mSlabAtoms.size()-1); j>-1; j--)
         {
-            if (mCoordinates[j][2] < (mNthAtom[2]-tolerance))
+            if (mSlabAtoms[j].coordinates().z() < (mNthAtom[2]-tolerance))
             {   
-                mSecondLayerZ = mCoordinates[j][2];
+                mSecondLayerZ = mSlabAtoms[j].coordinates().z();
                 break;
             }   
         } 
-        for (int j=(mCoordinates.size()-1); j>-1; j--)
+        for (int j=(mSlabAtoms.size()-1); j>-1; j--)
         {   
-            if (mCoordinates[j][2] < (mSecondLayerZ-tolerance))
+            if (mSlabAtoms[j].coordinates().z() < (mSecondLayerZ-tolerance))
             {   
-                mThirdLayerZ = mCoordinates[j][2];
+                mThirdLayerZ = mSlabAtoms[j].coordinates().z();
                 break;
             }   
         }
@@ -183,17 +180,17 @@ bool Surface::setSlabSize()
     int length = 0;
     int height = 0;
     int layer = 0;
-    for (unsigned int i=0; i<mCoordinates.size()-1; ++i)
+    for (unsigned int i=0; i<mSlabAtoms.size()-1; ++i)
     {
-        if (mCoordinates[i][1] <= mCoordinates[0][1]+tolerance &&
-            mCoordinates[i][1] >= mCoordinates[0][1]-tolerance &&
-            mCoordinates[i][2] <= mCoordinates[0][2]+tolerance &&
-            mCoordinates[i][2] >= mCoordinates[0][2]-tolerance)
+        if (mSlabAtoms[i].coordinates().y() <= mSlabAtoms[0].coordinates().y()+tolerance &&
+            mSlabAtoms[i].coordinates().y() >= mSlabAtoms[0].coordinates().y()-tolerance &&
+            mSlabAtoms[i].coordinates().z() <= mSlabAtoms[0].coordinates().z()+tolerance &&
+            mSlabAtoms[i].coordinates().z() >= mSlabAtoms[0].coordinates().z()-tolerance)
         {
             ++width;
         }
-        if (mCoordinates[i][2] <= mCoordinates[0][2]+tolerance &&
-            mCoordinates[i][2] >= mCoordinates[0][2]-tolerance)
+        if (mSlabAtoms[i].coordinates().z() <= mSlabAtoms[0].coordinates().z()+tolerance &&
+            mSlabAtoms[i].coordinates().z() >= mSlabAtoms[0].coordinates().z()-tolerance)
         {
             ++layer;
         }
@@ -215,11 +212,11 @@ bool Surface::setSlabSize()
 bool Surface::isFound(const double &inX, const double &inY, const double &inZ)
 {
     const double tolerance = 0.15;
-    for (unsigned int i=0; i<mCoordinates.size(); ++i)
+    for (unsigned int i=0; i<mSlabAtoms.size(); ++i)
     {
-        if (  ((mCoordinates[i][0] <= (inX + tolerance)) && (mCoordinates[i][0] >= (inX - tolerance)) ) &&
-              ((mCoordinates[i][1] <= (inY + tolerance)) && (mCoordinates[i][1] >= (inY - tolerance)) ) &&   
-              ((mCoordinates[i][2] <= (inZ + tolerance)) && (mCoordinates[i][2] >= (inZ - tolerance)) )  )   
+        if (  ((mSlabAtoms[i].coordinates().x() <= (inX + tolerance)) && (mSlabAtoms[i].coordinates().x() >= (inX - tolerance)) ) &&
+              ((mSlabAtoms[i].coordinates().y() <= (inY + tolerance)) && (mSlabAtoms[i].coordinates().y() >= (inY - tolerance)) ) &&   
+              ((mSlabAtoms[i].coordinates().z() <= (inZ + tolerance)) && (mSlabAtoms[i].coordinates().z() >= (inZ - tolerance)) )  )   
         {   
             return (true);
         }   
@@ -786,13 +783,13 @@ std::vector<int> Surface::findNearbySites(const unsigned int atomIndex, const do
     {
             //std::cout << "1111 Im here %%%%%%%%%%%%%%%\n";
         if ( (mBindingSites[i].getType() == siteType || siteType == ALL) && 
-                atomIndex <= (mCoordinates.size()+mBindingSites.size()) )
+                atomIndex <= (mSlabAtoms.size()+mBindingSites.size()) )
         {
             //std::cout << "Im here %%%%%%%%%%%%%%%\n";
             //double refX = mCoordinates[atomIndex-1][0];
             //double refY = mCoordinates[atomIndex-1][1];
-            double refX = mBindingSites[atomIndex - mCoordinates.size() - 1].coordinates().x();
-            double refY = mBindingSites[atomIndex - mCoordinates.size() - 1].coordinates().y();
+            double refX = mBindingSites[atomIndex - mSlabAtoms.size() - 1].coordinates().x();
+            double refY = mBindingSites[atomIndex - mSlabAtoms.size() - 1].coordinates().y();
             double testX = mBindingSites[i].coordinates().x();
             double testY = mBindingSites[i].coordinates().y();
             /*if ((testX <= refX+radius && testX >= refX-radius) &&
@@ -862,17 +859,18 @@ bool Surface::writeToFile(std::string &outFile)
     ofs << std::to_string(mNumOfSurfAtoms+mNumOfAdsorbateAtoms+mBindingSites.size()) << "\n";
     ofs << "\n";
     ofs << std::fixed << std::setprecision(15);
-    for (unsigned int i=0; i<mCoordinates.size(); ++i)
+    for (unsigned int i=0; i<mSlabAtoms.size(); ++i)
     {   
-        ofs << mSurfaceSymbols[i] << "            " << mCoordinates[i][0]
-            << "            " << mCoordinates[i][1]
-            << "            " << mCoordinates[i][2] << "\n";
+        ofs << mSlabAtoms[i].name() << "            ";
+        ofs << mSlabAtoms[i].coordinates().x() << "            ";
+        ofs << mSlabAtoms[i].coordinates().y() << "            ";
+        ofs << mSlabAtoms[i].coordinates().z() << "\n";
     }
     for (unsigned int k=0; k<mAdsorbateCoord.size(); ++k)
     {
-        ofs << mAdsorbateSymbols[k] << "            " << mAdsorbateCoord[k][0]
+        /*ofs << mAdsorbateSymbols[k] << "            " << mAdsorbateCoord[k][0]
             << "            " << mAdsorbateCoord[k][1]
-            << "            " << mAdsorbateCoord[k][2] << "\n";
+            << "            " << mAdsorbateCoord[k][2] << "\n";*/ //TODO
     }
     for (unsigned int j=0; j<mBindingSites.size(); ++j)
     {
@@ -886,18 +884,42 @@ bool Surface::writeToFile(std::string &outFile)
     return (success);
 }
 
+bool Surface::writeBSToFile(std::string &outFile)
+{
+    bool success = false;
+    std::ofstream ofs;
+    ofs.open(outFile.c_str());
+
+    ofs << std::to_string(mBindingSites.size()) << "\n";
+    ofs << "\n";
+    ofs << std::fixed << std::setprecision(15);
+    for (unsigned int j=0; j<mBindingSites.size(); ++j)
+    {
+        ofs << "X             ";
+        ofs << mBindingSites[j].coordinates().x() << "            ";
+        ofs << mBindingSites[j].coordinates().y() << "            ";
+        ofs << mBindingSites[j].coordinates().z() << "\n";
+    }
+    ofs.close();
+    success = true;
+    return (success);
+}
+
+
+
+
 void Surface::resetGeometry()
 {
 //    mSurfaceSymbols.clear();
     std::vector<BindingSite> swap1;
     mBindingSites.swap(swap1);
     //mSelectedBindingSites.swap(swap1);
-    std::vector<std::string> swap2;
+    /*std::vector<std::string> swap2;
     mSurfaceSymbols.swap(swap2);
     mAdsorbateSymbols.swap(swap2);
     std::vector< std::vector<double> > swap3;
     mCoordinates.swap(swap3);
-    mAdsorbateCoord.swap(swap3);
+    mAdsorbateCoord.swap(swap3);*/
 }
 
 const SLAB_TYPE stringToSlabType(std::string in)
