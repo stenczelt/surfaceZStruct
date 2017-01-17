@@ -751,7 +751,7 @@ void Align::add_align(int nadd1, int* add1) //, std::vector<BindingSiteClass> al
     }
     else if (ENOENT == errno)
     {
-        std::cout << "*** ERROR: Directory 'aligned-string' does not exist and should "
+        std::cout << "*** ERROR: Directory 'aligned-structures' does not exist and should "
             << "be created by the user." << std::endl;
         exit(-1);
     }
@@ -817,9 +817,14 @@ void Align::add_align(int nadd1, int* add1) //, std::vector<BindingSiteClass> al
                 mCoordinatesCombined[l] = icp.coords[l];
             }
             // TODO: make a function ^^^^^
+            std::string angle1 = "0";
+            std::string angle2 = "0";
+            if (mAdsorbateNum == 0)
+                angle1 = std::to_string((int)angleSet[j]);
+            else if (mAdsorbateNum == 1)
+                angle2 = std::to_string((int)angleSet[j]);
             std::string outFileName = "./aligned-structures/output-" + std::to_string(add1[0]) + "-" + 
-                std::to_string(add1[2]) + "-" + std::to_string(mAdsorbateNum) + "-" + 
-                std::to_string((int)angleSet[j]) + ".xyz";
+                std::to_string(add1[2]) + "-" + angle1 + "-" + angle2 + ".xyz";
 
             std::cout << "+++++++++++++++++++++++++++++ IN ADD_ALIGN\n";
             std::cout << "+++++++++++++++++++++++++++++ " << outFileName << std::endl;
