@@ -14,19 +14,19 @@ os.environ['OMP_NUM_THREADS'] = '1'
 import shutil
 from os import listdir
 from os.path import isfile, join
+from string import Template
+from subprocess import call
 
 '''
 ASE modules
 '''
-from ase.lattice.surface import surface
 from ase import Atoms,Atom
 from ase.calculators.emt import EMT
 from ase.calculators.vasp import Vasp
 from ase.constraints import FixAtoms
-from ase.io import write
-from ase.io import read
-from ase.lattice.surface import add_adsorbate, fcc100, fcc110, fcc111, hcp0001,\
-        bcc100, bcc110, bcc111
+from ase.io import write, read
+from ase.lattice.surface import surface, add_adsorbate, fcc100, fcc110, fcc111,\
+        hcp0001, bcc100, bcc110, bcc111
 
 '''
 functions and main()
@@ -78,16 +78,41 @@ def main():
                 fh.write(lines[i])
         fh.close()
 
-    '''
-    generate all the necessary input files for ASE/VASP optimization. Enable
-    EMT calculator too.
-    '''
-        
-        #read file using ASE
-        #fileName = "aligned-structures/noBS/" + element
-        #slab = read(fileName, format='xyz')
-        #set up ASE objects
-        #submit optimizations in new folders in parallel
+        '''
+        generate all the necessary input files for ASE/VASP optimization (.xyz file,
+        run.py, and submit.qsh). These files are generated using templates.
+        http://stackoverflow.com/questions/6385686/python-technique-or-simple-templating-system-for-plain-text-output
+        '''
+        # setting up run.py files
+        fh = open("run.py")
+        templateFile = Template(fh.read())
+        input = element.split(".")[0] + "-in.xyz"
+        outputName = element
+        myDictionary={'input':input, 'outputName':outputName}
+        #do the substitution
+        result = templateFile.substitute(myDictionary)
+        pyFile = newFolder + "/run.py"
+        fh = open(pyFile,"w")
+        fh.write(result)
+        fh.close()
+
+        # setting up submit.qsh files
+        fh = open("submit.qsh")
+        templateFile2 = Template(fh.read())
+        # user can replace this with a meaningful name
+        jobName = "test"
+        fileNumber = (element.split(".")[0]).replace("output-", "")
+        myDictionary2={'jobName':jobName, 'fileNumber':fileNumber}
+        result2 = templateFile2.substitute(myDictionary2)
+        PBSfile = newFolder + "/submit.qsh"
+        fh = open(PBSfile,"w")
+        fh.write(result2)
+        fh.close()
+
+        #submit optimizations
+        os.chdir(newFolder)
+        call(["qsub", "submit.qsh"])
+        os.chdir(cwd)
 
 if __name__ == "__main__":
     main()
