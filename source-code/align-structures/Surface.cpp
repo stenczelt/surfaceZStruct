@@ -750,8 +750,7 @@ int Surface::findBridge()
 std::vector<int> Surface::findNearbySites(const unsigned int atomIndex, const double radius, 
         const BINDING_SITE_TYPE siteType)
 {
-    std::vector<int> swap1;
-    mSelectedBSIndices.swap(swap1);
+    std::vector<int> tempSelectedBSIndices;
     /*
     if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
     {
@@ -804,8 +803,8 @@ std::vector<int> Surface::findNearbySites(const unsigned int atomIndex, const do
             if ( sqrt( pow(refX-testX, 2) + pow(refY-testY, 2) ) < radius )
             {
                 // the site is in the range
-                mSelectedBindingSites.push_back(mBindingSites[i]);
-                mSelectedBSIndices.push_back(i); // save index of binding sites
+                //mSelectedBindingSites.push_back(mBindingSites[i]);
+                tempSelectedBSIndices.push_back(i); // save index of binding sites
                 //std::cout << "This site IS within the specified radius/type" << std::endl;
             }
             else
@@ -814,7 +813,7 @@ std::vector<int> Surface::findNearbySites(const unsigned int atomIndex, const do
             }
         }
     }
-    return (mSelectedBSIndices);
+    return (tempSelectedBSIndices);
 }
 
 void Surface::findAllSites()
@@ -860,7 +859,7 @@ bool Surface::writeToFile(std::string &outFile)
     std::ofstream ofs;
     ofs.open(outFile.c_str());
 
-    ofs << std::to_string(mNumOfSurfAtoms+mNumOfAdsorbateAtoms+mSelectedBindingSites.size()) << "\n";
+    ofs << std::to_string(mNumOfSurfAtoms+mNumOfAdsorbateAtoms+mBindingSites.size()) << "\n";
     ofs << "\n";
     ofs << std::fixed << std::setprecision(15);
     for (unsigned int i=0; i<mCoordinates.size(); ++i)
@@ -875,12 +874,12 @@ bool Surface::writeToFile(std::string &outFile)
             << "            " << mAdsorbateCoord[k][1]
             << "            " << mAdsorbateCoord[k][2] << "\n";
     }
-    for (unsigned int j=0; j<mSelectedBindingSites.size(); ++j)
+    for (unsigned int j=0; j<mBindingSites.size(); ++j)
     {
         ofs << "X             ";
-        ofs << mSelectedBindingSites[j].coordinates().x() << "            ";
-        ofs << mSelectedBindingSites[j].coordinates().y() << "            ";
-        ofs << mSelectedBindingSites[j].coordinates().z() << "\n";
+        ofs << mBindingSites[j].coordinates().x() << "            ";
+        ofs << mBindingSites[j].coordinates().y() << "            ";
+        ofs << mBindingSites[j].coordinates().z() << "\n";
     }
     ofs.close();
     success = true;
@@ -892,7 +891,7 @@ void Surface::resetGeometry()
 //    mSurfaceSymbols.clear();
     std::vector<BindingSite> swap1;
     mBindingSites.swap(swap1);
-    mSelectedBindingSites.swap(swap1);
+    //mSelectedBindingSites.swap(swap1);
     std::vector<std::string> swap2;
     mSurfaceSymbols.swap(swap2);
     mAdsorbateSymbols.swap(swap2);

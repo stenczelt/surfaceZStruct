@@ -13,6 +13,11 @@
 //  ---(N-1)*----(N)*
 //       |        |
 
+// A Surface object has 3 main attributes:
+//   - Atoms
+//   - Adsorbates (max 2 for now) 
+//   - Binding Sites
+
 #ifndef _SURFACECLASS_H_
 #define _SURFACECLASS_H_
 #include "BindingSite.h"
@@ -43,7 +48,6 @@ class Surface
         // a vector to store all the binding sites of the surface
         std::vector<BindingSite> mBindingSites; 
         // a vector to store only the sites within a range and atom
-        std::vector<BindingSite> mSelectedBindingSites; //XXX
         // a vector to store atomic sybmols
         std::vector<std::string> mSurfaceSymbols;
         std::vector<std::string> mAdsorbateSymbols;
@@ -74,7 +78,7 @@ class Surface
 
     public:
         // vector to store indices within a given radius. BS: binding site
-        std::vector<int> mSelectedBSIndices;
+        //std::vector<int> mSelectedBSIndices;
         // getter functions
         SLAB_TYPE getSurfaceType() const;
         int getNumOfAtoms() const;
