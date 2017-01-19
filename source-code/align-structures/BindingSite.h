@@ -34,7 +34,8 @@ class BindingSite
 
     public:
         // Ctors
-        BindingSite(BINDING_SITE_TYPE inType, double inX, double inY, double ins);
+        //BindingSite();
+        BindingSite(BINDING_SITE_TYPE inType, double inX, double inY, double inZ);
         // getter functions
         BINDING_SITE_TYPE getType() const;
         inline const Coordinates& coordinates() const { return mCoordinates; }

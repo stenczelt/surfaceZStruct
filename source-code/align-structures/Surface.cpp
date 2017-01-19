@@ -7,6 +7,28 @@
 #include <fstream>
 #include <iomanip>
 
+Surface::Surface()
+{
+}
+
+Surface::Surface(std::vector<Atom> slabAtoms, std::vector<Atom> bindingSites,
+        std::vector<Molecule> adsorbateList)
+{
+    //TODO
+    //This is a hack, Fix it
+    mSlabAtoms = slabAtoms;
+    mBindingSitesTemp = bindingSites;
+    mAdsorbates = adsorbateList;
+}
+
+/*Surface::Surface(std::vector<Atom> slabAtoms, std::vector<BindingSite> bindingSites,
+        std::vector<Molecule> adsorbateList)
+{
+    mSlabAtoms = slabAtoms;
+    mBindingSites = bindingSites;
+    mAdsorbates = adsorbateList;
+}*/
+
 SLAB_TYPE Surface::getSurfaceType() const
 {
     return (mSurfaceType);
@@ -65,6 +87,8 @@ bool Surface::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicS
         else
         {
             std::cout << "ERROR: Reading surfaces with adsorbates not implemented" << std::endl;
+            // TODO if slab is not clean and already has adsorbates attached to it, it should be taken
+            // care of at this part of the code. We need that information only for finding empty binding sites.
             //Atom anAtom(atomicSymbols[i], coordinates[3*i], coordinates[3*i+1], coordinates[3*i+2]);
             //create Molecule
             //mAdsorbates.push_back(anAtom); //push back molecules
@@ -866,12 +890,13 @@ bool Surface::writeToFile(std::string &outFile)
         ofs << mSlabAtoms[i].coordinates().y() << "            ";
         ofs << mSlabAtoms[i].coordinates().z() << "\n";
     }
-    for (unsigned int k=0; k<mAdsorbateCoord.size(); ++k)
+    //TODO this part needs to be written
+    /*for (unsigned int k=0; k<mAdsorbateCoord.size(); ++k)
     {
-        /*ofs << mAdsorbateSymbols[k] << "            " << mAdsorbateCoord[k][0]
+        ofs << mAdsorbateSymbols[k] << "            " << mAdsorbateCoord[k][0]
             << "            " << mAdsorbateCoord[k][1]
-            << "            " << mAdsorbateCoord[k][2] << "\n";*/ //TODO
-    }
+            << "            " << mAdsorbateCoord[k][2] << "\n";
+    }*/
     for (unsigned int j=0; j<mBindingSites.size(); ++j)
     {
         ofs << "X             ";

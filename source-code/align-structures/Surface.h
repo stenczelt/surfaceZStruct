@@ -47,6 +47,7 @@ class Surface
         int mSlabSize[3] = {0, 0, 0}; // x * y * z
         // a vector to store all the binding sites of the surface
         std::vector<BindingSite> mBindingSites; 
+        std::vector<Atom> mBindingSitesTemp;
         // a vector to store only the sites within a range and atom
         // a vector to store atomic sybmols
         /*
@@ -62,7 +63,7 @@ class Surface
 
         // a 2D vector to store atomic coordinates
         //std::vector< std::vector<double> > mCoordinates;
-        std::vector< std::vector<double> > mAdsorbateCoord;
+        //std::vector< std::vector<double> > mAdsorbateCoord;
         // some parameters
         double mDeltaX = 0.0;
         double mDeltaY = 0.0;
@@ -78,8 +79,12 @@ class Surface
         void resetGeometry();
 
     public:
-        // vector to store indices within a given radius. BS: binding site
-        //std::vector<int> mSelectedBSIndices;
+        Surface();
+        // temp constructor
+        Surface(std::vector<Atom> slabAtoms, std::vector<Atom> bindingSites,
+                std::vector<Molecule> adsorbateList);
+        /*Surface(std::vector<Atom> slabAtoms, std::vector<BindingSite> bindingSites,
+                std::vector<Molecule> adsorbateList);*/
         // getter functions
         SLAB_TYPE getSurfaceType() const;
         int getNumOfAtoms() const;

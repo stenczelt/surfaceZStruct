@@ -6,3 +6,4 @@ eigen/*
 *.out
 tags
 fort.48
+optimization

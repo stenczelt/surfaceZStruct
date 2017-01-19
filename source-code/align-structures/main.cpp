@@ -12,7 +12,6 @@
 #include <fstream>
 #include <stdio.h>
 #include <algorithm>
-#include <fenv.h> // for NaN debugging
 
 // slab, atom1, .. : Surface
 // adsorbate1, atom2, .. : Adsorbate-1
@@ -22,7 +21,8 @@ bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int 
 int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices, double* radius,
                   std::string* adsorbateFiles, int* adsorbateIndices, int* reactiveIndex1,
                   int* reactiveIndex2, int &numOfAdd, int &numOfBreak, std::string &slabFileName);
-
+Surface readXYZfile_createObject(std::string &slabFileName, int numOfAdsorbates,
+        std::string* adsorbateFileNames);
 bool readSlabFileAndWrite(std::string &slabFileName);
 bool readSlabFile(std::string &slabFileName, Surface &aSurface);
 
@@ -72,14 +72,9 @@ int main(int argc, char* argv[])
             std::vector<int> allSites1 = 
                 aSurface.findNearbySites(slabIndices[0], radius[0], ALL);
 
-          std::cout << " slab index 0 " << slabIndices[0] << std::endl;
-          std::cout << " slab index 1 " << slabIndices[1] << std::endl;
-
-
           // removes the element that equals the input index
             //allSites1.erase(std::remove(allSites1.begin(), allSites1.end(), 
             //            slabIndices[0]-aSurface.getNumOfAtoms()-1), allSites1.end());
-                //aSurface.findNearbySites(slabIndices[0] - aSurface.getNumOfAtoms(), radius[0], "all");
 
             // create objects from input structures
             ICoord slab, adsorbate1, adsorbate2;
@@ -91,7 +86,6 @@ int main(int argc, char* argv[])
             // list of adsorbate and slab indices
             addArray[0] = slabIndices[0] - 1;
             addArray[1] = adsorbateIndices[0] + slab.natoms - 1;
-            //std::vector<int> allSitesCombined = allSites1;
             std::vector<int> allSites2;
 
             if (numOfAdsorbates == 2)
@@ -124,6 +118,28 @@ int main(int argc, char* argv[])
             std::cout << "\n***************************************\n";
             std::cout << "\nOutput is written to output-*.xyz file\n";
             std::cout << "\n***************************************\n";
+        }
+        else if (returnVal == 2)
+        {
+            // stage four: create Surface class objects from geometry optimized files.
+            // TODO: run python script to find unique strucutres
+
+            if (numOfAdsorbates == 1)
+            {
+                // uni-molecular reaction
+                // find nearby empty sites
+                // generate combinations of driving coordinates and write to file
+            }
+            else if (numOfAdsorbates == 2)
+            {
+                // bi-molecular reaction
+                // generate combinations and write to file. ISOMERS0001, ISOMERS0002, ...
+                // initial0001.xyz, initial0002.xyz, ...
+                //for output files in some directory
+                //Surface surface_1 = readXYZfile_createObject();
+                //surface_1.updateCoordinates(output_25_28_0_0);
+
+            }
         }
         else if (returnVal < 0)
         {
@@ -380,6 +396,153 @@ bool readSlabFile(std::string &slabFileName, Surface &aSurface)
 
     return true;
 }
+
+Surface readXYZfile_createObject(std::string &slabFileName, int numOfAdsorbates,
+        std::string* adsorbateFileNames/*, int* reactiveIndices1, int size1,
+        int* reactiveIndices2, int size2, std::string bindingsiteFile*/)
+{
+    // reading slab file
+    std::vector<std::string> xyzFileSlab; // vector to store input file
+    std::ifstream fileHandle;
+    fileHandle.open(slabFileName);
+    if (!fileHandle.is_open())
+    {
+        std::cout << "ERROR: File 333 " << slabFileName << " does not exist!" << std::endl;
+    }
+    std::string newLine;
+    while (std::getline(fileHandle, newLine))
+    {   
+        xyzFileSlab.push_back(newLine);
+    }
+    fileHandle.close();
+
+//    int numOfSlabAtoms = std::stoi(*(xyzFileSlab.begin()));
+    SLAB_TYPE slabType ;
+    try
+    {
+        slabType = stringToSlabType(xyzFileSlab[1]);
+    }
+    catch(...)
+    {
+        std::cout << "ERROR in setting slab type" << std::endl;
+        exit(-2);
+    }
+
+    if (xyzFileSlab[1].empty())
+    {   
+        std::cout << "ERROR: Set surface type in the input file" << std::endl;
+        exit(-1);
+    }   
+
+    std::vector<Atom> slabAtoms;
+    for (auto i=xyzFileSlab.begin()+2; i != xyzFileSlab.end(); ++i)
+    {
+        std::string name = "";
+        std::string unwanted = "";
+        double temp[3];
+        std::istringstream iss(*i);
+        iss >> name >> temp[0] >> temp[1] >> temp[2] >> unwanted;
+        Atom anAtom(name, temp[0], temp[1], temp[2]);
+        slabAtoms.push_back(anAtom);
+    }
+    // end reading slab file
+    
+    std::vector<Molecule> adsorbates;
+    // reading first adsorbate
+    std::vector<std::string> adsorbate1;
+    fileHandle.open(adsorbateFileNames[0]);
+    if (!fileHandle.is_open())
+    {
+        std::cout << "ERROR: File 444 " << adsorbateFileNames[0] << " does not exist!" << std::endl;
+    }
+    std::string newLine_2;
+    while (std::getline(fileHandle, newLine_2))
+    {   
+        adsorbate1.push_back(newLine_2);
+    }
+    fileHandle.close();
+
+    int numOfAds1Atoms = std::stoi(*(adsorbate1.begin()));
+    std::vector<Atom> ads1Atoms;
+    for (auto i=adsorbate1.begin()+2; i != adsorbate1.end(); ++i)
+    {
+        std::string name = "";
+        std::string unwanted = "";
+        double temp[3];
+        std::istringstream iss(*i);
+        iss >> name >> temp[0] >> temp[1] >> temp[2] >> unwanted;
+        Atom anAtom(name, temp[0], temp[1], temp[2]);
+        ads1Atoms.push_back(anAtom);
+    }
+    Molecule firstMolecule(ads1Atoms, numOfAds1Atoms);
+    // end reading first adsorbate
+    adsorbates.push_back(firstMolecule);
+
+    // reading second adsorbate
+    if (numOfAdsorbates == 2)
+    {
+        std::vector<std::string> adsorbate2;
+        fileHandle.open(adsorbateFileNames[1]);
+        if (!fileHandle.is_open())
+        {
+            std::cout << "ERROR: File 444 " << adsorbateFileNames[1] << " does not exist!" << std::endl;
+        }
+        std::string newLine_3;
+        while (std::getline(fileHandle, newLine_3))
+        {   
+            adsorbate2.push_back(newLine_3);
+        }
+        fileHandle.close();
+
+        int numOfAds2Atoms = std::stoi(*(adsorbate2.begin()));
+        std::vector<Atom> ads2Atoms;
+        for (auto i=adsorbate2.begin()+2; i != adsorbate2.end(); ++i)
+        {
+            std::string name = "";
+            std::string unwanted = "";
+            double temp[3];
+            std::istringstream iss(*i);
+            iss >> name >> temp[0] >> temp[1] >> temp[2] >> unwanted;
+            Atom anAtom(name, temp[0], temp[1], temp[2]);
+            ads2Atoms.push_back(anAtom);
+        }
+        Molecule secondMolecule(ads2Atoms, numOfAds2Atoms);
+        // end reading first adsorbate
+        adsorbates.push_back(secondMolecule);
+    }
+    // read binding site file
+    std::vector<std::string> bindingsites;
+    fileHandle.open("bindingSites.xyz");
+    if (!fileHandle.is_open())
+    {
+        std::cout << "ERROR: File 444 bindingSites.xyz does not exist!" << std::endl;
+    }
+    std::string newLine_4;
+    while (std::getline(fileHandle, newLine_4))
+    {   
+        bindingsites.push_back(newLine_4);
+    }
+    fileHandle.close();
+
+    //int numOfBSAtoms = std::stoi(*(.begin(bindingsites)));
+    std::vector<Atom> bsAtoms;
+    for (auto i=bindingsites.begin()+2; i != bindingsites.end(); ++i)
+    {
+        std::string name = "";
+        std::string unwanted = "";
+        double temp[3];
+        std::istringstream iss(*i);
+        iss >> name >> temp[0] >> temp[1] >> temp[2] >> unwanted;
+        Atom anAtom(name, temp[0], temp[1], temp[2]);
+        bsAtoms.push_back(anAtom);
+    }
+    // end reading binding site file
+
+    Surface mySurface(slabAtoms, bsAtoms, adsorbates);
+
+    return mySurface;
+}
+
 
 
 
