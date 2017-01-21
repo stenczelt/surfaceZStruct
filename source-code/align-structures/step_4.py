@@ -96,6 +96,48 @@ def readInputFile():
             adsorbFile2, adsorbIndex2, reactive_2Index1, reactive_2Index2, addMoves,\
             breakMoves)
 
+'''
+def generateIsomers(numOfBreakMoves, numOfAddMoves, reactiveIndices_1, reactiveIndices_2,\
+        currentSet):
+    for i in range(0, numOfBreakMoves):
+        generateIsomers(numOfBreakMoves, numOfAddMoves, reactiveIndices_1[1:],\
+                (reactiveIndices_2[:i] + reactiveIndices_2[(i+1):]),\
+                (currentSet.append(reactiveIndices_1[0]).append(reactiveIndices_2[i])))
+#        currentSet.append(reactiveIndices_1[0], reactiveIndices_2[i])
+        if i == 2:
+            return currentSet
+
+'''
+
+# TODO check reactive indices are <= than number of atoms
+# creates a list of lists. Each list has indices of two atoms that wil be added
+def generateIsomerPair(reactiveIndices_1, reactiveIndices_2):
+    listOfLists = []
+    #for i in range(0, len(reactiveIndices_1)):
+    for index_1 in reactiveIndices_1:
+        #for j in range(0, len(reactiveIndices_2)):
+        for index_2 in reactiveIndices_2:
+            list = []
+            list.append(index_1)
+            list.append(index_2)
+            listOfLists.append(list)
+    return listOfLists
+
+# create lists of two pairs of add moves
+def generate2IsomerPairs(reactiveIndices_1, reactiveIndices_2):
+    pairs = generateIsomerPair(reactiveIndices_1, reactiveIndices_2)
+    lists = []
+    # add unique pairs to the list
+    for i in range(0, len(pairs)):
+        for j in range(i, len(pairs)):
+            if pairs[i][0] != pairs[j][0] and\
+               pairs[i][1] != pairs[j][1]:
+                list = []
+                list.append(pairs[i])
+                list.append(pairs[j])
+                lists.append(list)
+    return lists
+
 
 
 def main():
@@ -104,6 +146,22 @@ def main():
     adsorbIndex1, reactive_1Index1, reactive_1Index2, slabIndex2, radius2,\
     adsorbFile2, adsorbIndex2, reactive_2Index1, reactive_2Index2, addMoves,\
     breakMoves = readInputFile()
+
+    # combine reactive indices into two lists for each adsorbate
+    reactiveIndices_1 = [ reactive_1Index1, reactive_1Index2 ]
+    reactiveIndices_2 = [ reactive_2Index1, reactive_2Index2 ]
+
+    # read number of adsorbate atoms
+    with open(slabFile, 'r') as fh:
+        numOfSlabAtoms = int(fh.readline().strip())
+
+    # read number of adsorbate 1 atoms
+    with open(adsorbFile1, 'r') as fh:
+        numOfAds1Atoms = int(fh.readline().strip())
+
+    # read number of adsorbate 1 atoms
+    with open(adsorbFile2, 'r') as fh:
+        numOfAds2Atoms = int(fh.readline().strip())
 
     # read binding sites
     binding_sites = read("bindingSites.xyz")
@@ -129,12 +187,43 @@ def main():
             print "111"
             # call a function to tag atoms
         # uni-molecular reaction
-        print numOfAdsorbates
         if (numOfAdsorbates == 1):
             print "stuff"
         # bi-molecular reaction
         elif (numOfAdsorbates == 2):
-            print "stuff"
+            # generate breaks
+            pairsSet = generateIsomerPair(reactiveIndices_1, reactiveIndices_2)
+            print pairsSet
+            if addMoves == 2:
+                twoPairsSet = generate2IsomerPairs(reactiveIndices_1, reactiveIndices_2)
+                print twoPairsSet
+
+            # write combinations to file
+            i = 1
+            for element in pairsSet:
+                fh = open("ISOMERS"+str(i).zfill(4), 'w')
+                fh.write("NEW\n")
+                fh.write("ADD  " + str(element[0]) + "  "+ str(element[1]) )
+                fh.close()
+                i += 1
+            '''
+            for i in range(0, breakMoves):
+                print "BREAK    ", 
+            for i in range(0, addMoves):
+                for index_1 in reactiveIndices_1:
+                    if (index_1 != 0):
+                        index_1 += numOfSlabAtoms
+                    else:
+                        continue
+                    for index_2 in reactiveIndices_2:
+                        if (index_2 != 0):
+                            index_2 += (numOfSlabAtoms + numOfAds1Atoms)
+                            print "ADD  ", index_1, "      ", index_2
+                        else:
+                            continue
+                            '''
+
+
 
 
 if __name__ == "__main__":
