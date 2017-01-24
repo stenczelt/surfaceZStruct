@@ -107,10 +107,11 @@ int main(int argc, char* argv[])
             // Sample all the binding sites within a given index and radiu
             for (unsigned int l = 0; l < allSites1.size() ; l++)
             {
-                for (unsigned int k = 0; k < allSites2.size(); k++)
+                for (unsigned int k = 0; k < std::max(1, (int)(allSites2.size())); k++)
                 {
                     addArray[0] = allSites1[l] + aSurface.getNumOfAtoms(); 
-                    addArray[2] = allSites2[k] + aSurface.getNumOfAtoms(); 
+                    if (allSites2.size() > 0)
+                        addArray[2] = allSites2[k] + aSurface.getNumOfAtoms(); 
                     totalSystem.add_align(numOfAdds, addArray);
                 }
             }
