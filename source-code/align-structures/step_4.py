@@ -1,4 +1,5 @@
 # Mina Jafari
+                    irint "element", element
 # 19-01-2017
 # This script reads optimized files, finds unique ones, and sorts them based on
 # energy. TODO
@@ -21,6 +22,7 @@ from subprocess import call
 import numpy as np
 #import pandas as pd
 import csv
+import math
 
 '''
 ASE modules
@@ -81,13 +83,13 @@ def readInputFile():
     reactive_1Index1 = int(inputFile[7].split()[1])
     reactive_1Index2 = int(inputFile[7].split()[2])
 
-    if (numOfAdsorbates == 2):
-        slabIndex2 = int(inputFile[9].split()[1])
-        radius2 = float(inputFile[10].split()[1])
-        adsorbFile2 = inputFile[11].split()[1]
-        adsorbIndex2 = int(inputFile[12].split()[1])
-        reactive_2Index1 = int(inputFile[13].split()[1])
-        reactive_2Index2 = int(inputFile[13].split()[2])
+    #if (numOfAdsorbates == 2):
+    slabIndex2 = int(inputFile[9].split()[1])
+    radius2 = float(inputFile[10].split()[1])
+    adsorbFile2 = inputFile[11].split()[1]
+    adsorbIndex2 = int(inputFile[12].split()[1])
+    reactive_2Index1 = int(inputFile[13].split()[1])
+    reactive_2Index2 = int(inputFile[13].split()[2])
 
     addMoves = int(inputFile[15].split()[1])
     breakMoves = int(inputFile[16].split()[1])
@@ -127,6 +129,7 @@ def generateIsomerPair(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
                 list.append(index_1 + numOfSlabAtoms - 1)
                 list.append(index_2 + numOfSlabAtoms + numOfAds1Atoms - 1)
                 listOfAdds.append(list)
+                # TODO
                 '''
                 if (index_1 . coordination() == max_coordination ):
                     BREAK index_1[0] index_1[1]
@@ -152,6 +155,76 @@ def generate2IsomerPairs(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
                 lists.append(list)
     return lists
 
+# find sites that are within MAX_DISTANCE of a given adsorbate index
+def findNearbySites(slab, atomIndex, bindingSiteFile):
+
+
+    fh = open(bindingSiteFile, 'r')
+    lines = fh.readlines()
+    fh.close()
+
+    listOfSites = []
+
+    MAX_DISTANCE = 2.0 # Angstroms
+    THRESH = 0.1
+
+    atomX = slab[atomIndex - 1].x
+    atomY = slab[atomIndex - 1].y
+    atomZ = slab[atomIndex - 1].z
+    lines.pop(0)
+    lines.pop(0)
+
+    wrongIndices = []
+    for i in range(0, len(lines)):
+        inX, inY, inZ = lines[i].split()[1:4]
+        inX = float(inX)
+        inY = float(inY)
+        inZ = float(inZ)
+
+        distance = (atomX - inX)**2 + (atomY - inY)**2 + (atomZ - inZ)**2
+        if ( math.sqrt(distance) <= MAX_DISTANCE and math.sqrt(distance) > 0.01 ):
+            for atom in slab:
+                if ( (atom.x+THRESH >= inX and atom.x-THRESH <= inX)\
+                        and (atom.y+THRESH >= inY and atom.y-THRESH <= inY)\
+                        and (atom.z+THRESH >= inZ and atom.z-THRESH <= inZ) ):
+                    wrongIndices.append(i)
+
+                else:
+                    listOfSites.append(i)
+
+    listOfSites = set(listOfSites)
+    for element in wrongIndices:
+        if element in listOfSites:
+            listOfSites.remove(element)
+    return listOfSites
+
+
+# find two indices from two input lists that are farthest from eachother
+def findFarthestIndices(list1, list2, bindingSiteFile):
+    # read as ASE Atoms object
+    binding_sites = read(bindingSiteFile)
+    outIndex = []
+    distance = 0.0
+    for index_1 in list1:
+        for index_2 in list2:
+            x_1 = float(binding_sites[index_1].x)
+            y_1 = float(binding_sites[index_1].y)
+            z_1 = float(binding_sites[index_1].z)
+
+            x_2 = float(binding_sites[index_2].x)
+            y_2 = float(binding_sites[index_2].y)
+            z_2 = float(binding_sites[index_2].z)
+
+            new_distance = math.sqrt( (x_1 - x_2)**2 + (y_1 - y_2)**2 + (z_1 - z_2)**2 )
+            if (new_distance > distance):
+                distance = new_distance
+                outIndex = [ index_1, index_2 ]
+
+    return outIndex
+
+
+
+
 
 # TODO write function to find number of atoms in each layer, x, y
 
@@ -167,7 +240,7 @@ def main():
     reactiveIndices_1 = [ reactive_1Index1, reactive_1Index2 ]
     reactiveIndices_2 = [ reactive_2Index1, reactive_2Index2 ]
 
-    # read number of adsorbate atoms
+    # read number of slab atoms
     with open(slabFile, 'r') as fh:
         numOfSlabAtoms = int(fh.readline().strip())
 
@@ -178,6 +251,10 @@ def main():
     # read number of adsorbate 1 atoms
     with open(adsorbFile2, 'r') as fh:
         numOfAds2Atoms = int(fh.readline().strip())
+
+    # read number of binding site atoms
+    with open("bindingSites.xyz", 'r') as fh:
+        numOfBSAtoms = int(fh.readline().strip())
 
     # read binding sites
     binding_sites = read("bindingSites.xyz")
@@ -190,7 +267,7 @@ def main():
     # define slab
     slab = fcc100('Cu', size=(4,3,2), vacuum=14)
     #adsorbate= Atoms('NH3OH2')
-    adsorbate= Atoms('NH3')
+    adsorbate = Atoms('NH3')
     add_adsorbate(slab, adsorbate, 1.7, 'ontop')
 
     # update slab coordinates from optimized files
@@ -204,21 +281,59 @@ def main():
             print "111"
             # TODO call a function to tag atoms
             # TODO ads1 = -1, ads2 = -2, BS = -3. Find ads1 and ads2 atoms from INPUT or numberOfAds1/2Atoms
-        # uni-molecular reaction
-        if (numOfAdsorbates == 1):
 
-            print "stuff"
+        # uni-molecular reaction
+        # TODO check number of adds and breaks match number of reactive atoms. Raise error if not.
+        if (numOfAdsorbates == 1):
+            # TODO make sure the site is empty
             '''
             if one adsorbate, we have maximum of two reactive atoms. Break the bond
             between them and add each fragment to a new site.
             - break bond
             - find nearby sites
-            - find smaller fragment
-            - attach it to a site that is > 2.5 A away
+            - make sure the site is empty: at this stage of development we're skipping this step
+            - find smaller fragment ( needed ? )
+            - attach two fragments to sites that is > 2.0 A away
+            - push two fragments in opposite directions, satisfied by above step
             - if two fragments have similar size, always move one of them
             - generate driving coordinates
             '''
-            print "BREAK    ", reactiveIndices_1[0], "    ", reactiveIndices_1[1]
+            # create slab to be written to initial000# file
+            slab_out = slab[0:numOfSlabAtoms]
+            binding_sites = read("bindingSites.xyz", format='xyz')
+            for i in range(0, len(binding_sites)):
+                slab_out.append(binding_sites[i])
+            for i in range(0+numOfSlabAtoms, numOfAds1Atoms+numOfSlabAtoms):
+                slab_out.append(slab[i])
+
+            # find sites nearby a given adsorbate index
+            indexIn = reactiveIndices_1[0] + numOfSlabAtoms
+            listOfSitesFrag_1 = findNearbySites(slab, indexIn, "bindingSites.xyz")
+            indexIn = reactiveIndices_1[1] + numOfSlabAtoms
+            listOfSitesFrag_2 = findNearbySites(slab, indexIn, "bindingSites.xyz")
+            # find two sites that are farthest from two lists of binding sites
+            farthestSites = findFarthestIndices(listOfSitesFrag_1,\
+                    listOfSitesFrag_2, "bindingSites.xyz")
+            # TODO add to different binding site types
+            # write initial### and ISOMERS file
+            i = 1
+            folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
+                    str(i).zfill(4) + "/scratch/"
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+            fh.write("NEW\n")
+            firstNum = reactiveIndices_1[0] + numOfSlabAtoms + numOfBSAtoms
+            secondNum = reactiveIndices_1[1] + numOfSlabAtoms + numOfBSAtoms
+            fh.write("BREAK " + str(firstNum) + "  " + str(secondNum) + "\n")
+            fh.write("ADD   " + str(farthestSites[0] + 1 + numOfSlabAtoms) + "  " +\
+                    str(firstNum) + "\n")
+            fh.write("ADD   " + str(farthestSites[1] + 1 + numOfSlabAtoms) + "  " +\
+                    str(secondNum) + "\n")
+            fh.close()
+
+            slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+            i += 1
 
 
         # bi-molecular reaction
