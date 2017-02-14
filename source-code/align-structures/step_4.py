@@ -304,6 +304,9 @@ def main():
     adsorbate = Atoms('NH3')
     add_adsorbate(slab, adsorbate, 1.7, 'ontop')
 
+    # current working directory
+    cwd = os.getcwd()
+
     # update slab coordinates from optimized files
     for file in files:
         #current position read in
@@ -354,7 +357,6 @@ def main():
             for element in breakCombos:
                 connected = areConnected(adsorbFile1, element)
                 if (connected == True):
-
                     indexIn = element[0] + numOfSlabAtoms
                     listOfSitesFrag_1 = findNearbySites(slab, indexIn, "bindingSites.xyz")
                     indexIn = element[1] + numOfSlabAtoms
@@ -381,6 +383,38 @@ def main():
                     fh.close()
 
                     slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+
+                    # submit SE-GSM
+                    # files needed for SE-GSM calculation: inpfileq, grad.py,
+                    # status, gfstringq.exe, scratch/submit_gsm.qsh, scratch/initial000.xyz,
+                    # and scratch/ISOMERS000
+                    folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
+                        str(i).zfill(4)
+                    src = "inputs_se_gsm/"
+                    src_files = listFiles(src)
+                    for file_name in src_files:
+                        full_file_name = os.path.join(src, file_name)
+                        #if (os.path.isfile(full_file_name)):
+                        shutil.copy(full_file_name, folder)
+
+                    # setting up runGSM.qsh files
+                    fh = open("inputs_se_gsm/scratch/runGSM.qsh")
+                    templateFile = Template(fh.read())
+                    # user can replace this with a meaningful name
+                    jobName = "test" + str(i).zfill(4)
+                    print (jobName)
+                    #fileNumber = (element.split(".")[0]).replace("output-", "") 
+                    #myDictionary = {'jobName':jobName, 'fileNumber':fileNumber}
+                    myDictionary = {'jobName':jobName, 'jobID':i}
+                    result = templateFile.substitute(myDictionary)
+                    PBSfile = folder + "/scratch/runGSM.qsh"
+                    fh = open(PBSfile,"w")
+                    fh.write(result)
+                    fh.close()
+
+                    os.chdir(folder)
+                    call(["qsub", "scratch/runGSM.qsh"])
+                    os.chdir(cwd)
                     i += 1
 
 
