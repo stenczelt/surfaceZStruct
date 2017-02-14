@@ -1,0 +1,25 @@
+#PBS -t ${jobID}
+
+# set the number of nodes and processes per node
+#PBS -l nodes=1:ppn=8 -l walltime=80:00:00 -q zimintel
+
+# set name of job
+#PBS -N ${jobName}
+
+# mail alert at (e)nd and (a)bortion of execution
+#PBS -m ea
+
+# send mail to the following address
+#PBS -M mjafari@umich.edu
+
+ID=`printf "%0*d\n" 4 $${PBS_ARRAYID}`
+# run in parallel
+export PATH=$$PATH:/export/zimmerman/paulzim/vasp.5.3/exe/mpi
+export VASP_NCORE=8
+export OMP_NUM_THREADS=1
+
+# start job from the directory it was submitted
+cd $$PBS_O_WORKDIR
+
+# run the ptyhon script
+./gfstringq.exe $${PBS_ARRAYID} 4 > scratch/paragsm$$ID
