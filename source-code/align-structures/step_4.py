@@ -87,8 +87,7 @@ def readInputFile():
     reactiveIndices_1 = []
     reactiveIndices_2 = []
 
-    # reading max of 10 indices
-    print ("RRR ", len(inputFile[7].split()))
+    # reading max of 10 indices 11 = 10 indices + first column of the file
     if ( len(inputFile[7].split()) > 11 ):
         print ("ERROR: Maximum of 10 reactive atoms on each adsorbate are allowed!")
         sys.exit(-1)
@@ -103,6 +102,7 @@ def readInputFile():
     radius2 = float(inputFile[10].split()[1])
     adsorbFile2 = inputFile[11].split()[1]
     adsorbIndex2 = int(inputFile[12].split()[1])
+    # reading max of 10 indices 11 = 10 indices + first column of the file
     if ( len(inputFile[13].split()) > 11 ):
         print ("ERROR: Maximum of 10 reactive atoms on each adsorbate are allowed!")
         sys.exit(-1)
@@ -273,10 +273,19 @@ def main():
     #reactiveIndices_1 = [ reactive_1Index1, reactive_1Index2 ]
     #reactiveIndices_2 = [ reactive_2Index1, reactive_2Index2 ]
 
+    slabType = ""
+    numOfSlabAtoms = 0
     # read number of slab atoms
     with open(slabFile, 'r') as fh:
-        numOfSlabAtoms = int(fh.readline().strip())
+        #numOfSlabAtoms = int(fh.readline().strip())
+        for i, line in enumerate(fh):
+            if i == 0:
+                numOfSlabAtoms = int(line.strip())
+            if i == 1:
+                slabType = line.strip()
+                #slabType = fh.readline().strip()
 
+    print (slabType)
     # read number of adsorbate 1 atoms
     with open(adsorbFile1, 'r') as fh:
         numOfAds1Atoms = int(fh.readline().strip())
@@ -336,12 +345,12 @@ def main():
             - generate driving coordinates
             '''
             # create slab to be written to initial000# file
-            slab_out = slab[0:numOfSlabAtoms]
+            #slab_out = slab[0:numOfSlabAtoms]
             #binding_sites = read("bindingSites.xyz", format='xyz')
-            for i in range(0, len(binding_sites)):
-                slab_out.append(binding_sites[i])
-            for i in range(0+numOfSlabAtoms, numOfAds1Atoms+numOfSlabAtoms):
-                slab_out.append(slab[i])
+            #for i in range(0, len(binding_sites)):
+            #    slab_out.append(binding_sites[i])
+            #for i in range(0+numOfSlabAtoms, numOfAds1Atoms+numOfSlabAtoms):
+            #    slab_out.append(slab[i])
 
             # find all combinations of reactive indices
             breakCombos = []
@@ -373,8 +382,8 @@ def main():
                         os.makedirs(folder)
                     fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
                     fh.write("NEW\n")
-                    firstNum = element[0] + numOfSlabAtoms + numOfBSAtoms
-                    secondNum = element[1] + numOfSlabAtoms + numOfBSAtoms
+                    firstNum = element[0] + numOfSlabAtoms #+ numOfBSAtoms
+                    secondNum = element[1] + numOfSlabAtoms #+ numOfBSAtoms
                     fh.write("BREAK " + str(firstNum) + "  " + str(secondNum) + "\n")
                     fh.write("ADD   " + str(farthestSites[0] + 1 + numOfSlabAtoms) + "  " +\
                         str(firstNum) + "\n")
@@ -382,7 +391,19 @@ def main():
                         str(secondNum) + "\n")
                     fh.close()
 
-                    slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+                    #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+                    slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+
+                    ################ Read slab type form slab file input (surface.xyz)
+                    fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'r')
+                    lines = fh.readlines()
+                    lines[1] = slabType + '\n'
+                    fh.close()
+
+                    fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
+                    fh.writelines(lines)
+                    fh.close()
+                    ################
 
                     # submit SE-GSM
                     # files needed for SE-GSM calculation: inpfileq, grad.py,
