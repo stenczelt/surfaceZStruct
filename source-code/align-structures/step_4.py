@@ -146,8 +146,8 @@ def generateIsomerPair(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
         for index_2 in reactiveIndices_2:
             list = []
             if (index_1 != 0 and index_2 != 0):
-                list.append(index_1 + numOfSlabAtoms - 1)
-                list.append(index_2 + numOfSlabAtoms + numOfAds1Atoms - 1)
+                list.append(index_1 + numOfSlabAtoms)
+                list.append(index_2 + numOfSlabAtoms + numOfAds1Atoms)
                 listOfAdds.append(list)
                 # TODO
                 '''
@@ -258,6 +258,14 @@ def areConnected(inputFile, twoIndices):
     #print (adsorbate.NumBonds())
 
 
+def getCoordinationNum(inputFile, indexIn):
+    obConversion = OB.OBConversion()
+    obConversion.SetInFormat("xyz")
+    adsorbate = OB.OBMol()
+    obConversion.ReadFile(adsorbate, inputFile)
+
+    anAtom = adsorbate.GetAtom(indexIn)
+    return anAtom.GetValence()
 
 
 # TODO write function to find number of atoms in each layer, x, y
@@ -268,6 +276,11 @@ def main():
     findSites, slabFile, numOfAdsorbates, slabIndex1, radius1, adsorbFile1,\
     adsorbIndex1, reactiveIndices_1, slabIndex2, radius2,\
     adsorbFile2, adsorbIndex2, reactiveIndices_2, addMoves, breakMoves = readInputFile()
+
+    assert(addMoves < 3)
+    assert(addMoves > 0)
+    assert(breakMoves < 3)
+    assert(breakMoves > 0)
 
     # combine reactive indices into two lists for each adsorbate
     #reactiveIndices_1 = [ reactive_1Index1, reactive_1Index2 ]
@@ -343,7 +356,7 @@ def main():
             - push two fragments in opposite directions, satisfied by above step
             - if two fragments have similar size, always move one of them
             - generate driving coordinates
-            '''
+#add '' here
             # create slab to be written to initial000# file
             #slab_out = slab[0:numOfSlabAtoms]
             #binding_sites = read("bindingSites.xyz", format='xyz')
@@ -354,6 +367,7 @@ def main():
 
             # find all combinations of reactive indices
             breakCombos = []
+            # TODO check elements are non zero
             for i in range(0, len(reactiveIndices_1)):
                 for j in range(i+1, len(reactiveIndices_1)):
                     temp = []
@@ -380,6 +394,7 @@ def main():
                         str(i).zfill(4) + "/scratch/"
                     if not os.path.exists(folder):
                         os.makedirs(folder)
+                    # TODO check for number of addMoves and breakMoves
                     fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
                     fh.write("NEW\n")
                     firstNum = element[0] + numOfSlabAtoms #+ numOfBSAtoms
@@ -437,20 +452,116 @@ def main():
                     call(["qsub", "scratch/runGSM.qsh"])
                     os.chdir(cwd)
                     i += 1
-
+'''
 
         # bi-molecular reaction
         # TODO check number of adds and breaks match number of reactive atoms. Raise error if an add
         # move requires breaking a bond but number of breaks is zero.
-        elif (numOfAdsorbates == 2):
+        if (numOfAdsorbates == 2):
+        #elif (numOfAdsorbates == 2):
             # generate breaks
-            # generate adds
-            pairsSet = generateIsomerPair(reactiveIndices_1, reactiveIndices_2,\
-                    numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
+            # find all combinations of reactive indices 1
+            breakCombos_1 = []
+            for i in range(0, len(reactiveIndices_1)):
+                for j in range(i+1, len(reactiveIndices_1)):
+                    if ( (reactiveIndices_1[i] != 0) and (reactiveIndices_1[j] != 0) ):
+                        temp = []
+                        temp.append(reactiveIndices_1[i])
+                        temp.append(reactiveIndices_1[j])
+                        breakCombos_1.append(temp)
+            # find all combinations of reactive indices 2
+            breakCombos_2 = []
+            for i in range(0, len(reactiveIndices_2)):
+                for j in range(i+1, len(reactiveIndices_2)):
+                    if ( (reactiveIndices_2[i] != 0) and (reactiveIndices_2[j] != 0) ):
+                        temp = []
+                        temp.append(reactiveIndices_2[i])
+                        temp.append(reactiveIndices_2[j])
+                        breakCombos_2.append(temp)
+            #print (breakCombos_1)
+            print (breakCombos_2)
 
-            if addMoves == 2:
-                twoPairsSet = generate2IsomerPairs(reactiveIndices_1, reactiveIndices_2,\
-                        numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
+            # for addMove == 1 and breakMove == 1
+            i = 1
+            for element_1 in breakCombos_1:
+                #for element_2 in breakCombos_2:
+                    connected_1 = areConnected(adsorbFile1, element_1)
+                    #connected_2 = areConnected(adsorbFile2, element_2)
+                    if (connected_1 == True): # and connected_2 == True):
+                        #print ("Here")
+                        #print (element_1)
+                        #print (element_2)
+                        #pairsSet = generateIsomerPair(element_1, element_2,\
+                        pairsSet = generateIsomerPair(element_1, reactiveIndices_2,\
+                            numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
+                        print ("QQQQQQQQQQQQQ")
+                        print (pairsSet)
+
+                        for kk in range(0, len(pairsSet)):
+                            # TODO check coordination number
+                            coordNum = getCoordinationNum(adsorbFile2, (pairsSet[kk][1]-\
+                                    numOfSlabAtoms))
+                            if (coordNum < MAX_COORDINATION_NUM):
+                                # write initial### and ISOMERS file
+                                folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
+                                        str(i).zfill(4) + "/scratch/"
+                                if not os.path.exists(folder):
+                                    os.makedirs(folder)
+                        #for brk in range(0, breakMoves):
+                            #for add in range(0, addMoves):
+                                    fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+                                    fh.write("NEW\n")
+                                    firstNum_1 = element_1[0] + numOfSlabAtoms
+                                    secondNum_1 = element_1[1] + numOfSlabAtoms
+                                    fh.write("BREAK " + str(firstNum_1) + "  " + str(secondNum_1) + "\n")
+                                    #firstNum_2 = element_2[0] + numOfSlabAtoms + numOfAds1Atoms
+                                    #secondNum_2 = element_2[1] + numOfSlabAtoms + numOfAds1Atoms
+                                    #fh.write("BREAK " + str(firstNum_2) + "  " + str(secondNum_2) + "\n")
+                                    #fh.write("ADD   " + str(firstNum_1) + "  " + str(pairsSet[kk]) + "\n")
+                                    fh.write("ADD   " + str(pairsSet[kk][0]) + "  " + str(pairsSet[kk][1]) + "\n")
+                                    #fh.write("ADD   " + str(secondNum_1) + "  " + str(secondNum_2) + "\n")
+                                    fh.close()
+                                    i += 1
+
+            for element_2 in breakCombos_2:
+                #for element_1 in breakCombos_1:
+                    #connected_1 = areConnected(adsorbFile1, element_1)
+                    connected_2 = areConnected(adsorbFile2, element_2)
+                    if (connected_2 == True):
+                    #if (connected_1 == True and connected_2 == True):
+                        #pairsSet = generateIsomerPair(element_1, element_2,\
+                        #    numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
+                        pairsSet = generateIsomerPair(element_2, reactiveIndices_1,\
+                            numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
+                        print ("FFFFFFF", len(pairsSet))
+                        print (pairsSet)
+                        for kk in range(0, len(pairsSet)):
+                            # TODO check coordination number
+                            coordNum = getCoordinationNum(adsorbFile1, (pairsSet[kk][0] -\
+                                    numOfSlabAtoms - numOfAds1Atoms))
+                            if (coordNum < MAX_COORDINATION_NUM):
+                                # write initial### and ISOMERS file
+                                folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
+                                        str(i).zfill(4) + "/scratch/"
+                                if not os.path.exists(folder):
+                                    os.makedirs(folder)
+                                fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+                                fh.write("NEW\n")
+                                firstNum_2 = element_2[0] + numOfSlabAtoms + numOfAds1Atoms
+                                secondNum_2 = element_2[1] + numOfSlabAtoms + numOfAds1Atoms
+                                fh.write("BREAK " + str(firstNum_2) + "  " + str(secondNum_2) + "\n")
+                                fh.write("ADD   " + str(pairsSet[kk][1]) + "  " + str(pairsSet[kk][0]) + "\n")
+                                fh.close()
+                                i += 1
+
+                    #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+            # generate adds
+            #pairsSet = generateIsomerPair(reactiveIndices_1, reactiveIndices_2,\
+            #        numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
+
+            #if addMoves == 2:
+            #    twoPairsSet = generate2IsomerPairs(reactiveIndices_1, reactiveIndices_2,\
+            #            numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
 
             '''
             write combinations to file:
@@ -458,37 +569,37 @@ def main():
             combination.
             '''
             # TODO convert this to function
-            i = 1
-            for element in pairsSet:
-                folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
-                        str(i).zfill(4) + "/scratch/"
-                if not os.path.exists(folder):
-                    os.makedirs(folder)
-                fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
-                fh.write("NEW\n")
-                fh.write("ADD  " + str(element[0]) + "  "+ str(element[1]) )
-                fh.close()
+            #i = 1
+            #for element in pairsSet:
+            #    folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
+            #            str(i).zfill(4) + "/scratch/"
+            #    if not os.path.exists(folder):
+            #        os.makedirs(folder)
+            #    fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+            #    fh.write("NEW\n")
+            #    fh.write("ADD  " + str(element[0]) + "  "+ str(element[1]) )
+            #    fh.close()
 
-                slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+            #    slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
 
-                i += 1
+            #    i += 1
 
-            if addMoves == 2:
-                for element in twoPairsSet:
-                    print ("element", element)
-                    print (element[0][0], "      ", element[0][1])
-                    print (element[1][0], "      ", element[1][1])
-                    folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
-                            str(i).zfill(4) + "/scratch/"
-                    if not os.path.exists(folder):
-                        os.makedirs(folder)
-                    fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
-                    fh.write("NEW\n")
-                    fh.write("ADD  " + str(element[0][0]) + "  "+ str(element[0][1]) + "\n" )
-                    fh.write("ADD  " + str(element[1][0]) + "  "+ str(element[1][1]) + "\n" )
-                    fh.close()
-                    slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-                    i += 1
+            #if addMoves == 2:
+            #    for element in twoPairsSet:
+            #        print ("element", element)
+            #        print (element[0][0], "      ", element[0][1])
+            #        print (element[1][0], "      ", element[1][1])
+            #        folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
+            #                str(i).zfill(4) + "/scratch/"
+            #        if not os.path.exists(folder):
+            #            os.makedirs(folder)
+            #        fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+            #        fh.write("NEW\n")
+            #        fh.write("ADD  " + str(element[0][0]) + "  "+ str(element[0][1]) + "\n" )
+            #        fh.write("ADD  " + str(element[1][0]) + "  "+ str(element[1][1]) + "\n" )
+            #        fh.close()
+            #        slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+            #        i += 1
             '''
             for i in range(0, breakMoves):
                 print "BREAK    ", 
