@@ -42,31 +42,6 @@ import openbabel as OB
 '''
 functions and main()
 '''
-print ("")
-
-'''
-set up slab and adsorbates by reading it from input file
-
-slab = fcc100('Cu', size=(4,3,2), vacuum=14)
-adsorbate= Atoms('NH3OH2')
-add_adsorbate(slab, adsorbate, 1.7, 'ontop')
-#current position read in
-#slabatoms = read("output-46-55-0-0.xyz")
-slabatoms = read("output-25-28-0-0-in.xyz")
-slab.set_positions(slabatoms.get_positions())
-
-mask = [atom.tag > 1 for atom in slab]
-slab.set_constraint(FixAtoms(mask=mask))
-calc = Vasp(xc='PBE', lreal='Auto', kpts=[1,1,1], ismear=1, sigma=0.2, algo='fast', istart=0, npar=2, encut=300)
-#calc = EMT()
-slab.set_calculator(calc)
-
-
-dyn = QuasiNewton(slab, trajectory='trajectory.traj')
-dyn.run(fmax=0.05)
-
-wriSlabAtomste("${outputName}", slab)
-'''
 
 # returns a list of all the files in a directory
 def listFiles(folderPath):
@@ -94,8 +69,6 @@ def readInputFile():
     else:
         for i in range(1, len(inputFile[7].split()) ):
             reactiveIndices_1.append( int(inputFile[7].split()[i]) )
-    #reactive_1Index1 = int(inputFile[7].split()[1])
-    #reactive_1Index2 = int(inputFile[7].split()[2])
 
     #if (numOfAdsorbates == 2):
     slabIndex2 = int(inputFile[9].split()[1])
@@ -109,8 +82,6 @@ def readInputFile():
     else:
         for i in range(1, len(inputFile[13].split()) ):
             reactiveIndices_2.append( int(inputFile[13].split()[i]) )
-    #reactive_2Index1 = int(inputFile[13].split()[1])
-    #reactive_2Index2 = int(inputFile[13].split()[2])
 
     addMoves = int(inputFile[15].split()[1])
     breakMoves = int(inputFile[16].split()[1])
@@ -140,22 +111,14 @@ def generateIsomerPair(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
     assert( reactiveIndices_1[0] <= numOfAds1Atoms and reactiveIndices_1[1] <= numOfAds1Atoms  )
     assert( reactiveIndices_2[0] <= numOfAds2Atoms and reactiveIndices_2[1] <= numOfAds2Atoms  )
     listOfAdds = []
-    #for i in range(0, len(reactiveIndices_1)):
     for index_1 in reactiveIndices_1:
-        #for j in range(0, len(reactiveIndices_2)):
         for index_2 in reactiveIndices_2:
             list = []
             if (index_1 != 0 and index_2 != 0):
                 list.append(index_1 + numOfSlabAtoms)
                 list.append(index_2 + numOfSlabAtoms + numOfAds1Atoms)
                 listOfAdds.append(list)
-                # TODO
-                '''
-                if (index_1 . coordination() == max_coordination ):
-                    BREAK index_1[0] index_1[1]
-                    if index_1[0] not connected to index_1[1]:
-                        raise Error
-                '''
+
     return listOfAdds
 
 # create lists of two pairs of add moves
@@ -248,15 +211,10 @@ def areConnected(inputFile, twoIndices):
 
     index_1 = twoIndices[0]
     index_2 = twoIndices[1]
-    #print (adsorbate.GetAtom( twoIndices[0] ).GetType())
-    #print (adsorbate.GetAtom( twoIndices[1] ).GetType())
-    #if (adsorbate.GetBond(index_1, index_2).GetBondOrder() != None):
     if (adsorbate.GetBond(index_1, index_2) != None):
         return True;
     else:
         return False;
-    #print (adsorbate.NumBonds())
-
 
 def getCoordinationNum(inputFile, indexIn):
     obConversion = OB.OBConversion()
@@ -282,21 +240,15 @@ def main():
     assert(breakMoves < 3)
     assert(breakMoves > 0)
 
-    # combine reactive indices into two lists for each adsorbate
-    #reactiveIndices_1 = [ reactive_1Index1, reactive_1Index2 ]
-    #reactiveIndices_2 = [ reactive_2Index1, reactive_2Index2 ]
-
     slabType = ""
     numOfSlabAtoms = 0
     # read number of slab atoms
     with open(slabFile, 'r') as fh:
-        #numOfSlabAtoms = int(fh.readline().strip())
         for i, line in enumerate(fh):
             if i == 0:
                 numOfSlabAtoms = int(line.strip())
             if i == 1:
                 slabType = line.strip()
-                #slabType = fh.readline().strip()
 
     print (slabType)
     # read number of adsorbate 1 atoms
@@ -320,6 +272,8 @@ def main():
     folderName = "unique-structures/"
     files = listFiles(folderName)
 
+    #TODO User should change this part without editing source code file
+    #TODO How about slabs read from POSCAR file
     # define slab
     slab = fcc100('Cu', size=(4,3,2), vacuum=14)
     #adsorbate= Atoms('NH3OH2')
@@ -356,7 +310,7 @@ def main():
             - push two fragments in opposite directions, satisfied by above step
             - if two fragments have similar size, always move one of them
             - generate driving coordinates
-#add '' here
+            '''
             # create slab to be written to initial000# file
             #slab_out = slab[0:numOfSlabAtoms]
             #binding_sites = read("bindingSites.xyz", format='xyz')
@@ -389,7 +343,6 @@ def main():
                         listOfSitesFrag_2, "bindingSites.xyz")
                     # TODO add to different binding site types
                     # write initial### and ISOMERS file
-                    #i = 1
                     folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
                         str(i).zfill(4) + "/scratch/"
                     if not os.path.exists(folder):
@@ -409,7 +362,7 @@ def main():
                     #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
                     slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
 
-                    ################ Read slab type form slab file input (surface.xyz)
+                    # Read slab type form slab file input (surface.xyz)
                     fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'r')
                     lines = fh.readlines()
                     lines[1] = slabType + '\n'
@@ -418,7 +371,6 @@ def main():
                     fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
                     fh.writelines(lines)
                     fh.close()
-                    ################
 
                     # submit SE-GSM
                     # files needed for SE-GSM calculation: inpfileq, grad.py,
@@ -438,9 +390,6 @@ def main():
                     templateFile = Template(fh.read())
                     # user can replace this with a meaningful name
                     jobName = "test" + str(i).zfill(4)
-                    print (jobName)
-                    #fileNumber = (element.split(".")[0]).replace("output-", "") 
-                    #myDictionary = {'jobName':jobName, 'fileNumber':fileNumber}
                     myDictionary = {'jobName':jobName, 'jobID':i}
                     result = templateFile.substitute(myDictionary)
                     PBSfile = folder + "/scratch/runGSM.qsh"
@@ -452,14 +401,11 @@ def main():
                     call(["qsub", "scratch/runGSM.qsh"])
                     os.chdir(cwd)
                     i += 1
-'''
 
         # bi-molecular reaction
         # TODO check number of adds and breaks match number of reactive atoms. Raise error if an add
         # move requires breaking a bond but number of breaks is zero.
         if (numOfAdsorbates == 2):
-        #elif (numOfAdsorbates == 2):
-            # generate breaks
             # find all combinations of reactive indices 1
             breakCombos_1 = []
             for i in range(0, len(reactiveIndices_1)):
@@ -478,81 +424,57 @@ def main():
                         temp.append(reactiveIndices_2[i])
                         temp.append(reactiveIndices_2[j])
                         breakCombos_2.append(temp)
-            #print (breakCombos_1)
-            print (breakCombos_2)
 
             # for addMove == 1 and breakMove == 1
             i = 1
             for element_1 in breakCombos_1:
-                #for element_2 in breakCombos_2:
-                    connected_1 = areConnected(adsorbFile1, element_1)
-                    #connected_2 = areConnected(adsorbFile2, element_2)
-                    if (connected_1 == True): # and connected_2 == True):
-                        #print ("Here")
-                        #print (element_1)
-                        #print (element_2)
-                        #pairsSet = generateIsomerPair(element_1, element_2,\
-                        pairsSet = generateIsomerPair(element_1, reactiveIndices_2,\
+                connected_1 = areConnected(adsorbFile1, element_1)
+                if (connected_1 == True):
+                    pairsSet = generateIsomerPair(element_1, reactiveIndices_2,\
                             numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
-                        print ("QQQQQQQQQQQQQ")
-                        print (pairsSet)
 
-                        for kk in range(0, len(pairsSet)):
-                            # TODO check coordination number
-                            coordNum = getCoordinationNum(adsorbFile2, (pairsSet[kk][1]-\
-                                    numOfSlabAtoms))
-                            if (coordNum < MAX_COORDINATION_NUM):
-                                # write initial### and ISOMERS file
-                                folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
-                                        str(i).zfill(4) + "/scratch/"
-                                if not os.path.exists(folder):
-                                    os.makedirs(folder)
-                        #for brk in range(0, breakMoves):
-                            #for add in range(0, addMoves):
-                                    fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
-                                    fh.write("NEW\n")
-                                    firstNum_1 = element_1[0] + numOfSlabAtoms
-                                    secondNum_1 = element_1[1] + numOfSlabAtoms
-                                    fh.write("BREAK " + str(firstNum_1) + "  " + str(secondNum_1) + "\n")
-                                    #firstNum_2 = element_2[0] + numOfSlabAtoms + numOfAds1Atoms
-                                    #secondNum_2 = element_2[1] + numOfSlabAtoms + numOfAds1Atoms
-                                    #fh.write("BREAK " + str(firstNum_2) + "  " + str(secondNum_2) + "\n")
-                                    #fh.write("ADD   " + str(firstNum_1) + "  " + str(pairsSet[kk]) + "\n")
-                                    fh.write("ADD   " + str(pairsSet[kk][0]) + "  " + str(pairsSet[kk][1]) + "\n")
-                                    #fh.write("ADD   " + str(secondNum_1) + "  " + str(secondNum_2) + "\n")
-                                    fh.close()
-                                    i += 1
+                    for kk in range(0, len(pairsSet)):
+                        # TODO check coordination number
+                        coordNum = getCoordinationNum(adsorbFile2, (pairsSet[kk][1]-\
+                                numOfSlabAtoms))
+                        if (coordNum < MAX_COORDINATION_NUM):
+                            # write initial### and ISOMERS file
+                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
+                                    str(i).zfill(4) + "/scratch/"
+                            if not os.path.exists(folder):
+                                os.makedirs(folder)
+                            fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+                            fh.write("NEW\n")
+                            firstNum_1 = element_1[0] + numOfSlabAtoms
+                            secondNum_1 = element_1[1] + numOfSlabAtoms
+                            fh.write("BREAK " + str(firstNum_1) + "  " + str(secondNum_1) + "\n")
+                            fh.write("ADD   " + str(pairsSet[kk][0]) + "  " + str(pairsSet[kk][1]) + "\n")
+                            fh.close()
+                            i += 1
 
             for element_2 in breakCombos_2:
-                #for element_1 in breakCombos_1:
-                    #connected_1 = areConnected(adsorbFile1, element_1)
-                    connected_2 = areConnected(adsorbFile2, element_2)
-                    if (connected_2 == True):
-                    #if (connected_1 == True and connected_2 == True):
-                        #pairsSet = generateIsomerPair(element_1, element_2,\
-                        #    numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
-                        pairsSet = generateIsomerPair(element_2, reactiveIndices_1,\
+                connected_2 = areConnected(adsorbFile2, element_2)
+                if (connected_2 == True):
+                    pairsSet = generateIsomerPair(element_2, reactiveIndices_1,\
                             numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
-                        print ("FFFFFFF", len(pairsSet))
-                        print (pairsSet)
-                        for kk in range(0, len(pairsSet)):
-                            # TODO check coordination number
-                            coordNum = getCoordinationNum(adsorbFile1, (pairsSet[kk][0] -\
-                                    numOfSlabAtoms - numOfAds1Atoms))
-                            if (coordNum < MAX_COORDINATION_NUM):
-                                # write initial### and ISOMERS file
-                                folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
-                                        str(i).zfill(4) + "/scratch/"
-                                if not os.path.exists(folder):
-                                    os.makedirs(folder)
-                                fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
-                                fh.write("NEW\n")
-                                firstNum_2 = element_2[0] + numOfSlabAtoms + numOfAds1Atoms
-                                secondNum_2 = element_2[1] + numOfSlabAtoms + numOfAds1Atoms
-                                fh.write("BREAK " + str(firstNum_2) + "  " + str(secondNum_2) + "\n")
-                                fh.write("ADD   " + str(pairsSet[kk][1]) + "  " + str(pairsSet[kk][0]) + "\n")
-                                fh.close()
-                                i += 1
+                    for kk in range(0, len(pairsSet)):
+                        # TODO check coordination number
+                        coordNum = getCoordinationNum(adsorbFile1, (pairsSet[kk][0] -\
+                                numOfSlabAtoms - numOfAds1Atoms))
+                        if (coordNum < MAX_COORDINATION_NUM):
+                            # write initial### and ISOMERS file
+                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
+                                    str(i).zfill(4) + "/scratch/"
+                            if not os.path.exists(folder):
+                                os.makedirs(folder)
+                            fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+                            fh.write("NEW\n")
+                            firstNum_2 = element_2[0] + numOfSlabAtoms + numOfAds1Atoms
+                            secondNum_2 = element_2[1] + numOfSlabAtoms + numOfAds1Atoms
+                            fh.write("BREAK " + str(firstNum_2) + "  " + str(secondNum_2) + "\n")
+                            fh.write("ADD   " + str(pairsSet[kk][1]) + "  " + str(pairsSet[kk][0]) + "\n")
+                            fh.close()
+                            i += 1
 
                     #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
             # generate adds
@@ -622,48 +544,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-'''
-
-
-#print (slab[0].get_symbol())
-
-print (slab[0].symbol)
-
-print (slab.get_tags())
-binding_sites.set_tags(-1)
-print (binding_sites.get_tags())
-#slab_2 = fcc111('Al', size=(2,2,3), vacuum=10.0)
-#print (slab_2.get_tags())
-vasp_slab = vasp.read_vasp('POSCAR')
-print (vasp_slab.get_tags())
-
-
-list files in the unique geometry directory
-open files and create slab object
-if all tags == 0
-set tags based on INPUT file
-open binding site file
-if name == X, set tag = -3
-if (tag1 != tag2)
-if num of adsorbates == 2
-    generate add and break moves (bimolecular)
-elif num of adsorbates == 1
-    find nearby sites, how????????
-    generate combinations
-
-
-
-find number of slab atoms in x, y, z
-'''
-
-
-
-
-
-
-
-
-
 
