@@ -23,6 +23,8 @@ import numpy as np
 import csv
 import math
 
+from CoordinationNumbers import CoordinationNumbers
+
 '''
 ASE modules
 '''
@@ -225,6 +227,14 @@ def getCoordinationNum(inputFile, indexIn):
     anAtom = adsorbate.GetAtom(indexIn)
     return anAtom.GetValence()
 
+def getAtomicNumber(inputFile, indexIn):
+    obConversion = OB.OBConversion()
+    obConversion.SetInFormat("xyz")
+    adsorbate = OB.OBMol()
+    obConversion.ReadFile(adsorbate, inputFile)
+
+    anAtom = adsorbate.GetAtom(indexIn)
+    return anAtom.GetAtomicNum()
 
 # TODO write function to find number of atoms in each layer, x, y
 
@@ -250,7 +260,6 @@ def main():
             if i == 1:
                 slabType = line.strip()
 
-    print (slabType)
     # read number of adsorbate 1 atoms
     with open(adsorbFile1, 'r') as fh:
         numOfAds1Atoms = int(fh.readline().strip())
@@ -434,9 +443,13 @@ def main():
                             numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
 
                     for kk in range(0, len(pairsSet)):
-                        # TODO check coordination number
+                        # check coordination number
                         coordNum = getCoordinationNum(adsorbFile2, (pairsSet[kk][1]-\
-                                numOfSlabAtoms))
+                                numOfSlabAtoms - numOfAds1Atoms))
+                        atomicNumber = getAtomicNumber(adsorbFile2, (pairsSet[kk][1]-\
+                                numOfSlabAtoms - numOfAds1Atoms))
+                        CoordinationNumbers()
+                        MAX_COORDINATION_NUM = CoordinationNumbers.getMaxCoordNum(atomicNumber)
                         if (coordNum < MAX_COORDINATION_NUM):
                             # write initial### and ISOMERS file
                             folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
@@ -458,10 +471,18 @@ def main():
                     pairsSet = generateIsomerPair(element_2, reactiveIndices_1,\
                             numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
                     for kk in range(0, len(pairsSet)):
-                        # TODO check coordination number
+                        # check coordination number
                         coordNum = getCoordinationNum(adsorbFile1, (pairsSet[kk][0] -\
-                                numOfSlabAtoms - numOfAds1Atoms))
+                                numOfSlabAtoms))
+
+                        '''
+                        atomicNumber = getAtomicNumber(adsorbFile1, (pairsSet[kk][0]-\
+                                numOfSlabAtoms))
+                        CoordinationNumbers()
+                        MAX_COORDINATION_NUM = CoordinationNumbers.getMaxCoordNum(atomicNumber)
                         if (coordNum < MAX_COORDINATION_NUM):
+                        '''
+                        if (True):
                             # write initial### and ISOMERS file
                             folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
                                     str(i).zfill(4) + "/scratch/"
