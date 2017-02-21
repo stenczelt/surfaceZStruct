@@ -1,9 +1,11 @@
 *.xyz
 *.o
 tmp/*
-eigen/*
+eigen/
 *.exe
 *.out
 tags
 fort.48
 optimization
+se_gsm_cals*
+__pycache__*
