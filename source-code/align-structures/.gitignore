@@ -9,3 +9,4 @@ fort.48
 optimization
 se_gsm_cals*
 __pycache__*
+*.pyc
