@@ -33,7 +33,8 @@ from ase.calculators.emt import EMT
 from ase.calculators.vasp import Vasp
 from ase.constraints import FixAtoms
 from ase.io import write, read
-from ase.build import surface, add_adsorbate, fcc100, fcc110, fcc111,\
+#from ase.build import surface, add_adsorbate, fcc100, fcc110, fcc111,\
+from ase.lattice.surface import surface, add_adsorbate, fcc100, fcc110, fcc111,\
         hcp0001, bcc100, bcc110, bcc111
 
 '''
@@ -286,7 +287,7 @@ def main():
     # define slab
     slab = fcc100('Cu', size=(4,3,2), vacuum=14)
     #adsorbate= Atoms('NH3OH2')
-    adsorbate = Atoms('NH3')
+    adsorbate = Atoms('CO2CO2')
     add_adsorbate(slab, adsorbate, 1.7, 'ontop')
 
     # current working directory
@@ -357,6 +358,9 @@ def main():
                     if not os.path.exists(folder):
                         os.makedirs(folder)
                     # TODO check for number of addMoves and breakMoves
+                    # TODO one add one break
+                    # TODO two add two break
+                    # TODO other cases
                     fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
                     fh.write("NEW\n")
                     firstNum = element[0] + numOfSlabAtoms #+ numOfBSAtoms
@@ -411,6 +415,7 @@ def main():
                     os.chdir(cwd)
                     i += 1
 
+        #######################
         # bi-molecular reaction
         # TODO check number of adds and breaks match number of reactive atoms. Raise error if an add
         # move requires breaking a bond but number of breaks is zero.
@@ -448,8 +453,8 @@ def main():
                                 numOfSlabAtoms - numOfAds1Atoms))
                         atomicNumber = getAtomicNumber(adsorbFile2, (pairsSet[kk][1]-\
                                 numOfSlabAtoms - numOfAds1Atoms))
-                        CoordinationNumbers()
-                        MAX_COORDINATION_NUM = CoordinationNumbers.getMaxCoordNum(atomicNumber)
+                        #CoordinationNumbers()
+                        MAX_COORDINATION_NUM = CoordinationNumbers().getMaxCoordNum(atomicNumber)
                         if (coordNum < MAX_COORDINATION_NUM):
                             # write initial### and ISOMERS file
                             folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
@@ -463,6 +468,46 @@ def main():
                             fh.write("BREAK " + str(firstNum_1) + "  " + str(secondNum_1) + "\n")
                             fh.write("ADD   " + str(pairsSet[kk][0]) + "  " + str(pairsSet[kk][1]) + "\n")
                             fh.close()
+
+                            #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+                            slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+
+                            # Read slab type form slab file input (surface.xyz)
+                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'r')
+                            lines = fh.readlines()
+                            lines[1] = slabType + '\n'
+                            fh.close()
+
+                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
+                            fh.writelines(lines)
+                            fh.close()
+
+                            # submit SE-GSM
+                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
+                                    str(i).zfill(4)
+                            src = "inputs_se_gsm/"
+                            src_files = listFiles(src)
+                            for file_name in src_files:
+                                full_file_name = os.path.join(src, file_name)
+                                #if (os.path.isfile(full_file_name)):
+                                shutil.copy(full_file_name, folder)
+
+                            # setting up runGSM.qsh files
+                            fh = open("inputs_se_gsm/scratch/runGSM.qsh")
+                            templateFile = Template(fh.read())
+                            # user can replace this with a meaningful name
+                            jobName = "test" + str(i).zfill(4)
+                            myDictionary = {'jobName':jobName, 'jobID':i}
+                            result = templateFile.substitute(myDictionary)
+                            PBSfile = folder + "/scratch/runGSM.qsh"
+                            fh = open(PBSfile,"w")
+                            fh.write(result)
+                            fh.close()
+
+                            os.chdir(folder)
+                            call(["qsub", "scratch/runGSM.qsh"])
+                            os.chdir(cwd)
+                            
                             i += 1
 
             for element_2 in breakCombos_2:
@@ -474,15 +519,11 @@ def main():
                         # check coordination number
                         coordNum = getCoordinationNum(adsorbFile1, (pairsSet[kk][0] -\
                                 numOfSlabAtoms))
-
-                        '''
                         atomicNumber = getAtomicNumber(adsorbFile1, (pairsSet[kk][0]-\
                                 numOfSlabAtoms))
-                        CoordinationNumbers()
-                        MAX_COORDINATION_NUM = CoordinationNumbers.getMaxCoordNum(atomicNumber)
+                        #CoordinationNumbers()
+                        MAX_COORDINATION_NUM = CoordinationNumbers().getMaxCoordNum(atomicNumber)
                         if (coordNum < MAX_COORDINATION_NUM):
-                        '''
-                        if (True):
                             # write initial### and ISOMERS file
                             folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
                                     str(i).zfill(4) + "/scratch/"
@@ -495,7 +536,145 @@ def main():
                             fh.write("BREAK " + str(firstNum_2) + "  " + str(secondNum_2) + "\n")
                             fh.write("ADD   " + str(pairsSet[kk][1]) + "  " + str(pairsSet[kk][0]) + "\n")
                             fh.close()
+
+                            #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+                            slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+
+                            # Read slab type form slab file input (surface.xyz)
+                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'r')
+                            lines = fh.readlines()
+                            lines[1] = slabType + '\n'
+                            fh.close()
+
+                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
+                            fh.writelines(lines)
+                            fh.close()
+
+                            # submit SE-GSM
+                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
+                                    str(i).zfill(4)
+                            src = "inputs_se_gsm/"
+                            src_files = listFiles(src)
+                            for file_name in src_files:
+                                full_file_name = os.path.join(src, file_name)
+                                #if (os.path.isfile(full_file_name)):
+                                shutil.copy(full_file_name, folder)
+
+                            # setting up runGSM.qsh files
+                            fh = open("inputs_se_gsm/scratch/runGSM.qsh")
+                            templateFile = Template(fh.read())
+                            # user can replace this with a meaningful name
+                            jobName = "test" + str(i).zfill(4)
+                            myDictionary = {'jobName':jobName, 'jobID':i}
+                            result = templateFile.substitute(myDictionary)
+                            PBSfile = folder + "/scratch/runGSM.qsh"
+                            fh = open(PBSfile,"w")
+                            fh.write(result)
+                            fh.close()
+
+                            os.chdir(folder)
+                            call(["qsub", "scratch/runGSM.qsh"])
+                            os.chdir(cwd)
+
                             i += 1
+
+
+            # for addMove == 2 and breakMove == 2
+            # TODO
+
+            for element_1 in breakCombos_1:
+                for element_2 in breakCombos_2:
+                    connected_1 = areConnected(adsorbFile1, element_1)
+                    connected_2 = areConnected(adsorbFile2, element_2)
+                    if (connected_1 == True and connected_2 == True):
+                        #pairsSet = generateIsomerPair(element_1, reactiveIndices_2,\
+                        #        numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
+                        twoPairsSet = generate2IsomerPairs(element_1, element_2,\
+                                numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
+
+                        for kk in range(0, len(twoPairsSet)):
+                            # check coordination number
+                            # Do we need this here? don't think so.
+                            '''
+                            coordNum = getCoordinationNum(adsorbFile2, (pairsSet[kk][1]-\
+                                    numOfSlabAtoms - numOfAds1Atoms))
+                            atomicNumber = getAtomicNumber(adsorbFile2, (pairsSet[kk][1]-\
+                                    numOfSlabAtoms - numOfAds1Atoms))
+                            #CoordinationNumbers()
+                            MAX_COORDINATION_NUM = CoordinationNumbers().getMaxCoordNum(atomicNumber)
+                            if (coordNum < MAX_COORDINATION_NUM):
+                            '''
+                            #if (True):
+                            # write initial### and ISOMERS file
+                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
+                                    str(i).zfill(4) + "/scratch/"
+                            if not os.path.exists(folder):
+                                os.makedirs(folder)
+                            fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+                            fh.write("NEW\n")
+                            firstNum_1 = element_1[0] + numOfSlabAtoms
+                            secondNum_1 = element_1[1] + numOfSlabAtoms
+                            firstNum_2 = element_2[0] + numOfSlabAtoms + numOfAds1Atoms
+                            secondNum_2 = element_2[1] + numOfSlabAtoms + numOfAds1Atoms
+                            fh.write("BREAK " + str(firstNum_1) + "  " + str(secondNum_1) + "\n")
+                            fh.write("BREAK " + str(firstNum_2) + "  " + str(secondNum_2) + "\n")
+                            fh.write("ADD   " + str(twoPairsSet[kk][0][0]) + "  " + str(twoPairsSet[kk][0][1]) + "\n")
+                            fh.write("ADD   " + str(twoPairsSet[kk][1][0]) + "  " + str(twoPairsSet[kk][1][1]) + "\n")
+                            fh.close()
+
+                            slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+
+                            # Read slab type form slab file input (surface.xyz)
+                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'r')
+                            lines = fh.readlines()
+                            lines[1] = slabType + '\n'
+                            fh.close()
+
+                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
+                            fh.writelines(lines)
+                            fh.close()
+
+                            # submit SE-GSM
+                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
+                                    str(i).zfill(4)
+                            src = "inputs_se_gsm/"
+                            src_files = listFiles(src)
+                            for file_name in src_files:
+                                full_file_name = os.path.join(src, file_name)
+                                #if (os.path.isfile(full_file_name)):
+                                shutil.copy(full_file_name, folder)
+
+                            # setting up runGSM.qsh files
+                            fh = open("inputs_se_gsm/scratch/runGSM.qsh")
+                            templateFile = Template(fh.read())
+                            # user can replace this with a meaningful name
+                            jobName = "test" + str(i).zfill(4)
+                            myDictionary = {'jobName':jobName, 'jobID':i}
+                            result = templateFile.substitute(myDictionary)
+                            PBSfile = folder + "/scratch/runGSM.qsh"
+                            fh = open(PBSfile,"w")
+                            fh.write(result)
+                            fh.close()
+
+
+                            os.chdir(folder)
+                            call(["qsub", "scratch/runGSM.qsh"])
+                            os.chdir(cwd)
+                            i += 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                     #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
             # generate adds
