@@ -7,7 +7,7 @@ class CoordinationNumbers():
 
     #def __init__(self):
     
-    def getMaxCoordNum(atomicNumber):
+    def getMaxCoordNum(self, atomicNumber):
         atomicNum_coordNum_dictionary = {
                 1:1,  # H
                 2:0,  # He
