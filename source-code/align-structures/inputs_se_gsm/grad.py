@@ -30,7 +30,7 @@ folder = 'scratch/vasp'+argv1
 
 #lattice and initial atom setup for unit cell
 slab = fcc100('Cu', size=(4,3,2), vacuum=10)
-add_adsorbate(slab, 'NH3', 2.5, 'ontop')
+add_adsorbate(slab, 'CO2CO2', 2.5, 'ontop')
 
 #current position read in
 slabatoms = read(fname)

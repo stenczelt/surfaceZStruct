@@ -1,7 +1,7 @@
 '''
 import modules
 '''
-import sys
+import sys 
 sys.path.append('/export/zimmerman/paulzim/ase')
 
 from ase import Atoms,Atom
@@ -10,15 +10,21 @@ from ase.calculators.vasp import Vasp
 from ase.constraints import FixAtoms
 from ase.optimize import QuasiNewton
 from ase.io import write, read
+#from ase.build import surface, add_adsorbate, fcc100, fcc110, fcc111,\
 from ase.lattice.surface import surface, add_adsorbate, fcc100, fcc110, fcc111,\
         hcp0001, bcc100, bcc110, bcc111
 
 '''
 set up slab and adsorbates by reading it from input file
 '''
-slab = read("${input}", format='xyz')
+slab = fcc100('Cu', size=(4,3,2), vacuum=10)
+ads = Atoms('CO2CO2')
+add_adsorbate(slab, ads, 2.5, 'ontop')
 
-mask = [atom.tag > 2 for atom in slab]
+slabAtoms = read("${input}", format='xyz')
+slab.set_positions(slabAtoms.get_positions())
+
+mask = [atom.tag > 1 for atom in slab]
 slab.set_constraint(FixAtoms(mask=mask))
 calc = Vasp(xc='PBE', lreal='Auto', kpts=[1,1,1], ismear=1, sigma=0.2, algo='fast', istart=0, npar=2, encut=300)
 #calc = EMT()
