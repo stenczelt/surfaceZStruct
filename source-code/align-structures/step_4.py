@@ -283,11 +283,12 @@ def main():
     files = listFiles(folderName)
 
     #TODO User should change this part without editing source code file
+    # read it from file
     #TODO How about slabs read from POSCAR file
     # define slab
-    slab = fcc100('Cu', size=(4,3,2), vacuum=14)
+    slab = fcc111('Pd', size=(4,3,2), vacuum=15)
     #adsorbate= Atoms('NH3OH2')
-    adsorbate = Atoms('CO2CO2')
+    adsorbate = Atoms('C2H3CHO')
     add_adsorbate(slab, adsorbate, 1.7, 'ontop')
 
     # current working directory
@@ -381,6 +382,29 @@ def main():
                     lines[1] = slabType + '\n'
                     fh.close()
 
+                    # read slab size and number of frozen atoms from run.py
+                    fh = open("run.py", 'r')
+                    run_lines = fh.readlines()
+                    fh.close()
+                    atomsInX = 0
+                    atomsInY = 0
+                    atomsInZ = 0
+                    frozenLayers = 0
+                    for line in run_lines:
+                        if "size" in line:
+                            splitted_line = line.split(',', -1)
+                            atomsInX = int( splitted_line[1].split('(')[1].strip() )
+                            atomsInY = int( splitted_line[2].strip() )
+                            atomsInZ = int( splitted_line[3].split(')')[0].strip() )
+                        if "atom.tag" in line:
+                            frozenLayers = int( line.split('>')[1].split('f')[0].strip() )
+                    numOfFrozenAtoms = atomsInX * atomsInY * (atomsInZ - frozenLayers)
+
+                    for k in range(2, numOfFrozenAtoms+2):
+                        lines[k] = lines[k].rstrip()
+                        lines[k] = lines[k] + " *\n"
+
+
                     fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
                     fh.writelines(lines)
                     fh.close()
@@ -440,6 +464,7 @@ def main():
                         breakCombos_2.append(temp)
 
             # for addMove == 1 and breakMove == 1
+            # TODO check for number of adds and breaks
             i = 1
             for element_1 in breakCombos_1:
                 connected_1 = areConnected(adsorbFile1, element_1)
@@ -477,6 +502,29 @@ def main():
                             lines = fh.readlines()
                             lines[1] = slabType + '\n'
                             fh.close()
+
+                            # read slab size and number of frozen atoms from run.py
+                            fh = open("run.py", 'r')
+                            run_lines = fh.readlines()
+                            fh.close()
+                            atomsInX = 0
+                            atomsInY = 0
+                            atomsInZ = 0
+                            frozenLayers = 0
+                            for line in run_lines:
+                                if "size" in line:
+                                    splitted_line = line.split(',', -1)
+                                    atomsInX = int( splitted_line[1].split('(')[1].strip() )
+                                    atomsInY = int( splitted_line[2].strip() )
+                                    atomsInZ = int( splitted_line[3].split(')')[0].strip() )
+                                if "atom.tag" in line:
+                                    frozenLayers = line.split('>')[1].split('f').strip()
+                            numOfFrozenAtoms = atomsInX * atomsInY * (atomsInZ - frozenLayers)
+                            
+                            for k in range(2, numOfFrozenAtoms+2):
+                                lines[k] = lines[k].rstrip()
+                                lines[k] = lines[k] + " *\n"
+
 
                             fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
                             fh.writelines(lines)
@@ -546,6 +594,29 @@ def main():
                             lines[1] = slabType + '\n'
                             fh.close()
 
+                            # read slab size and number of frozen atoms from run.py
+                            fh = open("run.py", 'r')
+                            run_lines = fh.readlines()
+                            fh.close()
+                            atomsInX = 0
+                            atomsInY = 0
+                            atomsInZ = 0
+                            frozenLayers = 0
+                            for line in run_lines:
+                                if "size" in line:
+                                    splitted_line = line.split(',', -1)
+                                    atomsInX = int( splitted_line[1].split('(')[1].strip() )
+                                    atomsInY = int( splitted_line[2].strip() )
+                                    atomsInZ = int( splitted_line[3].split(')')[0].strip() )
+                                if "atom.tag" in line:
+                                    frozenLayers = line.split('>')[1].split('f').strip()
+                            numOfFrozenAtoms = atomsInX * atomsInY * (atomsInZ - frozenLayers)
+                            
+                            for k in range(2, numOfFrozenAtoms+2):
+                                lines[k] = lines[k].rstrip()
+                                lines[k] = lines[k] + " *\n"
+
+
                             fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
                             fh.writelines(lines)
                             fh.close()
@@ -580,8 +651,9 @@ def main():
 
 
             # for addMove == 2 and breakMove == 2
-            # TODO
+            # TODO check for number of adds and breaks
 
+            # if (addMoves == 2 and breakMoves == 2):
             for element_1 in breakCombos_1:
                 for element_2 in breakCombos_2:
                     connected_1 = areConnected(adsorbFile1, element_1)
@@ -629,6 +701,29 @@ def main():
                             lines = fh.readlines()
                             lines[1] = slabType + '\n'
                             fh.close()
+
+                            # read slab size and number of frozen atoms from run.py
+                            fh = open("run.py", 'r')
+                            run_lines = fh.readlines()
+                            fh.close()
+                            atomsInX = 0
+                            atomsInY = 0
+                            atomsInZ = 0
+                            frozenLayers = 0
+                            for line in run_lines:
+                                if "size" in line:
+                                    splitted_line = line.split(',', -1)
+                                    atomsInX = int( splitted_line[1].split('(')[1].strip() )
+                                    atomsInY = int( splitted_line[2].strip() )
+                                    atomsInZ = int( splitted_line[3].split(')')[0].strip() )
+                                if "atom.tag" in line:
+                                    frozenLayers = line.split('>')[1].split('f').strip()
+                            numOfFrozenAtoms = atomsInX * atomsInY * (atomsInZ - frozenLayers)
+                            
+                            for k in range(2, numOfFrozenAtoms+2):
+                                lines[k] = lines[k].rstrip()
+                                lines[k] = lines[k] + " *\n"
+
 
                             fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
                             fh.writelines(lines)
