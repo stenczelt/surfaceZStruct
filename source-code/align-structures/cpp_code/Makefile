@@ -2,7 +2,7 @@
 
 # Executable name
 CMD = align.exe
-INC=-I$(MKLROOT)/include -I/export/zimmerman/mjafari/ZStruct-S/source-code/align-structures
+INC=-I$(MKLROOT)/include -I/export/zimmerman/mjafari/ZStruct-S/source-code/align-structures -I.
 #INC=-I$(MKLROOT)/include
 
 # -------- description of DFLAGS ---------------

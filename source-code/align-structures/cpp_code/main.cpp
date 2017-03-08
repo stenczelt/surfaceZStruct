@@ -56,7 +56,13 @@ int main(int argc, char* argv[])
         int addArray[4] = {};
         if (returnVal == 1)
         {
-            readSlabFileAndWrite(slabFileName);
+            if (! readSlabFileAndWrite(slabFileName))
+            {
+                std::cout << "ERROR: Slab type not set for this file. Set slab "
+                    "type on the second line of slab file input. Supported types "
+                    "are fcc and bcc 100, 110, 111, and hcp0001." << std::endl;
+                return -1;
+            }
             std::cout << "\n****************************************************************\n";
             std::cout << "  Output written to bindingSites.xyz and slabBindingSites.xyz" << std::endl;;
             std::cout << "\n****************************************************************\n";
@@ -312,6 +318,7 @@ bool readSlabFileAndWrite(std::string &slabFileName)
     }
     catch(...)
     {
+        std::cout << "TEST " << std::endl;
         return false;
     }
 
