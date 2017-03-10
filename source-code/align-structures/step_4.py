@@ -180,7 +180,7 @@ def findNearbySites(slab, atomIndex, bindingSiteFile):
     for element in wrongIndices:
         if element in listOfSites:
             listOfSites.remove(element)
-    return listOfSites
+    return list(listOfSites)
 
 
 # find two indices from two input lists that are farthest from eachother
@@ -352,6 +352,18 @@ def main():
                     # find two sites that are farthest from two lists of binding sites
                     farthestSites = findFarthestIndices(listOfSitesFrag_1,\
                         listOfSitesFrag_2, "bindingSites.xyz")
+                    '''
+                    for i in range (0, len(listOfSitesFrag_1)):
+                        listOfSitesFrag_1[i] += numOfSlabAtoms + numOfAds1Atoms + 1
+                    for i in range (0, len(listOfSitesFrag_2)):
+                        listOfSitesFrag_2[i] += numOfSlabAtoms + numOfAds1Atoms + 1
+                    for i in range (0, len(farthestSites)):
+                        farthestSites[i] += numOfSlabAtoms + numOfAds1Atoms + 1
+                    print ("FFFFFFFFF ", file)
+                    print ("AAAAAAAAAA ", listOfSitesFrag_1)
+                    print ("BBBBBBBBBB ", listOfSitesFrag_2)
+                    print ("CCCCCCCCC ", farthestSites)
+                    '''
                     # TODO add to different binding site types
                     # write initial### and ISOMERS file
                     folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
@@ -367,10 +379,10 @@ def main():
                     firstNum = element[0] + numOfSlabAtoms #+ numOfBSAtoms
                     secondNum = element[1] + numOfSlabAtoms #+ numOfBSAtoms
                     fh.write("BREAK " + str(firstNum) + "  " + str(secondNum) + "\n")
-                    fh.write("ADD   " + str(farthestSites[0] + 1 + numOfSlabAtoms) + "  " +\
-                        str(firstNum) + "\n")
-                    fh.write("ADD   " + str(farthestSites[1] + 1 + numOfSlabAtoms) + "  " +\
-                        str(secondNum) + "\n")
+                    fh.write("ADD   " + str(farthestSites[0] + numOfSlabAtoms + numOfAds1Atoms + 1)\
+                            + "  " + str(firstNum) + "\n")
+                    fh.write("ADD   " + str(farthestSites[1] + numOfSlabAtoms + numOfAds1Atoms + 1)\
+                            + "  " + str(secondNum) + "\n")
                     fh.close()
 
                     #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
@@ -426,7 +438,7 @@ def main():
                     fh = open("inputs_se_gsm/scratch/runGSM.qsh")
                     templateFile = Template(fh.read())
                     # user can replace this with a meaningful name
-                    jobName = "test" + str(i).zfill(4)
+                    jobName = file.split(".")[0].split('-', 1)[1] + str(i).zfill(4)
                     myDictionary = {'jobName':jobName, 'jobID':i}
                     result = templateFile.substitute(myDictionary)
                     PBSfile = folder + "/scratch/runGSM.qsh"
@@ -544,7 +556,8 @@ def main():
                             fh = open("inputs_se_gsm/scratch/runGSM.qsh")
                             templateFile = Template(fh.read())
                             # user can replace this with a meaningful name
-                            jobName = "test" + str(i).zfill(4)
+                            #jobName = "test" + str(i).zfill(4)
+                            jobName = file.split(".")[0].split('-', 1)[1] + str(i).zfill(4)
                             myDictionary = {'jobName':jobName, 'jobID':i}
                             result = templateFile.substitute(myDictionary)
                             PBSfile = folder + "/scratch/runGSM.qsh"
@@ -635,7 +648,8 @@ def main():
                             fh = open("inputs_se_gsm/scratch/runGSM.qsh")
                             templateFile = Template(fh.read())
                             # user can replace this with a meaningful name
-                            jobName = "test" + str(i).zfill(4)
+                            #jobName = "test" + str(i).zfill(4)
+                            jobName = file.split(".")[0].split('-', 1)[1] + str(i).zfill(4)
                             myDictionary = {'jobName':jobName, 'jobID':i}
                             result = templateFile.substitute(myDictionary)
                             PBSfile = folder + "/scratch/runGSM.qsh"
@@ -743,7 +757,8 @@ def main():
                             fh = open("inputs_se_gsm/scratch/runGSM.qsh")
                             templateFile = Template(fh.read())
                             # user can replace this with a meaningful name
-                            jobName = "test" + str(i).zfill(4)
+                            jobName = file.split(".")[0].split('-', 1)[1] + str(i).zfill(4)
+                            #jobName = "test" + str(i).zfill(4)
                             myDictionary = {'jobName':jobName, 'jobID':i}
                             result = templateFile.substitute(myDictionary)
                             PBSfile = folder + "/scratch/runGSM.qsh"
