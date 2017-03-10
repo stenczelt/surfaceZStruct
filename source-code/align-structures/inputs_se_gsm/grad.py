@@ -29,8 +29,8 @@ tmpDir = os.getenv('PBSTMPDIR')
 folder = 'scratch/vasp'+argv1
 
 #lattice and initial atom setup for unit cell
-slab = fcc100('Cu', size=(4,3,2), vacuum=10)
-add_adsorbate(slab, 'CO2CO2', 2.5, 'ontop')
+slab = fcc111('Pd', size=(4,3,2), vacuum=15)
+add_adsorbate(slab, 'C2H3CHO', 2.5, 'ontop')
 
 #current position read in
 slabatoms = read(fname)

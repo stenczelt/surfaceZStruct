@@ -17,8 +17,8 @@ from ase.lattice.surface import surface, add_adsorbate, fcc100, fcc110, fcc111,\
 '''
 set up slab and adsorbates by reading it from input file
 '''
-slab = fcc100('Cu', size=(4,3,2), vacuum=10)
-ads = Atoms('CO2CO2')
+slab = fcc111('Pd', size=(4,3,2), vacuum=15)
+ads = Atoms('C2H3CHO')
 add_adsorbate(slab, ads, 2.5, 'ontop')
 
 slabAtoms = read("${input}", format='xyz')

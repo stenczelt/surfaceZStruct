@@ -1,11 +1,11 @@
 find-sites          0               #0/1 if 1, finds binding sites
-slab-file           surface.xyz     #name of slab file
-numOfAdsorbates     2               #number of adsorbate fragments to be added to slab
-index-number-1      35              #index of the first binding site
-radius1             1.0             #search radius for the first fragment
-adsorbate-file      co2.xyz         #name of first adsorbate file
-adsIndex-number-1   1               #index of the atom to be added
-reactiveAtomIndex   1 2 0         #atoms to undergo combination search
+slab-file           fcc111_Pd.xyz   #name of slab file
+numOfAdsorbates     1               #number of adsorbate fragments to be added to slab
+index-number-1      41              #index of the first binding site
+radius1             0.5             #search radius for the first fragment
+adsorbate-file      acid.xyz         #name of first adsorbate file
+adsIndex-number-1   6               #index of the atom to be added
+reactiveAtomIndex   1 2 3 6 7         #atoms to undergo combination search
 ---------------------------------------------------------------------------------------
 index-number-2      56              #index of the second binding site
 radius2             1.0             #search radius for the second fragment
