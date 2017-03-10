@@ -1,8 +1,7 @@
 # Mina Jafari
 # 19-01-2017
-# This script reads optimized files, finds unique ones, and sorts them based on
-# energy. TODO
-# Step 4 of surface ZStruct: reading in optimized structures and generating driving coordinates
+# This script reads the unique structures and creates driving coordinates and runs SE-GSM.
+# Step 5 of surface ZStruct: reading in optimized structures and generating driving coordinates
 # and initial####.xyz files containing binding sites for SE-GSM calculations.
 
 '''
@@ -19,7 +18,6 @@ from os.path import isfile, join
 from string import Template
 from subprocess import call
 import numpy as np
-#import pandas as pd
 import csv
 import math
 
@@ -52,8 +50,7 @@ def listFiles(folderPath):
     return (alignedStructures)
 
 def readInputFile():
-    #inputFile = np.genfromtxt("INPUT", dtype='str', delimiter="\t", usecols = range(0,2))
-    inputFile = np.genfromtxt("INPUT", dtype='str', delimiter=" +")#, usecols=(0,1))
+    inputFile = np.genfromtxt("INPUT", dtype='str', delimiter=" +")
     
     findSites = int(inputFile[0].split()[1])
     slabFile = inputFile[1].split()[1]
@@ -92,20 +89,6 @@ def readInputFile():
     return (findSites, slabFile, numOfAdsorbates, slabIndex1, radius1, adsorbFile1,\
             adsorbIndex1, reactiveIndices_1, slabIndex2, radius2,\
             adsorbFile2, adsorbIndex2, reactiveIndices_2, addMoves, breakMoves)
-
-'''
-recursive 
-def generateIsomers(numOfBreakMoves, numOfAddMoves, reactiveIndices_1, reactiveIndices_2,\
-        currentSet):
-    for i in range(0, numOfBreakMoves):
-        generateIsomers(numOfBreakMoves, numOfAddMoves, reactiveIndices_1[1:],\
-                (reactiveIndices_2[:i] + reactiveIndices_2[(i+1):]),\
-                (currentSet.append(reactiveIndices_1[0]).append(reactiveIndices_2[i])))
-#        currentSet.append(reactiveIndices_1[0], reactiveIndices_2[i])
-        if i == 2:
-            return currentSet
-
-'''
 
 # creates a list of lists. Each list has indices of two atoms that wil be added
 def generateIsomerPair(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
@@ -237,6 +220,69 @@ def getAtomicNumber(inputFile, indexIn):
     anAtom = adsorbate.GetAtom(indexIn)
     return anAtom.GetAtomicNum()
 
+def createTemplateFiles(file, folder, index, slab, slabType):
+    slab.write(folder + "initial" + str(index).zfill(4) + ".xyz")
+
+    # Read slab type form slab file input (surface.xyz)
+    fh = open(folder + "initial" + str(index).zfill(4) + ".xyz", 'r')
+    lines = fh.readlines()
+    lines[1] = slabType + '\n'
+    fh.close()
+
+    # read slab size and number of frozen atoms from run.py
+    fh = open("run.py", 'r')
+    run_lines = fh.readlines()
+    fh.close()
+    atomsInX = 0
+    atomsInY = 0
+    atomsInZ = 0
+    frozenLayers = 0
+    for line in run_lines:
+        if "size" in line:
+            splitted_line = line.split(',', -1)
+            atomsInX = int( splitted_line[1].split('(')[1].strip() )
+            atomsInY = int( splitted_line[2].strip() )
+            atomsInZ = int( splitted_line[3].split(')')[0].strip() )
+        if "atom.tag" in line:
+            frozenLayers = int( line.split('>')[1].split('f')[0].strip() )
+    numOfFrozenAtoms = atomsInX * atomsInY * (atomsInZ - frozenLayers)
+    
+    for k in range(2, numOfFrozenAtoms+2):
+        lines[k] = lines[k].rstrip()
+        lines[k] = lines[k] + " *\n"
+
+
+    fh = open(folder + "initial" + str(index).zfill(4) + ".xyz", 'w')
+    fh.writelines(lines)
+    fh.close()
+
+    # setting up runGSM.qsh files
+    fh = open("inputs_se_gsm/scratch/runGSM.qsh")
+    templateFile = Template(fh.read())
+    jobName = file.split(".")[0].split('-', 1)[1] + str(index).zfill(4)
+    myDictionary = {'jobName':jobName, 'jobID':index}
+    result = templateFile.substitute(myDictionary)
+    PBSfile = folder + "/runGSM.qsh"
+    fh = open(PBSfile,"w")
+    fh.write(result)
+    fh.close()
+
+def submitSE_GSM(file, extension, index, cwd):
+    # submit SE-GSM
+    folder = "se_gsm_cals_" + str(extension) + "/" + file.split(".")[0] + "/" +\
+            str(index).zfill(4)
+    src = "inputs_se_gsm/"
+    src_files = listFiles(src)
+    for file_name in src_files:
+        full_file_name = os.path.join(src, file_name)
+        shutil.copy(full_file_name, folder)
+
+    os.chdir(folder)
+    call(["qsub", "scratch/runGSM.qsh"])
+    os.chdir(cwd)
+
+
+
 # TODO write function to find number of atoms in each layer, x, y
 
 
@@ -286,6 +332,7 @@ def main():
     # read it from file
     #TODO How about slabs read from POSCAR file
     # define slab
+
     slab = fcc111('Pd', size=(4,3,2), vacuum=15)
     #adsorbate= Atoms('NH3OH2')
     adsorbate = Atoms('C2H3CHO')
@@ -322,17 +369,9 @@ def main():
             - if two fragments have similar size, always move one of them
             - generate driving coordinates
             '''
-            # create slab to be written to initial000# file
-            #slab_out = slab[0:numOfSlabAtoms]
-            #binding_sites = read("bindingSites.xyz", format='xyz')
-            #for i in range(0, len(binding_sites)):
-            #    slab_out.append(binding_sites[i])
-            #for i in range(0+numOfSlabAtoms, numOfAds1Atoms+numOfSlabAtoms):
-            #    slab_out.append(slab[i])
-
             # find all combinations of reactive indices
             breakCombos = []
-            # TODO check elements are non zero
+            # TODO check elements are non zero. I think this is taken care of. Not 100% sure.
             for i in range(0, len(reactiveIndices_1)):
                 for j in range(i+1, len(reactiveIndices_1)):
                     temp = []
@@ -352,21 +391,9 @@ def main():
                     # find two sites that are farthest from two lists of binding sites
                     farthestSites = findFarthestIndices(listOfSitesFrag_1,\
                         listOfSitesFrag_2, "bindingSites.xyz")
-                    '''
-                    for i in range (0, len(listOfSitesFrag_1)):
-                        listOfSitesFrag_1[i] += numOfSlabAtoms + numOfAds1Atoms + 1
-                    for i in range (0, len(listOfSitesFrag_2)):
-                        listOfSitesFrag_2[i] += numOfSlabAtoms + numOfAds1Atoms + 1
-                    for i in range (0, len(farthestSites)):
-                        farthestSites[i] += numOfSlabAtoms + numOfAds1Atoms + 1
-                    print ("FFFFFFFFF ", file)
-                    print ("AAAAAAAAAA ", listOfSitesFrag_1)
-                    print ("BBBBBBBBBB ", listOfSitesFrag_2)
-                    print ("CCCCCCCCC ", farthestSites)
-                    '''
                     # TODO add to different binding site types
                     # write initial### and ISOMERS file
-                    folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
+                    folder = "se_gsm_cals_1/" + file.split(".")[0] + "/" +\
                         str(i).zfill(4) + "/scratch/"
                     if not os.path.exists(folder):
                         os.makedirs(folder)
@@ -385,70 +412,16 @@ def main():
                             + "  " + str(secondNum) + "\n")
                     fh.close()
 
-                    #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-                    slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-
-                    # Read slab type form slab file input (surface.xyz)
-                    fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'r')
-                    lines = fh.readlines()
-                    lines[1] = slabType + '\n'
-                    fh.close()
-
-                    # read slab size and number of frozen atoms from run.py
-                    fh = open("run.py", 'r')
-                    run_lines = fh.readlines()
-                    fh.close()
-                    atomsInX = 0
-                    atomsInY = 0
-                    atomsInZ = 0
-                    frozenLayers = 0
-                    for line in run_lines:
-                        if "size" in line:
-                            splitted_line = line.split(',', -1)
-                            atomsInX = int( splitted_line[1].split('(')[1].strip() )
-                            atomsInY = int( splitted_line[2].strip() )
-                            atomsInZ = int( splitted_line[3].split(')')[0].strip() )
-                        if "atom.tag" in line:
-                            frozenLayers = int( line.split('>')[1].split('f')[0].strip() )
-                    numOfFrozenAtoms = atomsInX * atomsInY * (atomsInZ - frozenLayers)
-
-                    for k in range(2, numOfFrozenAtoms+2):
-                        lines[k] = lines[k].rstrip()
-                        lines[k] = lines[k] + " *\n"
-
-
-                    fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
-                    fh.writelines(lines)
-                    fh.close()
+                    index = i
+                    createTemplateFiles(file, folder, index, slab, slabType)
 
                     # submit SE-GSM
                     # files needed for SE-GSM calculation: inpfileq, grad.py,
                     # status, gfstringq.exe, scratch/submit_gsm.qsh, scratch/initial000.xyz,
                     # and scratch/ISOMERS000
-                    folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
-                        str(i).zfill(4)
-                    src = "inputs_se_gsm/"
-                    src_files = listFiles(src)
-                    for file_name in src_files:
-                        full_file_name = os.path.join(src, file_name)
-                        #if (os.path.isfile(full_file_name)):
-                        shutil.copy(full_file_name, folder)
+                    extension = 1
+                    submitSE_GSM(file, extension, index, cwd)
 
-                    # setting up runGSM.qsh files
-                    fh = open("inputs_se_gsm/scratch/runGSM.qsh")
-                    templateFile = Template(fh.read())
-                    # user can replace this with a meaningful name
-                    jobName = file.split(".")[0].split('-', 1)[1] + str(i).zfill(4)
-                    myDictionary = {'jobName':jobName, 'jobID':i}
-                    result = templateFile.substitute(myDictionary)
-                    PBSfile = folder + "/scratch/runGSM.qsh"
-                    fh = open(PBSfile,"w")
-                    fh.write(result)
-                    fh.close()
-
-                    os.chdir(folder)
-                    call(["qsub", "scratch/runGSM.qsh"])
-                    os.chdir(cwd)
                     i += 1
 
         #######################
@@ -506,68 +479,10 @@ def main():
                             fh.write("ADD   " + str(pairsSet[kk][0]) + "  " + str(pairsSet[kk][1]) + "\n")
                             fh.close()
 
-                            #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-                            slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-
-                            # Read slab type form slab file input (surface.xyz)
-                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'r')
-                            lines = fh.readlines()
-                            lines[1] = slabType + '\n'
-                            fh.close()
-
-                            # read slab size and number of frozen atoms from run.py
-                            fh = open("run.py", 'r')
-                            run_lines = fh.readlines()
-                            fh.close()
-                            atomsInX = 0
-                            atomsInY = 0
-                            atomsInZ = 0
-                            frozenLayers = 0
-                            for line in run_lines:
-                                if "size" in line:
-                                    splitted_line = line.split(',', -1)
-                                    atomsInX = int( splitted_line[1].split('(')[1].strip() )
-                                    atomsInY = int( splitted_line[2].strip() )
-                                    atomsInZ = int( splitted_line[3].split(')')[0].strip() )
-                                if "atom.tag" in line:
-                                    frozenLayers = line.split('>')[1].split('f').strip()
-                            numOfFrozenAtoms = atomsInX * atomsInY * (atomsInZ - frozenLayers)
-                            
-                            for k in range(2, numOfFrozenAtoms+2):
-                                lines[k] = lines[k].rstrip()
-                                lines[k] = lines[k] + " *\n"
-
-
-                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
-                            fh.writelines(lines)
-                            fh.close()
-
-                            # submit SE-GSM
-                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
-                                    str(i).zfill(4)
-                            src = "inputs_se_gsm/"
-                            src_files = listFiles(src)
-                            for file_name in src_files:
-                                full_file_name = os.path.join(src, file_name)
-                                #if (os.path.isfile(full_file_name)):
-                                shutil.copy(full_file_name, folder)
-
-                            # setting up runGSM.qsh files
-                            fh = open("inputs_se_gsm/scratch/runGSM.qsh")
-                            templateFile = Template(fh.read())
-                            # user can replace this with a meaningful name
-                            #jobName = "test" + str(i).zfill(4)
-                            jobName = file.split(".")[0].split('-', 1)[1] + str(i).zfill(4)
-                            myDictionary = {'jobName':jobName, 'jobID':i}
-                            result = templateFile.substitute(myDictionary)
-                            PBSfile = folder + "/scratch/runGSM.qsh"
-                            fh = open(PBSfile,"w")
-                            fh.write(result)
-                            fh.close()
-
-                            os.chdir(folder)
-                            call(["qsub", "scratch/runGSM.qsh"])
-                            os.chdir(cwd)
+                            index = i
+                            createTemplateFiles(file, folder, index, slab, slabType)
+                            extension = 2
+                            submitSE_GSM(file, extension, index, cwd)
                             
                             i += 1
 
@@ -598,68 +513,10 @@ def main():
                             fh.write("ADD   " + str(pairsSet[kk][1]) + "  " + str(pairsSet[kk][0]) + "\n")
                             fh.close()
 
-                            #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-                            slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-
-                            # Read slab type form slab file input (surface.xyz)
-                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'r')
-                            lines = fh.readlines()
-                            lines[1] = slabType + '\n'
-                            fh.close()
-
-                            # read slab size and number of frozen atoms from run.py
-                            fh = open("run.py", 'r')
-                            run_lines = fh.readlines()
-                            fh.close()
-                            atomsInX = 0
-                            atomsInY = 0
-                            atomsInZ = 0
-                            frozenLayers = 0
-                            for line in run_lines:
-                                if "size" in line:
-                                    splitted_line = line.split(',', -1)
-                                    atomsInX = int( splitted_line[1].split('(')[1].strip() )
-                                    atomsInY = int( splitted_line[2].strip() )
-                                    atomsInZ = int( splitted_line[3].split(')')[0].strip() )
-                                if "atom.tag" in line:
-                                    frozenLayers = line.split('>')[1].split('f').strip()
-                            numOfFrozenAtoms = atomsInX * atomsInY * (atomsInZ - frozenLayers)
-                            
-                            for k in range(2, numOfFrozenAtoms+2):
-                                lines[k] = lines[k].rstrip()
-                                lines[k] = lines[k] + " *\n"
-
-
-                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
-                            fh.writelines(lines)
-                            fh.close()
-
-                            # submit SE-GSM
-                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
-                                    str(i).zfill(4)
-                            src = "inputs_se_gsm/"
-                            src_files = listFiles(src)
-                            for file_name in src_files:
-                                full_file_name = os.path.join(src, file_name)
-                                #if (os.path.isfile(full_file_name)):
-                                shutil.copy(full_file_name, folder)
-
-                            # setting up runGSM.qsh files
-                            fh = open("inputs_se_gsm/scratch/runGSM.qsh")
-                            templateFile = Template(fh.read())
-                            # user can replace this with a meaningful name
-                            #jobName = "test" + str(i).zfill(4)
-                            jobName = file.split(".")[0].split('-', 1)[1] + str(i).zfill(4)
-                            myDictionary = {'jobName':jobName, 'jobID':i}
-                            result = templateFile.substitute(myDictionary)
-                            PBSfile = folder + "/scratch/runGSM.qsh"
-                            fh = open(PBSfile,"w")
-                            fh.write(result)
-                            fh.close()
-
-                            os.chdir(folder)
-                            call(["qsub", "scratch/runGSM.qsh"])
-                            os.chdir(cwd)
+                            index = i
+                            createTemplateFiles(file, folder, index, slab, slabType)
+                            extension = 2
+                            submitSE_GSM(file, extension, index)
 
                             i += 1
 
@@ -708,148 +565,12 @@ def main():
                             fh.write("ADD   " + str(twoPairsSet[kk][1][0]) + "  " + str(twoPairsSet[kk][1][1]) + "\n")
                             fh.close()
 
-                            slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
+                            index = i
+                            createTemplateFiles(file, folder, index, slab, slabType)
+                            extension = 2
+                            submitSE_GSM(file, extension, index)
 
-                            # Read slab type form slab file input (surface.xyz)
-                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'r')
-                            lines = fh.readlines()
-                            lines[1] = slabType + '\n'
-                            fh.close()
-
-                            # read slab size and number of frozen atoms from run.py
-                            fh = open("run.py", 'r')
-                            run_lines = fh.readlines()
-                            fh.close()
-                            atomsInX = 0
-                            atomsInY = 0
-                            atomsInZ = 0
-                            frozenLayers = 0
-                            for line in run_lines:
-                                if "size" in line:
-                                    splitted_line = line.split(',', -1)
-                                    atomsInX = int( splitted_line[1].split('(')[1].strip() )
-                                    atomsInY = int( splitted_line[2].strip() )
-                                    atomsInZ = int( splitted_line[3].split(')')[0].strip() )
-                                if "atom.tag" in line:
-                                    frozenLayers = line.split('>')[1].split('f').strip()
-                            numOfFrozenAtoms = atomsInX * atomsInY * (atomsInZ - frozenLayers)
-                            
-                            for k in range(2, numOfFrozenAtoms+2):
-                                lines[k] = lines[k].rstrip()
-                                lines[k] = lines[k] + " *\n"
-
-
-                            fh = open(folder + "initial" + str(i).zfill(4) + ".xyz", 'w')
-                            fh.writelines(lines)
-                            fh.close()
-
-                            # submit SE-GSM
-                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
-                                    str(i).zfill(4)
-                            src = "inputs_se_gsm/"
-                            src_files = listFiles(src)
-                            for file_name in src_files:
-                                full_file_name = os.path.join(src, file_name)
-                                #if (os.path.isfile(full_file_name)):
-                                shutil.copy(full_file_name, folder)
-
-                            # setting up runGSM.qsh files
-                            fh = open("inputs_se_gsm/scratch/runGSM.qsh")
-                            templateFile = Template(fh.read())
-                            # user can replace this with a meaningful name
-                            jobName = file.split(".")[0].split('-', 1)[1] + str(i).zfill(4)
-                            #jobName = "test" + str(i).zfill(4)
-                            myDictionary = {'jobName':jobName, 'jobID':i}
-                            result = templateFile.substitute(myDictionary)
-                            PBSfile = folder + "/scratch/runGSM.qsh"
-                            fh = open(PBSfile,"w")
-                            fh.write(result)
-                            fh.close()
-
-
-                            os.chdir(folder)
-                            call(["qsub", "scratch/runGSM.qsh"])
-                            os.chdir(cwd)
                             i += 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    #slab_out.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-            # generate adds
-            #pairsSet = generateIsomerPair(reactiveIndices_1, reactiveIndices_2,\
-            #        numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
-
-            #if addMoves == 2:
-            #    twoPairsSet = generate2IsomerPairs(reactiveIndices_1, reactiveIndices_2,\
-            #            numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
-
-            '''
-            write combinations to file:
-            create new directories for each input geometry file and isomer
-            combination.
-            '''
-            # TODO convert this to function
-            #i = 1
-            #for element in pairsSet:
-            #    folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
-            #            str(i).zfill(4) + "/scratch/"
-            #    if not os.path.exists(folder):
-            #        os.makedirs(folder)
-            #    fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
-            #    fh.write("NEW\n")
-            #    fh.write("ADD  " + str(element[0]) + "  "+ str(element[1]) )
-            #    fh.close()
-
-            #    slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-
-            #    i += 1
-
-            #if addMoves == 2:
-            #    for element in twoPairsSet:
-            #        print ("element", element)
-            #        print (element[0][0], "      ", element[0][1])
-            #        print (element[1][0], "      ", element[1][1])
-            #        folder = "se_gsm_cals/" + file.split(".")[0] + "/" +\
-            #                str(i).zfill(4) + "/scratch/"
-            #        if not os.path.exists(folder):
-            #            os.makedirs(folder)
-            #        fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
-            #        fh.write("NEW\n")
-            #        fh.write("ADD  " + str(element[0][0]) + "  "+ str(element[0][1]) + "\n" )
-            #        fh.write("ADD  " + str(element[1][0]) + "  "+ str(element[1][1]) + "\n" )
-            #        fh.close()
-            #        slab.write(folder + "initial" + str(i).zfill(4) + ".xyz")
-            #        i += 1
-            '''
-            for i in range(0, breakMoves):
-                print "BREAK    ", 
-            for i in range(0, addMoves):
-                for index_1 in reactiveIndices_1:
-                    if (index_1 != 0):
-                        index_1 += numOfSlabAtoms
-                    else:
-                        continue
-                    for index_2 in reactiveIndices_2:
-                        if (index_2 != 0):
-                            index_2 += (numOfSlabAtoms + numOfAds1Atoms)
-                            print "ADD  ", index_1, "      ", index_2
-                        else:
-                            continue
-                            '''
-
-
 
 
 if __name__ == "__main__":
