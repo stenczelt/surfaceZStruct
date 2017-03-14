@@ -325,7 +325,7 @@ def main():
     # set tangs = -3 for binding sites
     binding_sites.set_tags(-3)
     # list all unique files in unique-structures directory
-    folderName = "unique-structures/"
+    folderName = "unique_structures/"
     files = listFiles(folderName)
 
     #TODO User should change this part without editing source code file
