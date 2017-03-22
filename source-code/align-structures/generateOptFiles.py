@@ -86,6 +86,7 @@ def main():
         # setting up run.py files
         fh = open("run.py")
         templateFile = Template(fh.read())
+        fh.close()
         input = element.split(".")[0] + "-in.xyz"
         outputName = element
         myDictionary={'input':input, 'outputName':outputName}
@@ -99,6 +100,7 @@ def main():
         # setting up submit.qsh files
         fh = open("submit.qsh")
         templateFile2 = Template(fh.read())
+        fh.close()
         # user can replace this with a meaningful name
         jobName = "test"
         fileNumber = (element.split(".")[0]).replace("output-", "")
