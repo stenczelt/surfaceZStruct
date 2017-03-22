@@ -30,7 +30,12 @@ def calculateRMSD(structure_1, structure_2):
         lines_2 = fh_2.readlines()
         fh_2.close()
 
-        assert(len(lines_1) == len(lines_2))
+        # assert number of atoms are the same
+        assert(int(lines_1[0]) == int(lines_2[0]))
+        # assert atom names are the same
+        for i in range(2, int(lines_1[0])+2):
+            assert(lines_1[i].split()[0] == lines_2[i].split[0])
+
 
         sum = 0.0
         for i in range(2, len(lines_1)):
@@ -64,6 +69,7 @@ def sortEnergy(listOfStructuresPath):
             # read OUTCAR file in each folder
             fh = open(fileName, 'r')
             lines = fh.readlines()
+            fh.close()
             finished = False
             for line in reversed(lines):
                 if "Total CPU time used" in line:
