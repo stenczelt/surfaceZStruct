@@ -37,11 +37,12 @@ int main(int argc, char* argv[])
     // reading input files
     else
     {
+        const int RADIUS_SIZE = 2;
         std::cout << "Reading input files" << std::endl;
         std::string slabFileName = "";
         int numOfAdsorbates = 0;
         int slabIndices[2] = {};
-        double radius[2] = {};
+        double radius[RADIUS_SIZE] = {};
         std::string adsorbateFiles[2] = {};
         int adsorbateIndices[2] = {};
         int reactiveIndex1[2] = {0, 0}; //maximum of 2 reactive atoms on each atom
@@ -53,6 +54,9 @@ int main(int argc, char* argv[])
         returnVal = readFromFile("INPUT", numOfAdsorbates, slabIndices, radius, adsorbateFiles, 
                      adsorbateIndices, reactiveIndex1, reactiveIndex2,
                      numOfAdd, numOfBreak, slabFileName);
+        for (int i=0;i<RADIUS_SIZE; i++)
+            if (radius[i] < 0.05)
+                radius[i] = 0.05;
         int addArray[4] = {};
         if (returnVal == 1)
         {
