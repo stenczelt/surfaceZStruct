@@ -31,6 +31,7 @@ from ase.calculators.emt import EMT
 from ase.calculators.vasp import Vasp
 from ase.constraints import FixAtoms
 from ase.io import write, read
+import ase.io.vasp
 #from ase.build import surface, add_adsorbate, fcc100, fcc110, fcc111,\
 from ase.lattice.surface import surface, add_adsorbate, fcc100, fcc110, fcc111,\
         hcp0001, bcc100, bcc110, bcc111
@@ -251,7 +252,6 @@ def createTemplateFiles(file, folder, index, slab, slabType):
         lines[k] = lines[k].rstrip()
         lines[k] = lines[k] + " *\n"
 
-
     fh = open(folder + "initial" + str(index).zfill(4) + ".xyz", 'w')
     fh.writelines(lines)
     fh.close()
@@ -259,6 +259,7 @@ def createTemplateFiles(file, folder, index, slab, slabType):
     # setting up runGSM.qsh files
     fh = open("inputs_se_gsm/scratch/runGSM.qsh")
     templateFile = Template(fh.read())
+    fh.close()
     jobName = file.split(".")[0].split('-', 1)[1] + str(index).zfill(4)
     myDictionary = {'jobName':jobName, 'jobID':index}
     result = templateFile.substitute(myDictionary)
@@ -328,15 +329,48 @@ def main():
     folderName = "unique_structures/"
     files = listFiles(folderName)
 
-    #TODO User should change this part without editing source code file
-    # read it from file
-    #TODO How about slabs read from POSCAR file
-    # define slab
+    # read slab set up from slab_setup.py
+    fh = open("slab_setup.py")
+    slab_lines = fh.readlines()
+    fh.close()
+    POSCAR = False
 
-    slab = fcc111('Pd', size=(4,3,2), vacuum=15)
-    #adsorbate= Atoms('NH3OH2')
-    adsorbate = Atoms('C2H3CHO')
-    add_adsorbate(slab, adsorbate, 1.7, 'ontop')
+    slab = fcc111('Cu', size=(1,1,1), vacuum=15)
+    adsorbate = Atoms('X')
+    for line in slab_lines:
+        if "slab_in" in line:
+            if '#' not in line:
+                slab_type = line.split('=')[1].split('(')[0].strip()
+                slab_atom = line.split('=')[1].split("'")[1].strip()
+                slab_size_x = int(line.split('=')[2].split('(')[1].split(',')[0])
+                slab_size_y = int(line.split('=')[2].split('(')[1].split(',')[1])
+                slab_size_z = int(line.split('=')[2].split('(')[1].split(',')[2].split(')')[0])
+                slab_vac = float(line.split('=')[3].split(')')[0])
+                slab = eval(slab_type)(slab_atom, size=(slab_size_x,slab_size_y,slab_size_z), vacuum=slab_vac)
+        if "adsorbate_in" in line:
+            if '#' not in line:
+                temp = line.split('=')[1].split("'")[1]
+                adsorbate = Atoms(temp)
+        
+        if "slab_POSCAR_file_name" in line:
+            if '#' not in line:
+                POSCAR = line.split('=')[1].strip().replace("'", "")
+                slab = ase.io.vasp.read_vasp(POSCAR)
+                POSCAR = True
+
+    try:
+        slab
+    except NameError:
+        print "slab is not defined! Check slab_setup.py file."
+        exit (-1)
+    if (POSCAR == False):
+        try:
+            adsorbate
+        except NameError:
+            print "adsorbate is not defined! Check slab_setup.py file."
+            exit (-1)
+        else:
+            add_adsorbate(slab, adsorbate, 1.7, 'ontop')
 
     # current working directory
     cwd = os.getcwd()
@@ -354,9 +388,7 @@ def main():
             # TODO ads1 = -1, ads2 = -2, BS = -3. Find ads1 and ads2 atoms from INPUT or numberOfAds1/2Atoms
 
         # uni-molecular reaction
-        # TODO check number of adds and breaks match number of reactive atoms. Raise error if not.
         if (numOfAdsorbates == 1):
-            # TODO make sure the site is empty
             '''
             if one adsorbate, we have two reactive atoms at a time. Break the bond
             between them and add each fragment to a new site.
@@ -369,9 +401,11 @@ def main():
             - if two fragments have similar size, always move one of them
             - generate driving coordinates
             '''
+            if (addMoves != 2):
+                print ("ERROR: You need at least 2 add moves for dissociation of one adsorbate.")
+                exit(-1)
             # find all combinations of reactive indices
             breakCombos = []
-            # TODO check elements are non zero. I think this is taken care of. Not 100% sure.
             for i in range(0, len(reactiveIndices_1)):
                 for j in range(i+1, len(reactiveIndices_1)):
                     temp = []
@@ -389,18 +423,15 @@ def main():
                     indexIn = element[1] + numOfSlabAtoms
                     listOfSitesFrag_2 = findNearbySites(slab, indexIn, "bindingSites.xyz")
                     # find two sites that are farthest from two lists of binding sites
+                    # TODO make sure the site is empty
                     farthestSites = findFarthestIndices(listOfSitesFrag_1,\
                         listOfSitesFrag_2, "bindingSites.xyz")
-                    # TODO add to different binding site types
+                    # TODO add to different binding site types input by the user
                     # write initial### and ISOMERS file
                     folder = "se_gsm_cals_1/" + file.split(".")[0] + "/" +\
                         str(i).zfill(4) + "/scratch/"
                     if not os.path.exists(folder):
                         os.makedirs(folder)
-                    # TODO check for number of addMoves and breakMoves
-                    # TODO one add one break
-                    # TODO two add two break
-                    # TODO other cases
                     fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
                     fh.write("NEW\n")
                     firstNum = element[0] + numOfSlabAtoms #+ numOfBSAtoms
@@ -426,8 +457,6 @@ def main():
 
         #######################
         # bi-molecular reaction
-        # TODO check number of adds and breaks match number of reactive atoms. Raise error if an add
-        # move requires breaking a bond but number of breaks is zero.
         if (numOfAdsorbates == 2):
             # find all combinations of reactive indices 1
             breakCombos_1 = []
@@ -449,7 +478,6 @@ def main():
                         breakCombos_2.append(temp)
 
             # for addMove == 1 and breakMove == 1
-            # TODO check for number of adds and breaks
             i = 1
             for element_1 in breakCombos_1:
                 connected_1 = areConnected(adsorbFile1, element_1)
@@ -522,7 +550,14 @@ def main():
 
 
             # for addMove == 2 and breakMove == 2
-            # TODO check for number of adds and breaks
+            if (addMoves != 2):
+                if (breakMoves != 2):
+                    print ("ERROR: You need at least 2 add and break moves for ligand exchange.")
+                    exit(-1)
+            if (len(reactiveIndices_1 < 2)):
+                if (len(reactiveIndices_2 < 2)):
+                    print ("ERROR: You need at least 2 reactive atoms on each adsorbate for ligand exchange.")
+                    exit(-1)
 
             # if (addMoves == 2 and breakMoves == 2):
             for element_1 in breakCombos_1:
