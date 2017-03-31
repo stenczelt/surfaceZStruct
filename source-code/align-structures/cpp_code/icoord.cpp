@@ -1600,6 +1600,10 @@ void ICoord::structure_read(string xyzfile){
   if (success){  
     //comment=line;
       std::vector<string> anglesToSample = StringTools::tokenize(line, " \t");
+      if (anglesToSample.size() == 0)
+      {
+          std::cout << "WARNING: No angle to sample. Is this what you want?" << std::endl;
+      }
       for (unsigned int i=0; i<anglesToSample.size(); i++)
       {
           if (std::stoi(anglesToSample[i]) < 0 || std::stoi(anglesToSample[i]) > 360)

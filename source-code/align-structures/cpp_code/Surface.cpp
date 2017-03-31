@@ -802,7 +802,6 @@ std::vector<int> Surface::findNearbySites(const unsigned int atomIndex, const do
     */
     // here, we have the mBindingSites vector with all the binding sites
     int numOfSites = mBindingSites.size();
-            std::cout << mBindingSites.size() << "  number of binding sites found Im here %%%%%%%%%%%%%%%\n";
     for (int i=0; i<numOfSites; ++i)
     {
             //std::cout << "1111 Im here %%%%%%%%%%%%%%%\n";
