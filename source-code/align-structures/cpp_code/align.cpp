@@ -740,7 +740,7 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
     */
 
     // check if directory exists
-    DIR* dir = opendir("./aligned-structures");
+    DIR* dir = opendir("./aligned_structures");
     if (dir)
     {
         // directory exists
@@ -748,7 +748,7 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
     }
     else if (ENOENT == errno)
     {
-        std::cout << "*** ERROR: Directory 'aligned-structures' does not exist and should "
+        std::cout << "*** ERROR: Directory 'aligned_structures' does not exist and should "
             << "be created by the user." << std::endl;
         exit(-1);
     }
@@ -792,23 +792,21 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
                     mAdsorbateNum = 0;
                 }
                 moveToBindingSite(bSite_2, ads_2, mAdsorbateNum);
-                for (int i=0;i<3*mAdsorbates[0].natoms;i++) 
-                {
-                    xyz2AtZeroDegree[i] = mAdsorbates[0].coords[i];
-                }
 
-                if (mAdsorbates.size() == 2)
-                {
-                    assert(xyz3AtZeroDegree!=NULL); //check for null pointer
-                    for (int i=0;i<3*mAdsorbates[1].natoms;i++) 
-                        xyz3AtZeroDegree[i] = mAdsorbates[1].coords[i];
-                }
-                // update structure
-                unifyStructures();
-                std::string outFileName = "./aligned-structures/output-" + std::to_string(bSite_1) 
-                    + "-" + std::to_string(bSite_2) + "-0-0.xyz";
-                writeToFile(outFileName);
+                assert(xyz3AtZeroDegree!=NULL); //check for null pointer
+                for (int i=0;i<3*mAdsorbates[1].natoms;i++) 
+                    xyz3AtZeroDegree[i] = mAdsorbates[1].coords[i];
             }
+            for (int i=0;i<3*mAdsorbates[0].natoms;i++) 
+            {
+                xyz2AtZeroDegree[i] = mAdsorbates[0].coords[i];
+            }
+
+            // update structure
+            unifyStructures();
+            std::string outFileName = "./aligned_structures/output-" + std::to_string(bSite_1+1) 
+                + "-" + std::to_string(bSite_2+1) + "-0-0.xyz";
+            writeToFile(outFileName);
 
             int* add_2 = new int[nadd1];
             add_2[0] = bSite_1;
@@ -2099,8 +2097,8 @@ void Align::sampleAngles(int nadd1, int* add1, double* xyz2AtZeroDegree, double*
                 angle1 = std::to_string((int)angleSet[j]);
             else if (mAdsorbateNum == 1)
                 angle2 = std::to_string((int)angleSet[j]);
-            std::string outFileName = "./aligned-structures/output-" + std::to_string(add1[0]) + "-" + 
-                std::to_string(add1[2]) + "-" + angle1 + "-" + angle2 + ".xyz";
+            std::string outFileName = "./aligned_structures/output-" + std::to_string(add1[0]+1) + "-" + 
+                std::to_string(add1[2]+1) + "-" + angle1 + "-" + angle2 + ".xyz";
             writeToFile(outFileName);
             //icp.freemem();
         }
