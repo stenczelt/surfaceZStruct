@@ -330,7 +330,7 @@ int Surface::findHollow()
 
 int Surface::findHcp()
 {
-    double m_DELTA_Z = 2.0;
+    double m_DELTA_Z = 1.5;
     double prevI_1 = 1.0;
     double limit_1 = mSlabSize[0]-1;
     double prevI_2 = 1.5;
@@ -419,7 +419,7 @@ int Surface::findHcp()
 
 int Surface::findFcc()
 {
-    double m_DELTA_Z = 2.0;
+    double m_DELTA_Z = 1.5;
     if (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001)
     {
         double prevI = 0.5;
@@ -482,7 +482,7 @@ int Surface::findFcc()
 
 int Surface::findAtop()
 {
-    double m_DELTA_Z = 2.5;
+    double m_DELTA_Z = 1.5;
     for (int i=0; i<mSlabSize[0]; ++i) // i is the X offset
     {
         for (int j=0; j<mSlabSize[1]; ++j) // j is the Y offset
@@ -536,7 +536,7 @@ int Surface::findAtop()
 
 int Surface::findLongBridge()
 {
-    double m_DELTA_Z = 2.0;
+    double m_DELTA_Z = 1.5;
     double offX, offY, LbrgX, LbrgY, LbrgZ = 0.0;
     if (mSurfaceType == FCC110)
     {
@@ -616,7 +616,7 @@ int Surface::findLongBridge()
 
 int Surface::findShortBridge()
 {
-    double m_DELTA_Z = 2.0;
+    double m_DELTA_Z = 1.5;
     double offX, offY, SbrgX, SbrgY, SbrgZ = 0.0;
     if (mSurfaceType == FCC110)
     {
@@ -674,7 +674,7 @@ int Surface::findShortBridge()
 
 int Surface::findBridge()
 {
-    double m_DELTA_Z = 2.0;
+    double m_DELTA_Z = 1.5;
     double offX, offY, brgX, brgY = 0.0;
     double brgZ = mNthAtom[2] + m_DELTA_Z;
     if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
