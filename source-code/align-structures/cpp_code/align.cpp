@@ -434,7 +434,9 @@ void Align::add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, 
   return;
 }*/
 
-void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vector<int> allSites2, int numOfSurfaceAtoms)
+void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1,
+        std::vector<int> allSites2, int numOfSurfaceAtoms,
+        double delta_z_1, double delta_z_2)
 {
     if (inited==0)
     {
@@ -550,7 +552,8 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
                 {
                     //printf("  using ool v1 (linear angle found) \n");
                     //linear_right(&averagedBondVector[3*numOfAlignedVecFound2],atom2,bonded2,xyz2, orientaion); \\TODO orientation
-                    linear_right(&averagedBondVector[3*numOfAlignedVecFound2],atom2,bonded2,mAdsorbates[mAdsorbateNum].coords);
+                    linear_right(&averagedBondVector[3*numOfAlignedVecFound2],atom2,
+                            bonded2,mAdsorbates[mAdsorbateNum].coords);
                 }
                 if (DEBUG)
                 {
@@ -566,12 +569,14 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
 
             if (numOfBondedToAtom2==3)
             {
-                double improperTorsionAngle = mAdsorbates[mAdsorbateNum].torsion_val(bonded2[0],atom2,bonded2[1],bonded2[2]);
+                double improperTorsionAngle = mAdsorbates[mAdsorbateNum].torsion_val(bonded2[0],
+                        atom2,bonded2[1],bonded2[2]);
                 //printf("  improperTorsionAngle: %4.2f \n",improperTorsionAngle);
                 if (fabs(improperTorsionAngle)>175.)
                 {
                     //printf("  using oop v1 (planar atom found) \n");
-                    planar_cross(&averagedBondVector[3*numOfAlignedVecFound2],atom2,bonded2,mAdsorbates[mAdsorbateNum].coords);
+                    planar_cross(&averagedBondVector[3*numOfAlignedVecFound2],atom2,bonded2,
+                            mAdsorbates[mAdsorbateNum].coords);
                     numOfPlanarVecs2++;
                 }
             }
@@ -581,7 +586,8 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
             }
             double n1 = norm(&averagedBondVector[3*numOfAlignedVecFound2],3); //TODO division by zero
             for (int j=0;j<3;j++)
-                averagedBondVector[3*numOfAlignedVecFound2+j] = averagedBondVector[3*numOfAlignedVecFound2+j] / n1; // normalize
+                averagedBondVector[3*numOfAlignedVecFound2+j] = 
+                    averagedBondVector[3*numOfAlignedVecFound2+j] / n1; // normalize
 
             numOfAlignedVecFound2++;
 
@@ -705,8 +711,10 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
             cross(surfNormal, bondVector, zDir);
             // find the angle between surface normal and x axis
             double xAxis[3] = {1., 0., 0.};
-            double dotProduct = surfNormal[0] * xAxis[0] + surfNormal[1] * xAxis[1] + surfNormal[2] * xAxis[2];
-            double lengthOf1st = sqrt(pow(surfNormal[0], 2) + pow(surfNormal[1], 2) + pow(surfNormal[2], 2));
+            double dotProduct = surfNormal[0] * xAxis[0] + surfNormal[1] * xAxis[1] 
+                + surfNormal[2] * xAxis[2];
+            double lengthOf1st = sqrt(pow(surfNormal[0], 2) + pow(surfNormal[1], 2) 
+                    + pow(surfNormal[2], 2));
             double lengthOf2nd = 1.0; // bc it's a unit vector along X axis
             double cosTheta = dotProduct / (lengthOf1st * lengthOf2nd);
             double angleToX = acos(cosTheta);
@@ -772,7 +780,7 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
                 mAdsorbateNum = 0;
             }
             
-            moveToBindingSite(bSite_1, ads_1, mAdsorbateNum);
+            moveToBindingSite(bSite_1, ads_1, mAdsorbateNum, delta_z_1);
 
             int bSite_2 = 0;
             int ads_2 = 0;
@@ -791,7 +799,7 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
                     ads_2 -= mSlab.natoms;
                     mAdsorbateNum = 0;
                 }
-                moveToBindingSite(bSite_2, ads_2, mAdsorbateNum);
+                moveToBindingSite(bSite_2, ads_2, mAdsorbateNum, delta_z_2);
 
                 assert(xyz3AtZeroDegree!=NULL); //check for null pointer
                 for (int i=0;i<3*mAdsorbates[1].natoms;i++) 
@@ -816,7 +824,7 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1, std::vec
                 add_2[2] = bSite_2;
                 add_2[3] = ads_2 + mSlab.natoms + mAdsorbates[0].natoms;
             }
-            sampleAngles(nadd1, add_2, xyz2AtZeroDegree, xyz3AtZeroDegree);
+            sampleAngles(nadd1, add_2, xyz2AtZeroDegree, xyz3AtZeroDegree, delta_z_1, delta_z_2);
         }
     }
 
@@ -1964,7 +1972,7 @@ void Align::moveToOrigin(int atom2)
 }
 
 //Moves atom2 to where atom1 is
-void Align::moveToBindingSite(int atom1, int atom2, int numAdsorbate)
+void Align::moveToBindingSite(int atom1, int atom2, int numAdsorbate, double delta_z)
 {
     assert (numAdsorbate == 0 or numAdsorbate == 1);
 
@@ -1978,7 +1986,7 @@ void Align::moveToBindingSite(int atom1, int atom2, int numAdsorbate)
     adsorbateCenter[1] = mAdsorbates[numAdsorbate].coords[3*atom2+1];
     adsorbateCenter[2] = mAdsorbates[numAdsorbate].coords[3*atom2+2];
 
-    const double DELTA_Z = 0.0;
+    const double DELTA_Z = delta_z - 1.5;
     displacement[0] = surfaceCenter[0] - adsorbateCenter[0];
     displacement[1] = surfaceCenter[1] - adsorbateCenter[1];
     displacement[2] = surfaceCenter[2] - adsorbateCenter[2] + DELTA_Z;
@@ -2038,11 +2046,13 @@ void Align::unifyStructures()
 }
 
 
-void Align::sampleAngles(int nadd1, int* add1, double* xyz2AtZeroDegree, double* xyz3AtZeroDegree)
+void Align::sampleAngles(int nadd1, int* add1, double* xyz2AtZeroDegree, 
+        double* xyz3AtZeroDegree, double delta_z_1, double delta_z_2)
 {
     // sample input angles
     for (int i=0; i<nadd1; i++)
     {
+        double delta_z = 0.0;
         int atom1 = add1[2*i+0];
         int atom2 = add1[2*i+1];
         if (atom2 >= (mSlab.natoms+mAdsorbates[0].natoms)) // >= bc zero indexed
@@ -2050,11 +2060,13 @@ void Align::sampleAngles(int nadd1, int* add1, double* xyz2AtZeroDegree, double*
             //atom2 belongs to adsorbate2 == mAdsorbates[1]
             atom2 = atom2 - (mSlab.natoms + mAdsorbates[0].natoms);
             mAdsorbateNum = 1;
+            delta_z = delta_z_2;
         }
         else
         {
             atom2 -= mSlab.natoms;
             mAdsorbateNum = 0;
+            delta_z = delta_z_1;
         }
 
         std::vector<double> angleSet = mAdsorbates[mAdsorbateNum].getAngleSet();
@@ -2070,7 +2082,7 @@ void Align::sampleAngles(int nadd1, int* add1, double* xyz2AtZeroDegree, double*
             }
             rotate_around_z(mAdsorbates[mAdsorbateNum].natoms, angleSet[j]*PI/180., 
                     mAdsorbates[mAdsorbateNum].coords, mAdsorbateNum);
-            moveToBindingSite(atom1, atom2, mAdsorbateNum);
+            moveToBindingSite(atom1, atom2, mAdsorbateNum, delta_z);
             unifyStructures();
             // TODO: make a function vvvvv
             //TODO Assert in ICoord class trigerred when this uncommented

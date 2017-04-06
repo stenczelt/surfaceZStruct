@@ -1,7 +1,7 @@
 # Use this Makefile with make
 
 # Executable name
-CMD = align.exe
+CMD = stage_1.exe
 INC=-I$(MKLROOT)/include -I/export/zimmerman/mjafari/ZStruct-S/source-code/align-structures -I.
 #INC=-I$(MKLROOT)/include
 

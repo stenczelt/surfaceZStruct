@@ -19,8 +19,9 @@
 bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms, 
                  std::string* inSymbols);
 int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices, double* radius,
-                  std::string* adsorbateFiles, int* adsorbateIndices, int* reactiveIndex1,
-                  int* reactiveIndex2, int &numOfAdd, int &numOfBreak, std::string &slabFileName);
+                  std::string* adsorbateFiles, int* adsorbateIndices, /*int* reactiveIndex1,
+                  int* reactiveIndex2,*/ int &numOfAdd, int &numOfBreak, std::string &slabFileName,
+                  double &delta_z_1, double &delta_z_2);
 Surface readXYZfile_createObject(std::string &slabFileName, int numOfAdsorbates,
         std::string* adsorbateFileNames);
 bool readSlabFileAndWrite(std::string &slabFileName);
@@ -45,15 +46,16 @@ int main(int argc, char* argv[])
         double radius[RADIUS_SIZE] = {};
         std::string adsorbateFiles[2] = {};
         int adsorbateIndices[2] = {};
-        int reactiveIndex1[2] = {0, 0}; //maximum of 2 reactive atoms on each atom
-        int reactiveIndex2[2] = {0, 0};
+        //int reactiveIndex1[2] = {0, 0}; //maximum of 2 reactive atoms on each atom
+        //int reactiveIndex2[2] = {0, 0};
         int numOfAdd = 0;
         int numOfBreak = 0;
+        double delta_z_1 = 0.0;
+        double delta_z_2 = 0.0;
 
         int returnVal = 1;
         returnVal = readFromFile("INPUT", numOfAdsorbates, slabIndices, radius, adsorbateFiles, 
-                     adsorbateIndices, reactiveIndex1, reactiveIndex2,
-                     numOfAdd, numOfBreak, slabFileName);
+                     adsorbateIndices, numOfAdd, numOfBreak, slabFileName, delta_z_1, delta_z_2);
         for (int i=0;i<RADIUS_SIZE; i++)
             if (radius[i] < 0.05)
                 radius[i] = 0.05;
@@ -114,7 +116,8 @@ int main(int argc, char* argv[])
             // numOfAdsorbates = numOfAdd passed to add_align
             int numOfAdds = numOfAdsorbates;
             int numOfSurfaceAtoms = aSurface.getNumOfAtoms();
-            totalSystem.add_align(numOfAdds, addArray, allSites1, allSites2, numOfSurfaceAtoms);
+            totalSystem.add_align(numOfAdds, addArray, allSites1, allSites2, numOfSurfaceAtoms,
+                    delta_z_1, delta_z_2);
 
             std::cout << "\n***************************************\n";
             std::cout << "\nOutput is written to output-*.xyz file\n";
@@ -182,8 +185,9 @@ bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int 
     }
 
 int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices, double* radius,
-        std::string* adsorbateFiles, int* adsorbateIndices, int* reactiveIndex1,
-        int* reactiveIndex2, int &numOfAdd, int &numOfBreak, std::string &slabFileName)
+        std::string* adsorbateFiles, int* adsorbateIndices, /*int* reactiveIndex1,
+        int* reactiveIndex2,*/ int &numOfAdd, int &numOfBreak, std::string &slabFileName,
+        double &delta_z_1, double &delta_z_2)
 {
     // populate vector by input file lines
     std::vector<std::string> inputFile;
@@ -217,8 +221,8 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
     else if (std::stoi(findSites) == 0)
     {
         // stage 2: add adsorbates to binding sites
-        std::cout << "** reading input file information" << std::endl;
-        std::cout << "** WARNING: slab is read from bindingSites.xyz" << std::endl;
+        std::cout << "** Reading input file information" << std::endl;
+        std::cout << "** Slab is read from bindingSites.xyz" << std::endl;
         ss.clear();
         ss.str(*(inputFile.begin()+1));
         std::string name = "";
@@ -243,37 +247,45 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
         ss.str(*(inputFile.begin()+6));
         ss >> unwanted >> temp[0] >> unwanted;
         adsorbateIndices[0] = std::stoi(temp[0]); // TODO + num of slab atoms
+        /*
         // line 8
         ss.str(*(inputFile.begin()+7));
         ss >> unwanted >> temp[0] >> temp[1] >> unwanted;
         reactiveIndex1[0] = std::stoi(temp[0]);
         reactiveIndex1[1] = std::stoi(temp[1]);
-
+        */
+        // line 9
+        ss.str(*(inputFile.begin()+8));
+        ss >> unwanted >> temp[0] >> unwanted;
+        delta_z_1 = std::stod(temp[0]);
 
         if (numOfAdsorbates == 2)
         {
-            // lines 9-14
-            ss.str(*(inputFile.begin()+9));
-            ss >> unwanted >> temp[0] >> unwanted;
-            slabIndices[1] = std::stoi(temp[0]);
+            // lines 11-16
             ss.str(*(inputFile.begin()+10));
             ss >> unwanted >> temp[0] >> unwanted;
-            radius[1] = std::stod(temp[0]);
+            slabIndices[1] = std::stoi(temp[0]);
             ss.str(*(inputFile.begin()+11));
-            ss >> unwanted >> adsorbateFiles[1] >> unwanted;
+            ss >> unwanted >> temp[0] >> unwanted;
+            radius[1] = std::stod(temp[0]);
             ss.str(*(inputFile.begin()+12));
+            ss >> unwanted >> adsorbateFiles[1] >> unwanted;
+            ss.str(*(inputFile.begin()+13));
             ss >> unwanted >> temp[0] >> unwanted;
             adsorbateIndices[1] = std::stoi(temp[0]); // TODO + num of slab+adsorbate1 atoms
-            ss.str(*(inputFile.begin()+13));
+            /*ss.str(*(inputFile.begin()+14));
             ss >> unwanted >> temp[0] >> temp[1] >> unwanted; //TODO
             reactiveIndex2[0] = std::stoi(temp[0]);
-            reactiveIndex2[1] = std::stoi(temp[1]);
+            reactiveIndex2[1] = std::stoi(temp[1]);*/
+            ss.str(*(inputFile.begin()+15));
+            ss >> unwanted >> temp[0] >> unwanted;
+            delta_z_2 = std::stod(temp[0]);
         }
 
-        ss.str(*(inputFile.begin()+15));
+        ss.str(*(inputFile.begin()+17));
         ss >> unwanted >> temp[0] >> unwanted;
         numOfAdd = std::stoi(temp[0]);
-        ss.str(*(inputFile.begin()+16));
+        ss.str(*(inputFile.begin()+18));
         ss >> unwanted >> temp[0] >> unwanted;
         numOfBreak = std::stoi(temp[0]);
 
@@ -296,6 +308,7 @@ bool readSlabFileAndWrite(std::string &slabFileName)
     if (!inFile.is_open())
     {
         std::cout << "ERROR: File 1111 " << slabFileName << " does not exist!" << std::endl;
+        exit(-1);
     }
     std::string newLine;
     while (std::getline(inFile, newLine))
@@ -354,6 +367,7 @@ bool readSlabFile(std::string &slabFileName, Surface &aSurface)
     if (!inFile.is_open())
     {
         std::cout << "ERROR: File 222 " << slabFileName << " does not exist!" << std::endl;
+        exit(-1);
     }
     std::string newLine;
     while (std::getline(inFile, newLine))
@@ -410,6 +424,7 @@ Surface readXYZfile_createObject(std::string &slabFileName, int numOfAdsorbates,
     if (!fileHandle.is_open())
     {
         std::cout << "ERROR: File 333 " << slabFileName << " does not exist!" << std::endl;
+        exit(-1);
     }
     std::string newLine;
     while (std::getline(fileHandle, newLine))
@@ -456,6 +471,7 @@ Surface readXYZfile_createObject(std::string &slabFileName, int numOfAdsorbates,
     if (!fileHandle.is_open())
     {
         std::cout << "ERROR: File 444 " << adsorbateFileNames[0] << " does not exist!" << std::endl;
+        exit(-1);
     }
     std::string newLine_2;
     while (std::getline(fileHandle, newLine_2))
@@ -488,6 +504,7 @@ Surface readXYZfile_createObject(std::string &slabFileName, int numOfAdsorbates,
         if (!fileHandle.is_open())
         {
             std::cout << "ERROR: File 444 " << adsorbateFileNames[1] << " does not exist!" << std::endl;
+            exit(-1);
         }
         std::string newLine_3;
         while (std::getline(fileHandle, newLine_3))
@@ -518,6 +535,7 @@ Surface readXYZfile_createObject(std::string &slabFileName, int numOfAdsorbates,
     if (!fileHandle.is_open())
     {
         std::cout << "ERROR: File 444 bindingSites.xyz does not exist!" << std::endl;
+        exit(-1);
     }
     std::string newLine_4;
     while (std::getline(fileHandle, newLine_4))

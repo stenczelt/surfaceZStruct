@@ -51,7 +51,8 @@ class Align
         void vdw_vector_opt(double* v1, ICoord icp);
         //void vdw_vector_opt(int numOfAtoms1, int numOfAtoms2, double* v1, ICoord icp, int atom1, int atom2);
         void unifyStructures();
-        void sampleAngles(int nadd1, int* add1, double* xyz2AtZeroDegree, double* xyz3AtZeroDegree);
+        void sampleAngles(int nadd1, int* add1, double* xyz2AtZeroDegree, 
+                double* xyz3AtZeroDegree, double delta_z_1, double delta_z_2);
 
     public:
         int inited;
@@ -60,7 +61,9 @@ class Align
         //void add_third(int numOfAtoms3i, string* atomicNames3i, int* anumbers3i, double* xyz3i);
         //void align_zero();
         //void add_align(int numOfAdd, int* addArray); //, std::vector<BindingSite> allSites); /*std::string orientationIn*/
-        void add_align(int numOfAdd, int* addArray, std::vector<int> allSites1, std::vector<int> allSites2i, int numOfSurfaceAtoms);
+        void add_align(int numOfAdd, int* addArray, std::vector<int> allSites1,
+                std::vector<int> allSites2i, int numOfSurfaceAtoms,
+                double delta_z_1, double delta_z_2);
         //int add_align_v(int nadd1, int* add1, int wtm, double* aprv);
         //void shuttle_align(int nadd1, int* add1);
         void print_xyz();
@@ -69,7 +72,7 @@ class Align
         void print_xyz_gen(int natoms, string* anames, double* coords);
         bool writeToFile(std::string &outFile);
         void moveToOrigin(int atom2);
-        void moveToBindingSite(int atom1, int atom2, int numAdsorbate);
+        void moveToBindingSite(int atom1, int atom2, int numAdsorbate, double delta_z);
         void applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix);
 };
 
