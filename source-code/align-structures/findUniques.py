@@ -34,7 +34,7 @@ def calculateRMSD(structure_1, structure_2):
         assert(int(lines_1[0]) == int(lines_2[0]))
         # assert atom names are the same
         for i in range(2, int(lines_1[0])+2):
-            assert(lines_1[i].split()[0] == lines_2[i].split[0])
+            assert(lines_1[i].split()[0] == lines_2[i].split()[0])
 
 
         sum = 0.0

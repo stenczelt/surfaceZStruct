@@ -44,13 +44,13 @@ def listFiles(folderPath):
 def main():
 
     # list of files in aligned-structures folder
-    folderPath = "aligned-structures"
+    folderPath = "aligned_structures"
     alignedStructures = listFiles(folderPath)
     cwd = os.getcwd()
 
     #count number of binding sites
     numOfBSites = 0
-    fh = open("aligned-structures/" + alignedStructures[0], "r")
+    fh = open("aligned_structures/" + alignedStructures[0], "r")
     lines = fh.readlines()
     fh.close()
     for line in lines:
@@ -61,7 +61,7 @@ def main():
 
     for element in alignedStructures:
         #open file
-        fh = open("aligned-structures/" + element, "r")
+        fh = open("aligned_structures/" + element, "r")
         lines = fh.readlines()
         fh.close()
         #create new directory

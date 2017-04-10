@@ -10,5 +10,6 @@ optimization
 se_gsm_cals*
 __pycache__*
 *.pyc
-NH3_test
-CO2_test
+TESTS
+scratch
+XYZstructures
