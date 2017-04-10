@@ -72,20 +72,20 @@ def readInputFile():
             reactiveIndices_1.append( int(inputFile[7].split()[i]) )
 
     #if (numOfAdsorbates == 2):
-    slabIndex2 = int(inputFile[9].split()[1])
-    radius2 = float(inputFile[10].split()[1])
-    adsorbFile2 = inputFile[11].split()[1]
-    adsorbIndex2 = int(inputFile[12].split()[1])
+    slabIndex2 = int(inputFile[10].split()[1])
+    radius2 = float(inputFile[11].split()[1])
+    adsorbFile2 = inputFile[12].split()[1]
+    adsorbIndex2 = int(inputFile[13].split()[1])
     # reading max of 10 indices 11 = 10 indices + first column of the file
-    if ( len(inputFile[13].split()) > 11 ):
+    if ( len(inputFile[14].split()) > 11 ):
         print ("ERROR: Maximum of 10 reactive atoms on each adsorbate are allowed!")
         sys.exit(-1)
     else:
-        for i in range(1, len(inputFile[13].split()) ):
-            reactiveIndices_2.append( int(inputFile[13].split()[i]) )
+        for i in range(1, len(inputFile[14].split()) ):
+            reactiveIndices_2.append( int(inputFile[14].split()[i]) )
 
-    addMoves = int(inputFile[15].split()[1])
-    breakMoves = int(inputFile[16].split()[1])
+    addMoves = int(inputFile[17].split()[1])
+    breakMoves = int(inputFile[18].split()[1])
 
     return (findSites, slabFile, numOfAdsorbates, slabIndex1, radius1, adsorbFile1,\
             adsorbIndex1, reactiveIndices_1, slabIndex2, radius2,\
@@ -280,11 +280,57 @@ def submitSE_GSM(file, extension, index, cwd):
 
     os.chdir(folder)
     call(["qsub", "scratch/runGSM.qsh"])
+    #call(["sbatch", "scratch/runGSM.qsh"])
     os.chdir(cwd)
 
+# read input files and set slab size--number of atoms in X, Y, Z directions
+# supported file types are xyz and VASP POSCAR
+def findSlabSize(inFile, numOfSlabAtoms):
+    numOfAtomsInX = 0
+    numOfAtomsInY = 1
+    TOLERANCE = 0.15
+    fileType = "xyz"
+
+    fh = open(inFile)
+    lines = fh.readlines()
+    fh.close()
+
+    numOfAtoms = 0
+    try:
+        numOfAtoms = int(lines[0])
+    except:
+        TypeError
+        fileType = "POSCAR"
+        print("ERROR: File type should be xyz")
+        exit(-1)
+
+    #if (fileType == "xyz"):
+    xCoordinate = float(lines[2].split()[1])
+    yCoordinate = float(lines[2].split()[2])
+    zCoordinate = float(lines[2].split()[3])
+    currentYcoordinate = float(lines[2].split()[2])
+    for i in range(2, len(lines)):
+        if (float(lines[i].split()[3]) <= zCoordinate + TOLERANCE and
+                float(lines[i].split()[3]) >= zCoordinate - TOLERANCE):
+            # atoms in the same z layer
+            if (float(lines[i].split()[2]) <= yCoordinate + TOLERANCE and
+                    float(lines[i].split()[2]) >= yCoordinate - TOLERANCE):
+                numOfAtomsInX += 1
+
+            newYcoordinate = float(lines[i].split()[2])
+            if (newYcoordinate >= currentYcoordinate + TOLERANCE or
+                    newYcoordinate <= currentYcoordinate - TOLERANCE):
+                numOfAtomsInY += 1
+                currentYcoordinate = float(lines[i].split()[2])
+
+    numOfAtomsInZ = numOfSlabAtoms / (numOfAtomsInX * numOfAtomsInY)
+    return (numOfAtomsInX, numOfAtomsInY, numOfAtomsInZ)
 
 
-# TODO write function to find number of atoms in each layer, x, y
+
+# TODO
+#def tagAtoms():
+    # find atoms in each layer
 
 
 def main():
@@ -384,12 +430,14 @@ def main():
         # xyz file)
         if (all(v == 0 for v in slab.get_tags())):
             print ("111")
+            findSlabSize(folderName + file, numOfSlabAtoms)
             # TODO call a function to tag atoms
             # TODO ads1 = -1, ads2 = -2, BS = -3. Find ads1 and ads2 atoms from INPUT or numberOfAds1/2Atoms
 
+
         # uni-molecular reaction
         if (numOfAdsorbates == 1):
-            '''
+            '''###
             if one adsorbate, we have two reactive atoms at a time. Break the bond
             between them and add each fragment to a new site.
             - break bond
@@ -400,7 +448,7 @@ def main():
             - push two fragments in opposite directions, satisfied by above step
             - if two fragments have similar size, always move one of them
             - generate driving coordinates
-            '''
+            '''###
             if (addMoves != 2):
                 print ("ERROR: You need at least 2 add moves for dissociation of one adsorbate.")
                 exit(-1)
@@ -544,7 +592,7 @@ def main():
                             index = i
                             createTemplateFiles(file, folder, index, slab, slabType)
                             extension = 2
-                            submitSE_GSM(file, extension, index)
+                            submitSE_GSM(file, extension, index, cwd)
 
                             i += 1
 
@@ -554,8 +602,8 @@ def main():
                 if (breakMoves != 2):
                     print ("ERROR: You need at least 2 add and break moves for ligand exchange.")
                     exit(-1)
-            if (len(reactiveIndices_1 < 2)):
-                if (len(reactiveIndices_2 < 2)):
+            if (len(reactiveIndices_1) < 2):
+                if (len(reactiveIndices_2) < 2):
                     print ("ERROR: You need at least 2 reactive atoms on each adsorbate for ligand exchange.")
                     exit(-1)
 
@@ -573,7 +621,7 @@ def main():
                         for kk in range(0, len(twoPairsSet)):
                             # check coordination number
                             # Do we need this here? don't think so.
-                            '''
+                            '''###
                             coordNum = getCoordinationNum(adsorbFile2, (pairsSet[kk][1]-\
                                     numOfSlabAtoms - numOfAds1Atoms))
                             atomicNumber = getAtomicNumber(adsorbFile2, (pairsSet[kk][1]-\
@@ -581,7 +629,7 @@ def main():
                             #CoordinationNumbers()
                             MAX_COORDINATION_NUM = CoordinationNumbers().getMaxCoordNum(atomicNumber)
                             if (coordNum < MAX_COORDINATION_NUM):
-                            '''
+                            '''###
                             #if (True):
                             # write initial### and ISOMERS file
                             folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
@@ -603,9 +651,10 @@ def main():
                             index = i
                             createTemplateFiles(file, folder, index, slab, slabType)
                             extension = 2
-                            submitSE_GSM(file, extension, index)
+                            submitSE_GSM(file, extension, index, cwd)
 
                             i += 1
+
 
 
 if __name__ == "__main__":
