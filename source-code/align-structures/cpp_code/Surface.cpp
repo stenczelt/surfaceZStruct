@@ -86,7 +86,9 @@ bool Surface::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicS
         }
         else
         {
-            std::cout << "ERROR: Reading surfaces with adsorbates not implemented" << std::endl;
+            Atom anAtom(atomicSymbols[i], coordinates[3*i], coordinates[3*i+1], coordinates[3*i+2]);
+            mAdsorbateAtoms.push_back(anAtom);
+            //std::cout << "ERROR: Reading surfaces with adsorbates not implemented" << std::endl;
             // TODO if slab is not clean and already has adsorbates attached to it, it should be taken
             // care of at this part of the code. We need that information only for finding empty binding sites.
             //Atom anAtom(atomicSymbols[i], coordinates[3*i], coordinates[3*i+1], coordinates[3*i+2]);
@@ -99,12 +101,12 @@ bool Surface::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicS
             mAdsorbateCoord.push_back(temp);
             mAdsorbateSymbols.push_back(atomicSymbols[k]);
             ++numOfAdsorbateAtoms;*/
-            isSet = false;
+            //isSet = false;
         }
     }
     mNumOfSurfAtoms = mSlabAtoms.size();
     //mNumOfAdsorbateAtoms = numOfAdsorbateAtoms;
-    mNumOfAdsorbateAtoms = 0;
+    mNumOfAdsorbateAtoms = mAdsorbateAtoms.size();
 
     if (setSlabSize())
     {
@@ -889,7 +891,13 @@ bool Surface::writeToFile(std::string &outFile)
         ofs << mSlabAtoms[i].coordinates().y() << "            ";
         ofs << mSlabAtoms[i].coordinates().z() << "\n";
     }
-    //TODO this part needs to be written
+    for (unsigned int i=0; i<mAdsorbateAtoms.size(); ++i)
+    {   
+        ofs << mAdsorbateAtoms[i].name() << "            ";
+        ofs << mAdsorbateAtoms[i].coordinates().x() << "            ";
+        ofs << mAdsorbateAtoms[i].coordinates().y() << "            ";
+        ofs << mAdsorbateAtoms[i].coordinates().z() << "\n";
+    }
     /*for (unsigned int k=0; k<mAdsorbateCoord.size(); ++k)
     {
         ofs << mAdsorbateSymbols[k] << "            " << mAdsorbateCoord[k][0]

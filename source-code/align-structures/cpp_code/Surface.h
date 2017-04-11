@@ -59,6 +59,7 @@ class Surface
         std::vector<Atom> mSlabAtoms;
         // Vector of adsorbates (NH3 for instance), set to 2 for now
         std::vector<Molecule> mAdsorbates;
+        std::vector<Atom> mAdsorbateAtoms;
         
 
         // a 2D vector to store atomic coordinates

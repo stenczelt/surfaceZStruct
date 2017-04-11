@@ -325,7 +325,6 @@ bool readSlabFileAndWrite(std::string &slabFileName)
     }
     catch(...)
     {
-        std::cout << "TEST " << std::endl;
         return false;
     }
 
