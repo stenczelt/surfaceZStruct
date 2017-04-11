@@ -56,7 +56,7 @@ def main():
     for line in lines:
         if line[0] == "X":
             numOfBSites += 1
-    numOfBSites = int(lines[0]) - numOfBSites
+    numOfAtoms = int(lines[0]) - numOfBSites
 
 
     for element in alignedStructures:
@@ -71,7 +71,7 @@ def main():
         #remove X and write to new directory
         fileName = newFolder + element.split(".")[0] + "-in.xyz"
         fh = open(fileName,"w")
-        fh.write( str(numOfBSites) )
+        fh.write( str(numOfAtoms) )
         fh.write("\n")
         for i in range(1, len(lines)):
             if lines[i][0] != "X":
