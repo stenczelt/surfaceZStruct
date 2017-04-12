@@ -62,6 +62,7 @@ def readInputFile():
     adsorbIndex1 = int(inputFile[6].split()[1])
     reactiveIndices_1 = []
     reactiveIndices_2 = []
+    surfaceReactiveIndices = []
 
     # reading max of 10 indices 11 = 10 indices + first column of the file
     if ( len(inputFile[7].split()) > 11 ):
@@ -78,7 +79,7 @@ def readInputFile():
     adsorbIndex2 = int(inputFile[13].split()[1])
     # reading max of 10 indices 11 = 10 indices + first column of the file
     if ( len(inputFile[14].split()) > 11 ):
-        print ("ERROR: Maximum of 10 reactive atoms on each adsorbate are allowed!")
+        print ("ERROR: Maximum of 10 reactive atoms on each adsorbate is allowed!")
         sys.exit(-1)
     else:
         for i in range(1, len(inputFile[14].split()) ):
@@ -86,13 +87,40 @@ def readInputFile():
 
     addMoves = int(inputFile[17].split()[1])
     breakMoves = int(inputFile[18].split()[1])
+    # reactive slab indices
+    if ( len(inputFile[19].split()) > 5 ):
+        print ("ERROR: Maximum of 4 reactive atoms on surface is allowed!")
+        sys.exit(-1)
+    else:
+        for i in range(1, len(inputFile[19].split()) ):
+            surfaceReactiveIndices.append( int(inputFile[19].split()[i]) )
+    reactionType = int(inputFile[20].split()[1])
 
     return (findSites, slabFile, numOfAdsorbates, slabIndex1, radius1, adsorbFile1,\
             adsorbIndex1, reactiveIndices_1, slabIndex2, radius2,\
-            adsorbFile2, adsorbIndex2, reactiveIndices_2, addMoves, breakMoves)
+            adsorbFile2, adsorbIndex2, reactiveIndices_2, addMoves, breakMoves,\
+            surfaceReactiveIndices, reactionType)
 
 # creates a list of lists. Each list has indices of two atoms that wil be added
-def generateIsomerPair(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
+# this function is for the case with reactive indices from surface
+def generateIsomerPair_1(reactiveIndices_1, surfaceReactiveIndices, numOfSlabAtoms,\
+        numOfAds1Atoms):
+    # check reactive indices are <= than number of atoms
+    assert( reactiveIndices_1[0] <= numOfAds1Atoms and reactiveIndices_1[1] <= numOfAds1Atoms  )
+    assert( surfaceReactiveIndices[0] <= numOfSlabAtoms and surfaceReactiveIndices[1] <= numOfSlabAtoms )
+    listOfAdds = []
+    for index_1 in reactiveIndices_1:
+        for index_2 in surfaceReactiveIndices:
+            list = []
+            if (index_1 != 0 and index_2 != 0):
+                list.append(index_1 + numOfSlabAtoms)
+                list.append(index_2)
+                listOfAdds.append(list)
+
+    return listOfAdds
+
+# creates a list of lists. Each list has indices of two atoms that wil be added
+def generateIsomerPair_2(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
         numOfAds1Atoms, numOfAds2Atoms):
     # check reactive indices are <= than number of atoms
     assert( reactiveIndices_1[0] <= numOfAds1Atoms and reactiveIndices_1[1] <= numOfAds1Atoms  )
@@ -110,9 +138,14 @@ def generateIsomerPair(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
 
 # create lists of two pairs of add moves
 def generate2IsomerPairs(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
-        numOfAds1Atoms, numOfAds2Atoms):
-    pairs = generateIsomerPair(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
-            numOfAds1Atoms, numOfAds2Atoms)
+        numOfAds1Atoms, numOfAds2Atoms, reactionType):
+    if (reactionType == 1):
+        pairs = generateIsomerPair_1(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
+                numOfAds1Atoms)
+    else:
+        pairs = generateIsomerPair_2(reactiveIndices_1, reactiveIndices_2, numOfSlabAtoms,\
+                numOfAds1Atoms, numOfAds2Atoms)
+
     lists = []
     # add unique pairs to the list
     for i in range(0, len(pairs)):
@@ -337,12 +370,19 @@ def main():
     # read INPUT file
     findSites, slabFile, numOfAdsorbates, slabIndex1, radius1, adsorbFile1,\
     adsorbIndex1, reactiveIndices_1, slabIndex2, radius2,\
-    adsorbFile2, adsorbIndex2, reactiveIndices_2, addMoves, breakMoves = readInputFile()
+    adsorbFile2, adsorbIndex2, reactiveIndices_2, addMoves, breakMoves,\
+    surfaceReactiveIndices, reactionType = readInputFile()
 
     assert(addMoves < 3)
     assert(addMoves > 0)
     assert(breakMoves < 3)
     assert(breakMoves > 0)
+
+    if (reactionType == 1 and numOfAdsorbates == 1):
+        if (len(surfaceReactiveIndices) < 1 or surfaceReactiveIndices[0] == 0):
+            print ("ERROR: For inter-molecular reaction with one added adsorbate\
+                    'reactive-atoms-surface' should be set in INPUT file.")
+            exit (-1)
 
     slabType = ""
     numOfSlabAtoms = 0
@@ -435,8 +475,10 @@ def main():
             # TODO ads1 = -1, ads2 = -2, BS = -3. Find ads1 and ads2 atoms from INPUT or numberOfAds1/2Atoms
 
 
+        ###############################################
         # uni-molecular reaction
-        if (numOfAdsorbates == 1):
+        ###############################################
+        if (numOfAdsorbates == 1 and reactionType == 0):
             '''###
             if one adsorbate, we have two reactive atoms at a time. Break the bond
             between them and add each fragment to a new site.
@@ -456,10 +498,11 @@ def main():
             breakCombos = []
             for i in range(0, len(reactiveIndices_1)):
                 for j in range(i+1, len(reactiveIndices_1)):
-                    temp = []
-                    temp.append(reactiveIndices_1[i])
-                    temp.append(reactiveIndices_1[j])
-                    breakCombos.append(temp)
+                    if ( (reactiveIndices_1[i] != 0) and (reactiveIndices_1[j] != 0) ):
+                        temp = []
+                        temp.append(reactiveIndices_1[i])
+                        temp.append(reactiveIndices_1[j])
+                        breakCombos.append(temp)
 
             # find sites nearby a given adsorbate index
             i = 1
@@ -503,9 +546,79 @@ def main():
 
                     i += 1
 
-        #######################
+
+
+        ###############################################
+        ## ligand transfer or ligand exchange reactions
+        ###############################################
+        #TODO ligand transfer
+        elif (numOfAdsorbates == 1 and reactionType == 1):
+            if (addMoves != 2 or breakMoves != 2):
+                print ("ERROR: You need at least 2 add and 2 break moves for this type of reaction.")
+                exit(-1)
+            if (len(reactiveIndices_1) < 2 or len(surfaceReactiveIndices) < 2):
+                    print ("ERROR: You need at least 2 reactive atoms on each adsorbate for ligand exchange.")
+                    exit(-1)
+
+            # find all combinations of reactive indices 1
+            breakCombos_1 = []
+            for i in range(0, len(reactiveIndices_1)):
+                for j in range(i+1, len(reactiveIndices_1)):
+                    if ( (reactiveIndices_1[i] != 0) and (reactiveIndices_1[j] != 0) ):
+                        temp = []
+                        temp.append(reactiveIndices_1[i])
+                        temp.append(reactiveIndices_1[j])
+                        breakCombos_1.append(temp)
+            # find all combinations of slab reactive indices
+            breakCombos_surface = []
+            for i in range(0, len(surfaceReactiveIndices)):
+                for j in range(i+1, len(surfaceReactiveIndices)):
+                    if ( (surfaceReactiveIndices[i] != 0) and (surfaceReactiveIndices[j] != 0) ):
+                        temp = []
+                        temp.append(surfaceReactiveIndices[i])
+                        temp.append(surfaceReactiveIndices[j])
+                        breakCombos_surface.append(temp)
+
+            for element_1 in breakCombos_1:
+                for element_2 in breakCombos_surface:
+                    connected_1 = areConnected(adsorbFile1, element_1)
+                    connected_2 = areConnected(slabFile, element_2)
+                    if (connected_1 == True and connected_2 == True):
+                        numOfAds2Atoms = 0
+                        twoPairsSet = generate2IsomerPairs(element_1, element_2,\
+                                numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms, reactionType)
+
+                        for kk in range(0, len(twoPairsSet)):
+                            # write initial### and ISOMERS file
+                            folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
+                                    str(i).zfill(4) + "/scratch/"
+                            if not os.path.exists(folder):
+                                os.makedirs(folder)
+                            fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+                            fh.write("NEW\n")
+                            firstNum_1 = element_1[0] + numOfSlabAtoms
+                            secondNum_1 = element_1[1] + numOfSlabAtoms
+                            firstNum_2 = element_2[0]
+                            secondNum_2 = element_2[1]
+                            fh.write("BREAK " + str(firstNum_1) + "  " + str(secondNum_1) + "\n")
+                            fh.write("BREAK " + str(firstNum_2) + "  " + str(secondNum_2) + "\n")
+                            fh.write("ADD   " + str(twoPairsSet[kk][0][0]) + "  " + str(twoPairsSet[kk][0][1]) + "\n")
+                            fh.write("ADD   " + str(twoPairsSet[kk][1][0]) + "  " + str(twoPairsSet[kk][1][1]) + "\n")
+                            fh.close()
+
+                            index = i
+                            createTemplateFiles(file, folder, index, slab, slabType)
+                            extension = 2
+                            #submitSE_GSM(file, extension, index, cwd)
+
+                            i += 1
+
+
+
+        ###############################################
         # bi-molecular reaction
-        if (numOfAdsorbates == 2):
+        ###############################################
+        elif (numOfAdsorbates == 2):
             # find all combinations of reactive indices 1
             breakCombos_1 = []
             for i in range(0, len(reactiveIndices_1)):
@@ -616,7 +729,7 @@ def main():
                         #pairsSet = generateIsomerPair(element_1, reactiveIndices_2,\
                         #        numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
                         twoPairsSet = generate2IsomerPairs(element_1, element_2,\
-                                numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
+                                numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms, reactionType)
 
                         for kk in range(0, len(twoPairsSet)):
                             # check coordination number
