@@ -609,7 +609,7 @@ def main():
                             index = i
                             createTemplateFiles(file, folder, index, slab, slabType)
                             extension = 2
-                            #submitSE_GSM(file, extension, index, cwd)
+                            submitSE_GSM(file, extension, index, cwd)
 
                             i += 1
 

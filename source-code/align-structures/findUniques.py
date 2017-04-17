@@ -117,6 +117,9 @@ def main():
             elif (rmsd == -1):
                 print ("ERROR: File does not exist!")
                 exit(-1)
+    if (len(filePaths) < 2):
+        uniqueFileNames.append(filePaths[0])
+
     uniqueFileNames = list( set(uniqueFileNames) )
 
     # sort uniqueFileNames based on energy and pick top 5 lowest energy structures
@@ -131,7 +134,6 @@ def main():
         os.makedirs(dst)
 
     numOfFiles = len(sorted_files)
-    print sorted_files[0][0]
     if (numOfFiles > 5):
         # only use 5 structures with lowest energy
         for i in range(0, 5):
