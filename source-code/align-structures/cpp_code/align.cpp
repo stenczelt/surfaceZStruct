@@ -819,6 +819,7 @@ void Align::add_align(int nadd1, int* add1, std::vector<int> allSites1,
             int* add_2 = new int[nadd1];
             add_2[0] = bSite_1;
             add_2[1] = ads_1 + mSlab.natoms;
+            add_2[2] = add_2[3] = 0;
             if (nadd1 > 1)
             {
                 add_2[2] = bSite_2;
