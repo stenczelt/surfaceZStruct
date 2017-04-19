@@ -166,8 +166,7 @@ def findNearbySites(slab, atomIndex, bindingSiteFile):
 
     listOfSites = []
 
-    MAX_DISTANCE = 2.0 # Angstroms
-    THRESH = 0.1
+    MAX_DISTANCE = 5.0 # Angstroms
 
     atomX = slab[atomIndex - 1].x
     atomY = slab[atomIndex - 1].y
@@ -182,27 +181,19 @@ def findNearbySites(slab, atomIndex, bindingSiteFile):
         inY = float(inY)
         inZ = float(inZ)
 
-        distance = (atomX - inX)**2 + (atomY - inY)**2 + (atomZ - inZ)**2
-        if ( math.sqrt(distance) <= MAX_DISTANCE and math.sqrt(distance) > 0.01 ):
-            for atom in slab:
-                if ( (atom.x+THRESH >= inX and atom.x-THRESH <= inX)\
-                        and (atom.y+THRESH >= inY and atom.y-THRESH <= inY)\
-                        and (atom.z+THRESH >= inZ and atom.z-THRESH <= inZ) ):
-                    wrongIndices.append(i)
+        #distance = (atomX - inX)**2 + (atomY - inY)**2 + (atomZ - inZ)**2
+        distance = (atomX - inX)**2 + (atomY - inY)**2
+        if ( math.sqrt(distance) <= MAX_DISTANCE and math.sqrt(distance) > 0.5 ):
+            listOfSites.append(i)
 
-                else:
-                    listOfSites.append(i)
-
-    listOfSites = set(listOfSites)
-    for element in wrongIndices:
-        if element in listOfSites:
-            listOfSites.remove(element)
-    return list(listOfSites)
+    return listOfSites
 
 
 # find two indices from two input lists that are farthest from eachother
 def findFarthestIndices(list1, list2, bindingSiteFile):
     # read as ASE Atoms object
+    list1 = list( set(list1) - set(list2) )
+    list2 = list( set(list2) - set(list1) )
     binding_sites = read(bindingSiteFile)
     outIndex = []
     distance = 0.0
