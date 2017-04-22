@@ -1,10 +1,7 @@
-// Internal coordinate class for surface reactions
+// Please see license.txt for licensing and copyright information //
+// Author: Paul Zimmerman, University of Michigan //
 #include "icoord.h"
 #include "utils.h"
-#include <string>
-#include <cassert>
-
-
 using namespace std;
 
 #define MAX_FRAG_DIST 12.0
@@ -17,12 +14,12 @@ int ICoord::init(string xyzfile){
  cout << " xyzfile: " << xyzfile << endl;
  structure_read(xyzfile);
  
- //print_xyz();
+ print_xyz();
 
  alloc_mem();
  // printf(" done allocating memory\n");
 
- ic_create();
+ int done = ic_create();
 
  printf(" initializing MM parameters \n");
  mm_init();
@@ -66,7 +63,7 @@ int ICoord::init(int nat, string* anam, int* anum, double* xyz){
 
  alloc_mem();
 
- ic_create();
+ int done = ic_create();
 
 // printf(" initializing MM parameters \n");
  mm_init();
@@ -179,11 +176,17 @@ int ICoord::ic_create()
   {
     printf(" isOpt: %i \n",isOpt);
     make_frags();
-    bond_frags();
+    if (use_xyz)
+    {
+      get_xyzic(); // Mina
+      bond_frags_xyz();
+    }
+    else
+      bond_frags();
   }
 
   coord_num(); // counts # surrounding species
-  if (use_xyz) get_xyzic();
+  //if (use_xyz) get_xyzic(); Mina
 
   make_angles();
   make_torsions();
@@ -192,7 +195,7 @@ int ICoord::ic_create()
   if (isOpt)
     linear_ties();
 
-  n_nonbond = make_nonbond(); //anything not connected by bond or angle
+//  n_nonbond = make_nonbond(); //anything not connected by bond or angle
 
   update_ic();
 
@@ -205,7 +208,10 @@ int ICoord::ic_create_nobonds()
   {
     printf(" isOpt: %i \n",isOpt);
     make_frags();
-    bond_frags();
+    if (use_xyz)
+      bond_frags_xyz();
+    else
+      bond_frags();
   }
 
   coord_num(); // counts # surrounding species
@@ -216,7 +222,7 @@ int ICoord::ic_create_nobonds()
   if (isOpt)
     linear_ties();
 
-  n_nonbond = make_nonbond(); //anything not connected by bond or angle
+//  n_nonbond = make_nonbond(); //anything not connected by bond or angle
 
   update_ic();
 
@@ -291,7 +297,7 @@ void ICoord::linear_ties()
     } //if !bond_exists
 
     int found;
-    //int b1,b2;
+    int b1,b2;
     for (int j=0;j<m[i];j++)
     for (int k=0;k<j;k++) 
     {
@@ -466,6 +472,7 @@ void ICoord::make_frags()
     atominfrag[bonds[i][0]] = 1;
     atominfrag[bonds[i][1]] = 1;
 
+    // is this first if statement ever trigerred? Mina  TODO
     if ( frags[bonds[i][0]] == -1 && frags[bonds[i][1]] == -1 )
     {
       frags[bonds[i][0]] = nfrags;
@@ -522,74 +529,87 @@ void ICoord::make_frags()
 
 void ICoord::bond_frags_xyz()
 {
-  printf(" in bond_frags() \n");
+  printf(" in bond_frags_xyz() \n");
   if (nfrags<2) return;
 
   int found = 0;
   int found2 = 0;
 
-  int a1,a2;
-  int b1,b2;
+  int a1,a2 = 0;
+  int b1,b2 = 0;
   double mclose;
   double mclose2;
   for (int n1=0;n1<nfrags;n1++)
-  for (int n2=0;n2<n1;n2++)
   {
-    if (natoms<150)
-      printf(" connecting frag %i to frag %i: ",n1+1,n2+1);
-
-    found = 0;
-    found2 = 0;
-    double close = 0.;
-    mclose = 1000.;
-    for (int i=0;i<natoms;i++)
-    for (int j=0;j<natoms;j++)
-    if (frags[i]==n1 && frags[j]==n2)
-    {
-      close = distance(i,j);
-      if (close<mclose)
+      for (int n2=0;n2<n1;n2++)
       {
-        mclose = close;
-        a1 = i;
-        a2 = j;
-        found = 1;
-      }
-    }
+          if (natoms<150)
+              printf(" connecting frag %i to frag %i: ",n1+1,n2+1);
 
-   //now connect a1 to next nearest
-    mclose2 = 1000.;
-    for (int i=0;i<natoms;i++)
-    if (frags[i]==n1 && i!=a1 && i!=a2)
-    {
-      close = distance(i,a1);
-      if (close<mclose2)
-      {
-        mclose2 = close;
-        b1 = a1;
-        b2 = i;
-        found2 = 1;
-      }
-    } 
+          found = 0;
+          found2 = 0;
+          double close = 0.;
+          mclose = 1000.;
+          for (int i=0;i<natoms;i++)
+          {
+              for (int j=0;j<natoms;j++)
+              {
+                  if (frags[i]==n1 && frags[j]==n2)
+                  {
+                      if (isTM(i)==0 && isTM(j)==0)
+                      {
+                          close = distance(i,j);
+                          if (close<mclose)
+                          {
+                              mclose = close;
+                              a1 = i;
+                              a2 = j;
+                              found = 1;
+                          }
+                      }
+                  }
+              }
+          }
 
-    if (found && !bond_exists(a1,a2))
-    {
-      printf(" bond pair1 added : %i %i ",a1+1,a2+1);
-      bonds[nbonds][0] = a1;
-      bonds[nbonds][1] = a2;
-      bondd[nbonds] = mclose;
-      nbonds++;
-    } // if found
+          //now connect a1 to next nearest
+          mclose2 = 1000.;
+          for (int i=0;i<natoms;i++)
+          {
+              //if (frags[i]==n1 && i!=a1 && i!=a2)
+              if (frags[i]!=n1 && i!=a1 && i!=a2)
+                  //if (isTM(i)==0) Mina
+                  {
+                      close = distance(i,a1);
+                      if (close<mclose2)
+                      {
+                          mclose2 = close;
+                          b1 = a1;
+                          b2 = i;
+                          found2 = 1;
+                      }
+                  } 
+          }
 
-    if (found2 && !bond_exists(b1,b2))
-    {
-      printf(" bond pair2 added : %i %i ",b1+1,b2+1);
-      bonds[nbonds][0] = b1;
-      bonds[nbonds][1] = b2;
-      bondd[nbonds] = mclose2;
-      nbonds++;
-    } // if found2
+          if (found && !bond_exists(a1,a2))
+          {
+              printf(" bond pair1 added : %i %i ",a1+1,a2+1);
+              bonds[nbonds][0] = a1;
+              bonds[nbonds][1] = a2;
+              bondd[nbonds] = mclose;
+              nbonds++;
+          } // if found
 
-  } //loop n2<n1 over nfrags
+          if (found2 && !bond_exists(b1,b2))
+          {
+              printf(" bond pair2 added : %i %i ",b1+1,b2+1);
+              bonds[nbonds][0] = b1;
+              bonds[nbonds][1] = b2;
+              bondd[nbonds] = mclose2;
+              nbonds++;
+          } // if found2
+
+      } //loop n2<n1 over nfrags
+  }
 
   return;
 }
@@ -742,8 +762,9 @@ void ICoord::connect_1_coord_mg()
     nxyzic += 3;
   }
 
+#if 0
   for (int i=0;i<natoms;i++)
-  if (!isTM(i) && coordn[i]<2 && !frozen[i] && anumbers[i]!=1 && anumbers[i]!=-1) 
+  if (!isTM(i) && coordn[i]<2 && !frozen[i] && anumbers[i]!=1 && anumbers[i]!=0) 
   {
     double d1 = 1000.;
     int wa = -1;
@@ -767,22 +788,78 @@ void ICoord::connect_1_coord_mg()
       coord_num();
     }
   }
+#endif
 
   return;
+}
+
+int ICoord::get_ox(int* oxel)
+{
+  printf("   testing get_ox \n");
+
+  for (int i=0;i<natoms;i++) oxel[i] = 0;
+
+  int* elem = new int[PTable::MAX_NUMBER_OF_ATOMS]; // number of elements in pTable.cpp
+  for (int i=0;i<PTable::MAX_NUMBER_OF_ATOMS;i++) elem[i] = 0;
+  for (int i=0;i<natoms;i++)
+  {
+    int atNum = anumbers[i];
+    if (atNum > 0)
+        elem[atNum]++;
+  }
+
+  int emax1 = -1;
+  int nmax1 = 0;
+  for (int i=2;i<PTable::MAX_NUMBER_OF_ATOMS;i++)
+  {
+    if (elem[i]>nmax1)
+    {
+      emax1 = i;
+      nmax1 = elem[i];
+    }
+  }
+  int emax2 = -1;
+  int nmax2 = 0;
+  for (int i=2;i<PTable::MAX_NUMBER_OF_ATOMS;i++)
+  {
+    if (elem[i]>nmax2 && i!=emax1)
+    {
+      emax2 = i;
+      nmax2 = elem[i];
+    }
+  }
+
+  printf("   most abundant: %2s/%2i %2s/%2i \n",PTable::atom_name(emax1).c_str(),nmax1,PTable::atom_name(emax2).c_str(),nmax2);
+
+ //verify second element is actually abundant
+  if (nmax2<natoms/5) 
+    emax2 = -1;
+
+  int nox = 0;
+  for (int i=0;i<natoms;i++)
+  if (anumbers[i]==emax1 || anumbers[i]==emax2)
+  {
+    oxel[i]++;
+    nox++;
+  }
+
+#if 0
+  for (int i=0;i<natoms;i++)
+    printf(" %2i: %i ",i+1,oxel[i]);
+  printf("\n");
+#endif
+
+  delete [] elem;
+
+  return nox;
 }
 
 //CPMZ tune me
 void ICoord::get_xyzic()
 {
-  printf("  in get_xyzic() \n");
+  printf("  in get_xyzic() use_xyz: %i \n",use_xyz);
 
-  nxyzic = 0;
-  for (int i=0;i<natoms;i++)
-  {
-      std::cout << "i: " << i << std::endl;
-      xyzic[i] = 0;
-  }
-
+  if (use_xyz==2)
   for (int i=0;i<nbonds;i++)
   {
     int a1 = bonds[i][0];
@@ -792,10 +869,6 @@ void ICoord::get_xyzic()
     if (frozen[a1] && frozen[a2])
       frzpair = 1;
 
-//    if (coordn[a1] + coordn[a2] > 8 || coordn[a1] > 6 || coordn[a2] > 6)
-//    if (coordn[a1]>4 && coordn[a2]>4)
-//    if ((coordn[a1]>4 && anumbers[a2]>20) || (coordn[a2]>4 && anumbers[a1]>20))
-//    if (isTM(a1) && isTM(a2) && (coordn[a1]>3 || coordn[a2]>3))
     if ((isTM(a1) && isTM(a2)) || frzpair)
     {
       //printf(" high coordn: %i/%i for atoms %i/%i \n",coordn[a1],coordn[a2],a1+1,a2+1);
@@ -810,11 +883,46 @@ void ICoord::get_xyzic()
       i--;
     }
   }
+  if (use_xyz==2) return;
+
+
+  int* oxel = new int[natoms];
+  int nox = get_ox(oxel);
+
+  nxyzic = 0;
+  for (int i=0;i<natoms;i++)
+    xyzic[i] = 0;
+
+  for (int i=0;i<nbonds;i++)
+  {
+    int a1 = bonds[i][0];
+    int a2 = bonds[i][1];
+    int frzpair = 0;
+    if (frozen!=NULL)
+    if (frozen[a1] && frozen[a2])
+      frzpair = 1;
+
+    //if ((isTM(a1) && isTM(a2)) || frzpair || oxel[a1] || oxel[a2])
+    if (frzpair || oxel[a1] || oxel[a2])
+    {
+      //printf(" high coordn: %i/%i for atoms %i/%i \n",coordn[a1],coordn[a2],a1+1,a2+1);
+      //printf(" metal-metal bond: %i-%i \n",a1+1,a2+1);
+        // bonds are deleted if transition metal
+      for (int j=i;j<nbonds-1;j++)
+      {
+        bonds[j][0] = bonds[j+1][0];
+        bonds[j][1] = bonds[j+1][1];
+        bondd[j] = bondd[j+1];
+      }
+      nbonds--;
+      i--;
+    }
+  }
 
   coord_num();
 
   for (int i=0;i<natoms;i++)
-  if ((coordn[i]<2 && isTM(i)) || coordn[i]<1) //was 1
+  if ((coordn[i]<2 && isTM(i)) || coordn[i]<1)
 //  if (coordn[i]<1)
   {
     //printf(" low coordn (%i), setting xyz: %i \n",coordn[i],i);
@@ -822,15 +930,19 @@ void ICoord::get_xyzic()
     nxyzic += 3;
   }
 
+#if 0
   if (nxyzic && isOpt)
   {
     connect_1_coord_mg(); //fix for oxides
     make_frags();
     bond_frags_xyz();
   }
+#endif
 
-#if 1
-  if (isOpt || 0)
+  delete [] oxel;
+
+#if 0
+  if (isOpt)
   {
     printf("\n XYZ vs. IC geometry \n");
     printf(" %i \n\n",natoms);
@@ -899,23 +1011,20 @@ void ICoord::make_bonds()
   nbonds = 0;
   nxyzic = 0;
   for (int i=0;i<natoms;i++)
-  {
-      for (int j=0;j<i;j++)
-      {
-          MAX_BOND_DIST = (getR(i) + getR(j))/2;
-          if (farBond>1.0) MAX_BOND_DIST *= farBond;
-          double d = distance(i,j);
-          // X is the binding site, does not need bonds
-          if (d<MAX_BOND_DIST and this->anames[i] != "X" and this->anames[j] != "X" ) 
-          {
-              //printf(" found bond: %2i %2i dist: %f \n",i+1,j+1,d);
-              bonds[nbonds][0]=i;
-              bonds[nbonds][1]=j;
-              bondd[nbonds]=d;
-              nbonds++;
-          }
-      }
-  }
+    for (int j=0;j<i;j++)
+    {
+       MAX_BOND_DIST = (getR(i) + getR(j))/2;
+       if (farBond>1.0) MAX_BOND_DIST *= farBond;
+       double d = distance(i,j);
+       if (d<MAX_BOND_DIST)
+       {
+          //printf(" found bond: %2i %2i dist: %f \n",i+1,j+1,d);
+          bonds[nbonds][0]=i;
+          bonds[nbonds][1]=j;
+          bondd[nbonds]=d;
+          nbonds++;
+       }
+    }
 
 }
 
@@ -1262,14 +1371,11 @@ double ICoord::torsion_val(int i, int j, int k, int l)
 
 double ICoord::angle_val(int i, int j, int k)
 {
-    //TODO what should happen if i==j or j==k or i==k? 
-    //Respectively, the distance becomes zero and it can cause problems
    double D1 = distance(i,j);
    double D2 = distance(j,k);
    double D3 = distance(i,k);
    
-   assert (D1 != 0 and D2 != 0); //TODO is assert a reasonable thing here?
-   double cos = ( D1*D1 + D2*D2 - D3*D3 ) / ( 2*D1*D2); // angle between D1 and D2
+   double cos = ( D1*D1 + D2*D2 - D3*D3 ) / ( 2*D1*D2);
  
    if (cos > 1) cos = 1;
    if (cos < -1) cos = -1;
@@ -1334,7 +1440,7 @@ int ICoord::isTM(int a) {
 
 //may later be extended to all 5+ coord types
   int anum;
-  if (a>-2)
+  if (a>-1)
     anum = anumbers[a];
   else
     return 0;
@@ -1344,7 +1450,7 @@ int ICoord::isTM(int a) {
     TM = 2;
   else if (anum > 20)
   {
-    if (anum < 31 || anum==-1)
+    if (anum < 31)
       TM = 1;
     else if (38 < anum && anum < 49)
       TM = 1;
@@ -1361,7 +1467,7 @@ double ICoord::getR(int i){
   double value;
  
   int an = anumbers[i];
-  if      (an==0) value = 1.0; //TODO Ask Paul what this is
+  if      (an==0) value = 0.05;
   else if (an==1) value = 1.3;
   else if (an==3) value = 2.65; //PT
   else if (an==4) value = 2.0; //PT
@@ -1389,6 +1495,7 @@ double ICoord::getR(int i){
   else if (an==28) value = 3.0;
   else if (an==29) value = 3.0;
   else if (an==35) value = 2.7;
+  else if (an==41) value = 2.15; //Nb
   else if (an==44) value = 3.2;
   else if (an==45) value = 3.15;
   else if (an==46) value = 3.15;
@@ -1398,7 +1505,7 @@ double ICoord::getR(int i){
   else if (an==77) value = 3.35;
   else if (an==78) value = 3.35;
   else if (an==79) value = 3.35;
-  else if (an==-1) value = 0.; 
+  else if (an==0) value = 0.; 
   else 
   {
     printf(" Need to add atomic number %i to getR! (atom %2i) \n",an,i+1);
@@ -1420,6 +1527,11 @@ double ICoord::distance(int i, int j)
 
 int ICoord::bond_exists(int b1, int b2) {
 
+   if (b1 < 0 || b1 > natoms)
+   {
+       std::cout << "ERROR: Something is wrong with atomic indices" << std::endl; //Mina
+       exit(-1);
+   }
    int found = 0;
    if (bond_num(b1,b2)>-1)
      found = 1;
@@ -1591,29 +1703,15 @@ void ICoord::structure_read(string xyzfile){
   bool success=true;
   success=static_cast<bool>(getline(infile, line));
   if (success){
-    //int length=StringTools::cleanstring(line);
+    int length=StringTools::cleanstring(line);
     natoms=atoi(line.c_str());
   }
   cout <<"  natoms: " << natoms << endl;
   
   success=static_cast<bool>(getline(infile, line));
-  if (success){  
-    //comment=line;
-      std::vector<string> anglesToSample = StringTools::tokenize(line, " \t");
-      if (anglesToSample.size() == 0)
-      {
-          std::cout << "WARNING: No angle to sample. Is this what you want?" << std::endl;
-      }
-      for (unsigned int i=0; i<anglesToSample.size(); i++)
-      {
-          if (std::stoi(anglesToSample[i]) < 0 || std::stoi(anglesToSample[i]) > 360)
-          {
-              std::cout << "ERROR: Invalid angle value!\n";
-              return;
-          }
-          mAnglesToSample.push_back(std::stod(anglesToSample[i]));
-      }
-  }
+//  if (success){  
+//    comment=line;
+//  }
   
   anumbers = new int[1+natoms];
   amasses = new double[1+natoms];
@@ -1622,7 +1720,7 @@ void ICoord::structure_read(string xyzfile){
   //cout <<"  -Reading the atomic names...";
   for (int i=0;i<natoms;i++){
     success=static_cast<bool>(getline(infile, line));
-    //int length=StringTools::cleanstring(line);
+    int length=StringTools::cleanstring(line);
     vector<string> tok_line = StringTools::tokenize(line, " \t");
     anames[i]=tok_line[0];
     anumbers[i]=PTable::atom_number(anames[i]);
@@ -1650,7 +1748,7 @@ void ICoord::structure_read(string xyzfile){
     success=static_cast<bool>(getline(infile, line));
     for (int j=0;j<natoms;j++){
       success=static_cast<bool>(getline(infile, line));
-      //int length=StringTools::cleanstring(line);
+      int length=StringTools::cleanstring(line);
       vector<string> tok_line = StringTools::tokenize(line, " \t");
       coords[3*j+0]=atof(tok_line[1].c_str());
       coords[3*j+1]=atof(tok_line[2].c_str());
@@ -1709,12 +1807,11 @@ int ICoord::read_ics(string filename)
   bool success=true;
   int type = 1;
   success=static_cast<bool>(getline(infile, line));
-  assert (success);
   while (!infile.eof())
   {
     success=static_cast<bool>(getline(infile, line));
     //cout << "RR0: " << line << endl;
-    StringTools::cleanstring(line);
+    int length=StringTools::cleanstring(line);
     vector<string> tok_line = StringTools::tokenize(line, " \t");
     if (tok_line.size()>0)
     {
@@ -1731,7 +1828,7 @@ int ICoord::read_ics(string filename)
         {
           success=static_cast<bool>(getline(infile, line));
           //cout << "RR: " << line << endl;
-          StringTools::cleanstring(line);
+          length=StringTools::cleanstring(line);
           tok_line = StringTools::tokenize(line, " \t");
           bonds[i][0] = atoi(tok_line[0].c_str());
           bonds[i][1] = atoi(tok_line[1].c_str());
@@ -1753,7 +1850,7 @@ int ICoord::read_ics(string filename)
         {
           success=static_cast<bool>(getline(infile, line));
           //cout << "RR: " << line << endl;
-          StringTools::cleanstring(line);
+          length=StringTools::cleanstring(line);
           tok_line = StringTools::tokenize(line, " \t");
           angles[i][0] = atoi(tok_line[0].c_str());
           angles[i][1] = atoi(tok_line[1].c_str());
@@ -1776,7 +1873,7 @@ int ICoord::read_ics(string filename)
         {
           success=static_cast<bool>(getline(infile, line));
           //cout << "RR: " << line << endl;
-          StringTools::cleanstring(line);
+          length=StringTools::cleanstring(line);
           tok_line = StringTools::tokenize(line, " \t");
           torsions[i][0] = atoi(tok_line[0].c_str());
           torsions[i][1] = atoi(tok_line[1].c_str());
@@ -1808,89 +1905,24 @@ int ICoord::read_ics(string filename)
   return nbonds + nangles + ntor;
 }
 
-double ICoord::mm_energy()
-//double ICoord::mm_energy(int atom1, int atom2)
-{
-  double Energy = 0.;
-  Energy += vdw_energy_all();
-  //Energy += vdw_energy_all(atom1, atom2);
-  //others not yet implemented
-
-  return Energy;
-}
-
-double ICoord::vdw_energy_all()
-//double ICoord::vdw_energy_all(int atom1, int atom2)
-{
-  double E = 0;
-  for (int i=0;i<n_nonbond;i++)
-    E += vdw_energy_1(nonbond[i][0],nonbond[i][1]);
-  //E = vdw_energy_1(atom1, atom2);
-
-  return E;
-}
-
-double ICoord::vdw_energy_1(int i, int j)
-{
-  double R = ffR[i] + ffR[j];
-  //std::cout << "test R:  " << ffR[i] << "   " << ffR[j] << std::endl;
-  double eps = sqrt( ffepsilon[i] * ffepsilon[j] );
-
-  double r = distance(i,j);
-
-//  printf(" R: %1.4f r: %1.4f \n",R,r);
-  double Rr = R / r;
-  double Rr6 = Rr*Rr*Rr;
-  Rr6 = Rr6*Rr6;
-
-  double E = eps * ( Rr6*Rr6 - 2*Rr6 );
-
-  return E;
-}
-
 void ICoord::freemem(){
 
  delete [] grad;
     
  for (int i=0;i<max_bonds;i++)
    delete [] bonds[i];
- delete [] bonds;
- delete [] bondd;
-
- //int max_bonds_tm = 25;
- /*
- for (int i=0;i<max_bonds_tm;i++)
-   delete [] bondstm[i];
- delete [] bondstm;
- for (int i=0;i<max_bonds_tm;i++)
-   delete [] bondstm2[i];
- delete [] bondstm2;
- Mina */
+// delete [] bonds;
 
  for (int i=0;i<max_angles;i++)
    delete [] angles[i];
- delete [] angles; 
- delete [] anglev;
-
- for (int i=0;i<max_torsions;i++)
-   delete [] torsions[i];
- delete [] torsions;
- delete [] torv;
-
- for (int i=0;i<max_imptor;i++)
-   delete [] imptor[i];
- delete [] imptor;
- delete [] imptorv;
+// delete [] angles; 
+// delete [] anglev;
 
  for (int i=0;i<max_nonbond;i++)
    delete [] nonbond[i];
- delete [] nonbond;
- delete [] nonbondd;
 
- delete [] coordn;
+// delete [] coordn;
 
- delete [] ffR;
- delete [] ffepsilon;
 
   delete [] anumbers;
   delete [] amasses;
@@ -1899,12 +1931,15 @@ void ICoord::freemem(){
   delete [] coordsts;
   delete [] coords;
 
+  delete [] xyzic;
 
   return;
 
 }
 
+
 void ICoord::alloc_mem(){
+
  farBond = 1.0;
  use_xyz = 0;
 
@@ -1931,7 +1966,7 @@ void ICoord::alloc_mem(){
  anglev = new double[max_angles];
 
  ntor = 0;
- max_torsions=natoms*60;
+ max_torsions=natoms*100;
  torsions = new int*[max_torsions];
  for (int i=0;i<max_torsions;i++)
    torsions[i] = new int[4];
@@ -1966,3 +2001,17 @@ std::vector<double> ICoord::getAngleSet()
 {
     return mAnglesToSample;
 }
+
+
+void ICoord::print_xyz()
+{
+    printf(" %i \n",natoms);
+    printf("\n");
+    for (int i=0;i<natoms;i++) 
+    {
+        cout << "  " << anames[i];
+        printf(" %f %f %f \n",coords[3*i+0],coords[3*i+1],coords[3*i+2]);
+    }
+    // printf("\n");
+}
+

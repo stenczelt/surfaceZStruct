@@ -36,11 +36,15 @@ class ICoord {
         void structure_read(string xyzfile);
         void alloc_mem();
         void make_bonds();
+        void make_bonds_1(int i);
         void coord_num();
         void get_xyzic();
+        int get_ox(int* oxel);
         void connect_1_coord_mg();
         void make_angles();
         void make_torsions();
+//        void make_frags();
+//        void bond_frags();
         void bond_frags_xyz();
         void linear_ties();
         void tm_ties();
@@ -73,7 +77,7 @@ class ICoord {
         double ffimptore(int i, int j, int k, int l); 
         double ffimptord(int i, int j, int k, int l); 
         // function to make arrays?
-
+        int isTM(int anum);
         // Gradient terms
         double* bmat;
         double* bmatti;
@@ -150,7 +154,7 @@ class ICoord {
         double path_overlap;
         int path_overlap_n;
         double path_overlap_e_g;
-        int isTM(int anum);
+//        int isTM(int anum);
         void bond_frags();
         void update_bfgs();
         void update_bfgsp(int makeHint);
@@ -274,9 +278,9 @@ class ICoord {
         void print_xyz();
         void print_xyz_save(string filename);
         void print_xyz_save(string xyzfile_string, double energy);
-        double vdw_energy_all();
+//        double vdw_energy_all();
         //double vdw_energy_all(int atom1, int atom2);
-        double vdw_energy_1(int i, int j);
+//        double vdw_energy_1(int i, int j);
 
 
         double distance(int i, int j);
@@ -294,7 +298,7 @@ class ICoord {
         void save_hessp(string filename);
         void read_hessp(string filename);
         void read_hessxyz(string filename, int write);
-        double mm_energy();
+//        double mm_energy();
         std::vector<double> getAngleSet();
         //double mm_energy(int atom1, int atom2);
 };
