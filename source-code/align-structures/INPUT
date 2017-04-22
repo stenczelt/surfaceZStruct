@@ -1,4 +1,4 @@
-find-sites              0               #0/1 if 1, finds binding sites
+find-sites              0               #0/1/2. If 1, finds binding sites. If 2, read input BS cooordinates.
 slab-file               fcc100_Cu.xyz   #name of slab file
 numOfAdsorbates         2               #number of adsorbate fragments to be added to slab
 index-number-1          37              #index of the first binding site
@@ -19,4 +19,6 @@ add                     2               #number of add moves
 break                   2               #number of break moves
 reactive-atoms-surface  25 26           #indices of reactive atoms from slab, currently adsorbed structures
 reaction-type           0               #0: dissociation  1: intra-molecular reaction; for 1 adsorbate case only
+bindingSite_coordinate1 3.3 2.5 18.0    #x, y, z coordinates of a binding site identified by the user. Set slab type to NONE.
+bindingSite_coordinate2 3.3 2.5 18.0    #x, y, z coordinates of a binding site identified by the user
 numberOfSlabAtoms       24              #number of atoms in slab, adsorbates not included

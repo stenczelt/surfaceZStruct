@@ -20,6 +20,7 @@ enum BINDING_SITE_TYPE
     LONG_BRIDGE  = 5,
     SHORT_BRIDGE = 6,
     BRIDGE       = 7,
+    NONE         = 8,
 };
 
 

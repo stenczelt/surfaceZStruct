@@ -300,6 +300,7 @@ void Align::align_v1(int numOfAlignedVecFound, double* v1)
     return;
 }*/
 
+/*
 void Align::vdw_vector_opt(double* v1, ICoord icp)
 {
     //printf(" in vdw_vector_opt \n");
@@ -334,6 +335,7 @@ void Align::vdw_vector_opt(double* v1, ICoord icp)
     }
     return;
 }
+*/
 
 /*void Align::init(int numOfAtoms1i, string* atomicNames1i, int* anumbers1i, double* xyz1i,
                  int numOfAtoms2i, string* atomicNames2i, int* anumbers2i, double* xyz2i)

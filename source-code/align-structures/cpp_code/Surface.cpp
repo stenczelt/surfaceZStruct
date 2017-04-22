@@ -36,7 +36,7 @@ SLAB_TYPE Surface::getSurfaceType() const
 
 int Surface::getNumOfAtoms() const
 {
-    return (mNumOfSurfAtoms);
+    return (mNumOfSurfAtoms + mNumOfAdsorbateAtoms);
 }
 
 int Surface::getSurfaceWidth() const
@@ -108,92 +108,95 @@ bool Surface::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicS
     //mNumOfAdsorbateAtoms = numOfAdsorbateAtoms;
     mNumOfAdsorbateAtoms = mAdsorbateAtoms.size();
 
-    if (setSlabSize())
+    if (mSurfaceType != ANY)
     {
-        // setting mNthAtom & mNumOfSurfAtoms
-        mNthAtom[0] = mSlabAtoms[mNumOfSurfAtoms-1].coordinates().x();
-        mNthAtom[1] = mSlabAtoms[mNumOfSurfAtoms-1].coordinates().y();
-        mNthAtom[2] = mSlabAtoms[mNumOfSurfAtoms-1].coordinates().z();
-        mNthMinusOneAtom[0] = mSlabAtoms[mNumOfSurfAtoms-2].coordinates().x();
-        mNthMinusOneAtom[1] = mSlabAtoms[mNumOfSurfAtoms-2].coordinates().y();
-        mNthMinusOneAtom[2] = mSlabAtoms[mNumOfSurfAtoms-2].coordinates().z();
-        mDeltaX = mNthAtom[0] - mNthMinusOneAtom[0];
-        mDeltaY = mNthAtom[1] - mNthMinusOneAtom[1];
-        if (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001)
+        if (setSlabSize())
         {
-            mDistance = std::sqrt(3)/2 * mDeltaX;
-        }
-        else if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
-        {
-            mDistance = mDeltaX;
-        }
-        else if (mSurfaceType == FCC110)
-        {
-            mDistance = mDeltaX / std::sqrt(2);
-        }
-        else if (mSurfaceType == BCC110)
-        {
-            mDistance = std::sqrt(2)/2 * mDeltaX;
-        }
-        // setting mStarAtom & mStarMinusOneAtom
-        // n-1 to n vector intersects w/ Y axis
-        if (std::abs(mDeltaX) > std::abs(mDeltaY) && 
-           (mSurfaceType == FCC100 || mSurfaceType == BCC100 || mSurfaceType == FCC110))
-        {
-            mStarAtom[0] = mNthAtom[0]; // x component
-            mStarAtom[1] = mNthAtom[1] - mDistance; // y component
-            mStarAtom[2] = mNthAtom[2]; // z component
-            mStarMinusOneAtom[0] = mNthMinusOneAtom[0]; // x component
-            mStarMinusOneAtom[1] = mNthMinusOneAtom[1] - mDistance; // y component
-            mStarMinusOneAtom[2] = mNthMinusOneAtom[2]; // z component
-        }
-        else if (std::abs(mDeltaX) > std::abs(mDeltaY) && 
-                (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001 || mSurfaceType == BCC110))
-        {
-            mStarAtom[0] = mNthAtom[0] - mDeltaX/2; // x component
-            mStarAtom[1] = mNthAtom[1] - mDistance; // y component
-            mStarAtom[2] = mNthAtom[2]; // z component
-            mStarMinusOneAtom[0] = mNthMinusOneAtom[0] - mDeltaX/2; // x component
-            mStarMinusOneAtom[1] = mNthMinusOneAtom[1] - mDistance; // y component
-            mStarMinusOneAtom[2] = mNthMinusOneAtom[2]; // z component
-        }
-        else 
-        { 
-            std::cout << "ERROR: not an ASE generated input file" << std::endl;
-            isSet = false;
-        }
-        if (!(isFound(mStarAtom[0], mStarAtom[1], mStarAtom[2])))
-        {   
-            std::cout << "ERROR: setting the StarAtom failed" << std::endl;
-            isSet = false;
-        }   
-        if (!(isFound(mStarMinusOneAtom[0], mStarMinusOneAtom[1], mStarMinusOneAtom[2])))
-        {   
-            std::cout << "ERROR: setting the StarMinusOneAtom failed" << std::endl;
-            isSet = false;
-        }   
+            // setting mNthAtom & mNumOfSurfAtoms
+            mNthAtom[0] = mSlabAtoms[mNumOfSurfAtoms-1].coordinates().x();
+            mNthAtom[1] = mSlabAtoms[mNumOfSurfAtoms-1].coordinates().y();
+            mNthAtom[2] = mSlabAtoms[mNumOfSurfAtoms-1].coordinates().z();
+            mNthMinusOneAtom[0] = mSlabAtoms[mNumOfSurfAtoms-2].coordinates().x();
+            mNthMinusOneAtom[1] = mSlabAtoms[mNumOfSurfAtoms-2].coordinates().y();
+            mNthMinusOneAtom[2] = mSlabAtoms[mNumOfSurfAtoms-2].coordinates().z();
+            mDeltaX = mNthAtom[0] - mNthMinusOneAtom[0];
+            mDeltaY = mNthAtom[1] - mNthMinusOneAtom[1];
+            if (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001)
+            {
+                mDistance = std::sqrt(3)/2 * mDeltaX;
+            }
+            else if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
+            {
+                mDistance = mDeltaX;
+            }
+            else if (mSurfaceType == FCC110)
+            {
+                mDistance = mDeltaX / std::sqrt(2);
+            }
+            else if (mSurfaceType == BCC110)
+            {
+                mDistance = std::sqrt(2)/2 * mDeltaX;
+            }
+            // setting mStarAtom & mStarMinusOneAtom
+            // n-1 to n vector intersects w/ Y axis
+            if (std::abs(mDeltaX) > std::abs(mDeltaY) && 
+                    (mSurfaceType == FCC100 || mSurfaceType == BCC100 || mSurfaceType == FCC110))
+            {
+                mStarAtom[0] = mNthAtom[0]; // x component
+                mStarAtom[1] = mNthAtom[1] - mDistance; // y component
+                mStarAtom[2] = mNthAtom[2]; // z component
+                mStarMinusOneAtom[0] = mNthMinusOneAtom[0]; // x component
+                mStarMinusOneAtom[1] = mNthMinusOneAtom[1] - mDistance; // y component
+                mStarMinusOneAtom[2] = mNthMinusOneAtom[2]; // z component
+            }
+            else if (std::abs(mDeltaX) > std::abs(mDeltaY) && 
+                    (mSurfaceType == FCC111 || mSurfaceType == BCC111 || mSurfaceType == HCP0001 || mSurfaceType == BCC110))
+            {
+                mStarAtom[0] = mNthAtom[0] - mDeltaX/2; // x component
+                mStarAtom[1] = mNthAtom[1] - mDistance; // y component
+                mStarAtom[2] = mNthAtom[2]; // z component
+                mStarMinusOneAtom[0] = mNthMinusOneAtom[0] - mDeltaX/2; // x component
+                mStarMinusOneAtom[1] = mNthMinusOneAtom[1] - mDistance; // y component
+                mStarMinusOneAtom[2] = mNthMinusOneAtom[2]; // z component
+            }
+            else 
+            { 
+                std::cout << "ERROR: not an ASE generated input file" << std::endl;
+                isSet = false;
+            }
+            if (!(isFound(mStarAtom[0], mStarAtom[1], mStarAtom[2])))
+            {   
+                std::cout << "ERROR: setting the StarAtom failed" << std::endl;
+                isSet = false;
+            }   
+            if (!(isFound(mStarMinusOneAtom[0], mStarMinusOneAtom[1], mStarMinusOneAtom[2])))
+            {   
+                std::cout << "ERROR: setting the StarMinusOneAtom failed" << std::endl;
+                isSet = false;
+            }   
 
-        const double tolerance = 0.20;
-        for (int j=(mSlabAtoms.size()-1); j>-1; j--)
-        {
-            if (mSlabAtoms[j].coordinates().z() < (mNthAtom[2]-tolerance))
+            const double tolerance = 0.20;
+            for (int j=(mSlabAtoms.size()-1); j>-1; j--)
+            {
+                if (mSlabAtoms[j].coordinates().z() < (mNthAtom[2]-tolerance))
+                {   
+                    mSecondLayerZ = mSlabAtoms[j].coordinates().z();
+                    break;
+                }   
+            } 
+            for (int j=(mSlabAtoms.size()-1); j>-1; j--)
             {   
-                mSecondLayerZ = mSlabAtoms[j].coordinates().z();
-                break;
-            }   
-        } 
-        for (int j=(mSlabAtoms.size()-1); j>-1; j--)
-        {   
-            if (mSlabAtoms[j].coordinates().z() < (mSecondLayerZ-tolerance))
-            {   
-                mThirdLayerZ = mSlabAtoms[j].coordinates().z();
-                break;
-            }   
+                if (mSlabAtoms[j].coordinates().z() < (mSecondLayerZ-tolerance))
+                {   
+                    mThirdLayerZ = mSlabAtoms[j].coordinates().z();
+                    break;
+                }   
+            }
         }
-    }
-    else
-    {
-        isSet = false;
+        else
+        {
+            isSet = false;
+        }
     }
     return (isSet);
 }
@@ -209,14 +212,14 @@ bool Surface::setSlabSize()
     for (unsigned int i=0; i<mSlabAtoms.size()-1; ++i)
     {
         if (mSlabAtoms[i].coordinates().y() <= mSlabAtoms[0].coordinates().y()+tolerance &&
-            mSlabAtoms[i].coordinates().y() >= mSlabAtoms[0].coordinates().y()-tolerance &&
-            mSlabAtoms[i].coordinates().z() <= mSlabAtoms[0].coordinates().z()+tolerance &&
-            mSlabAtoms[i].coordinates().z() >= mSlabAtoms[0].coordinates().z()-tolerance)
+                mSlabAtoms[i].coordinates().y() >= mSlabAtoms[0].coordinates().y()-tolerance &&
+                mSlabAtoms[i].coordinates().z() <= mSlabAtoms[0].coordinates().z()+tolerance &&
+                mSlabAtoms[i].coordinates().z() >= mSlabAtoms[0].coordinates().z()-tolerance)
         {
             ++width;
         }
         if (mSlabAtoms[i].coordinates().z() <= mSlabAtoms[0].coordinates().z()+tolerance &&
-            mSlabAtoms[i].coordinates().z() >= mSlabAtoms[0].coordinates().z()-tolerance)
+                mSlabAtoms[i].coordinates().z() >= mSlabAtoms[0].coordinates().z()-tolerance)
         {
             ++layer;
         }
@@ -241,8 +244,8 @@ bool Surface::isFound(const double &inX, const double &inY, const double &inZ)
     for (unsigned int i=0; i<mSlabAtoms.size(); ++i)
     {
         if (  ((mSlabAtoms[i].coordinates().x() <= (inX + tolerance)) && (mSlabAtoms[i].coordinates().x() >= (inX - tolerance)) ) &&
-              ((mSlabAtoms[i].coordinates().y() <= (inY + tolerance)) && (mSlabAtoms[i].coordinates().y() >= (inY - tolerance)) ) &&   
-              ((mSlabAtoms[i].coordinates().z() <= (inZ + tolerance)) && (mSlabAtoms[i].coordinates().z() >= (inZ - tolerance)) )  )   
+                ((mSlabAtoms[i].coordinates().y() <= (inY + tolerance)) && (mSlabAtoms[i].coordinates().y() >= (inY - tolerance)) ) &&   
+                ((mSlabAtoms[i].coordinates().z() <= (inZ + tolerance)) && (mSlabAtoms[i].coordinates().z() >= (inZ - tolerance)) )  )   
         {   
             return (true);
         }   
@@ -808,13 +811,13 @@ std::vector<int> Surface::findNearbySites(const unsigned int atomIndex, const do
     {
             //std::cout << "1111 Im here %%%%%%%%%%%%%%%\n";
         if ( (mBindingSites[i].getType() == siteType || siteType == ALL) && 
-                atomIndex <= (mSlabAtoms.size()+mBindingSites.size()) )
+                atomIndex <= (mSlabAtoms.size()+mAdsorbateAtoms.size()+mBindingSites.size()) )
         {
             //std::cout << "Im here %%%%%%%%%%%%%%%\n";
             //double refX = mCoordinates[atomIndex-1][0];
             //double refY = mCoordinates[atomIndex-1][1];
-            double refX = mBindingSites[atomIndex - mSlabAtoms.size() - 1].coordinates().x();
-            double refY = mBindingSites[atomIndex - mSlabAtoms.size() - 1].coordinates().y();
+            double refX = mBindingSites[atomIndex - mSlabAtoms.size() - mAdsorbateAtoms.size() - 1].coordinates().x();
+            double refY = mBindingSites[atomIndex - mSlabAtoms.size() - mAdsorbateAtoms.size() - 1].coordinates().y();
             double testX = mBindingSites[i].coordinates().x();
             double testY = mBindingSites[i].coordinates().y();
             /*if ((testX <= refX+radius && testX >= refX-radius) &&
@@ -840,6 +843,11 @@ std::vector<int> Surface::findNearbySites(const unsigned int atomIndex, const do
 
 void Surface::findAllSites()
 {
+    if (mSurfaceType == ANY)
+    {
+        std::cout << "Binding sites should be added using INPUT file." << std::endl;
+        return;
+    }
     if (mSurfaceType == FCC100 || mSurfaceType == BCC100)
     {
         // TODO if (findHollow() != 0) {ERROR}
@@ -970,6 +978,14 @@ const SLAB_TYPE stringToSlabType(std::string in)
         return BCC111;
     else if (in == "hcp0001")
         return HCP0001;
+    else if (in == "ANY")
+        return ANY;
     else
         throw std::exception();
+}
+
+void Surface::addBindingSites(BindingSite BS1, BindingSite BS2)
+{
+    mBindingSites.push_back(BS1);
+    mBindingSites.push_back(BS2);
 }

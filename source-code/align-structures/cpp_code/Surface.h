@@ -32,7 +32,8 @@ enum SLAB_TYPE
     BCC100  = 3,
     BCC110  = 4,
     BCC111  = 5,
-    HCP0001 = 6
+    HCP0001 = 6,
+    ANY     = 7,
 };
 
 class Surface
@@ -114,6 +115,7 @@ class Surface
         void findAllSites();
         bool writeToFile(std::string &outFile);
         bool writeBSToFile(std::string &outFile);
+        void addBindingSites(BindingSite BS1, BindingSite BS2);
 };
 
 const SLAB_TYPE stringToSlabType(std::string in);
