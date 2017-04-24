@@ -12,7 +12,7 @@ from ase.optimize import QuasiNewton
 from ase.io import write, read
 #from ase.build import surface, add_adsorbate, fcc100, fcc110, fcc111,\
 from ase.lattice.surface import surface, add_adsorbate, fcc100, fcc110, fcc111,\
-        hcp0001, bcc100, bcc110, bcc111
+        hcp0001, bcc100, bcc110, bcc111, diamond100
 
 '''
 set up slab and adsorbates by reading it from input file
