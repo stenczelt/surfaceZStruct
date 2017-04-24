@@ -115,7 +115,7 @@ class Surface
         void findAllSites();
         bool writeToFile(std::string &outFile);
         bool writeBSToFile(std::string &outFile);
-        void addBindingSites(BindingSite BS1, BindingSite BS2);
+        void addBindingSites(BindingSite BS1, BindingSite BS2, BindingSite BS3);
 };
 
 const SLAB_TYPE stringToSlabType(std::string in);

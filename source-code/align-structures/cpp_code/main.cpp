@@ -22,10 +22,10 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
                   std::string* adsorbateFiles, int* adsorbateIndices, /*int* reactiveIndex1,
                   int* reactiveIndex2,*/ int &numOfAdd, int &numOfBreak, std::string &slabFileName,
                   double &delta_z_1, double &delta_z_2, double* bindingSiteCoord_1,
-                  double* bindingSiteCoord_2);
+                  double* bindingSiteCoord_2, double* bindingSiteCoord_3);
 Surface readXYZfile_createObject(std::string &slabFileName, int numOfAdsorbates,
         std::string* adsorbateFileNames);
-bool readSlabFileAndWrite(std::string &slabFileName, BindingSite BS1, BindingSite BS2);
+bool readSlabFileAndWrite(std::string &slabFileName, BindingSite BS1, BindingSite BS2, BindingSite BS3);
 bool readSlabFile(std::string &slabFileName, Surface &aSurface);
 
 int main(int argc, char* argv[])
@@ -55,21 +55,23 @@ int main(int argc, char* argv[])
         double delta_z_2 = 0.0;
         double bindingSiteCoord_1[3] = {};
         double bindingSiteCoord_2[3] = {};
+        double bindingSiteCoord_3[3] = {};
 
         int returnVal = 1;
         returnVal = readFromFile("INPUT", numOfAdsorbates, slabIndices, radius, adsorbateFiles, 
                      adsorbateIndices, numOfAdd, numOfBreak, slabFileName, delta_z_1, delta_z_2,
-                     bindingSiteCoord_1, bindingSiteCoord_2);
+                     bindingSiteCoord_1, bindingSiteCoord_2, bindingSiteCoord_3);
         for (int i=0;i<RADIUS_SIZE; i++)
             if (radius[i] < 0.05)
                 radius[i] = 0.05;
         int addArray[4] = {};
         BindingSite BS1 = BindingSite(NONE, bindingSiteCoord_1[0], bindingSiteCoord_1[1], bindingSiteCoord_1[2]);
         BindingSite BS2 = BindingSite(NONE, bindingSiteCoord_2[0], bindingSiteCoord_2[1], bindingSiteCoord_2[2]);
+        BindingSite BS3 = BindingSite(NONE, bindingSiteCoord_3[0], bindingSiteCoord_3[1], bindingSiteCoord_3[2]);
 
         if (returnVal == 1)
         {
-            if (! readSlabFileAndWrite(slabFileName, BS1, BS2))
+            if (! readSlabFileAndWrite(slabFileName, BS1, BS2, BS3))
             {
                 std::cout << "ERROR: Slab type not set for this file. Set slab "
                     "type on the second line of slab file input. Supported types "
@@ -209,7 +211,8 @@ bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int 
 int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices, double* radius,
         std::string* adsorbateFiles, int* adsorbateIndices, /*int* reactiveIndex1,
         int* reactiveIndex2,*/ int &numOfAdd, int &numOfBreak, std::string &slabFileName,
-        double &delta_z_1, double &delta_z_2, double* bindingSiteCoord_1, double* bindingSiteCoord_2)
+        double &delta_z_1, double &delta_z_2, double* bindingSiteCoord_1, double* bindingSiteCoord_2,
+        double* bindingSiteCoord_3)
 {
     // populate vector by input file lines
     std::vector<std::string> inputFile;
@@ -251,6 +254,13 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
         bindingSiteCoord_2[0] = std::stod(temp[0]);
         bindingSiteCoord_2[1] = std::stod(temp[1]);
         bindingSiteCoord_2[2] = std::stod(temp[2]);
+        // line 24
+        ss.str(*(inputFile.begin()+23));
+        ss >> unwanted >> temp[0] >> temp[1] >> temp[2] >> unwanted;
+        bindingSiteCoord_3[0] = std::stod(temp[0]);
+        bindingSiteCoord_3[1] = std::stod(temp[1]);
+        bindingSiteCoord_3[2] = std::stod(temp[2]);
+
         return 1;
     }
     else if (std::stoi(findSites) == 0)
@@ -337,7 +347,7 @@ int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices,
     return -1;
 }
 
-bool readSlabFileAndWrite(std::string &slabFileName, BindingSite BS1, BindingSite BS2)
+bool readSlabFileAndWrite(std::string &slabFileName, BindingSite BS1, BindingSite BS2, BindingSite BS3)
 {
     std::vector<std::string> xyzFileSlab; // vector to store the input file
     std::ifstream inFile;
@@ -389,7 +399,7 @@ bool readSlabFileAndWrite(std::string &slabFileName, BindingSite BS1, BindingSit
     if (slabType == ANY)
     {
         // add binding sites manually
-        aSurface.addBindingSites(BS1, BS2);
+        aSurface.addBindingSites(BS1, BS2, BS3);
     }
     else
     {

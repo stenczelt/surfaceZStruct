@@ -984,8 +984,9 @@ const SLAB_TYPE stringToSlabType(std::string in)
         throw std::exception();
 }
 
-void Surface::addBindingSites(BindingSite BS1, BindingSite BS2)
+void Surface::addBindingSites(BindingSite BS1, BindingSite BS2, BindingSite BS3)
 {
     mBindingSites.push_back(BS1);
     mBindingSites.push_back(BS2);
+    mBindingSites.push_back(BS3);
 }
