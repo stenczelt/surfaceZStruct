@@ -217,6 +217,7 @@ def findFarthestIndices(list1, list2, bindingSiteFile):
     return outIndex
 
 def areConnected(inputFile, twoIndices):
+    HYDROGEN_BOND_LENGTH = 0.9
     obConversion = OB.OBConversion()
     obConversion.SetInFormat("xyz")
     adsorbate = OB.OBMol()
@@ -224,10 +225,27 @@ def areConnected(inputFile, twoIndices):
 
     index_1 = twoIndices[0]
     index_2 = twoIndices[1]
-    if (adsorbate.GetBond(index_1, index_2) != None):
-        return True;
+    #openbabel doesn't work correctly for H2
+    #if both indices are H
+    if ( adsorbate.GetAtom(index_1).GetType()[0] == "H" and\
+            adsorbate.GetAtom(index_2).GetType()[0] == "H"):
+        x_1 = adsorbate.GetAtom(index_1).GetX()
+        y_1 = adsorbate.GetAtom(index_1).GetY()
+        z_1 = adsorbate.GetAtom(index_1).GetZ()
+        x_2 = adsorbate.GetAtom(index_2).GetX()
+        y_2 = adsorbate.GetAtom(index_2).GetY()
+        z_2 = adsorbate.GetAtom(index_2).GetZ()
+
+        distance = math.sqrt( (x_1 - x_2)**2 + (y_1 - y_2)**2 + (z_1 - z_2)**2 )
+        if (distance < HYDROGEN_BOND_LENGTH):
+            return True
+        else:
+            return False
     else:
-        return False;
+        if (adsorbate.GetBond(index_1, index_2) != None):
+            return True;
+        else:
+            return False;
 
 def getCoordinationNum(inputFile, indexIn):
     obConversion = OB.OBConversion()
@@ -641,7 +659,7 @@ def main():
             for element_1 in breakCombos_1:
                 connected_1 = areConnected(adsorbFile1, element_1)
                 if (connected_1 == True):
-                    pairsSet = generateIsomerPair(element_1, reactiveIndices_2,\
+                    pairsSet = generateIsomerPair_2(element_1, reactiveIndices_2,\
                             numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
 
                     for kk in range(0, len(pairsSet)):
@@ -676,7 +694,7 @@ def main():
             for element_2 in breakCombos_2:
                 connected_2 = areConnected(adsorbFile2, element_2)
                 if (connected_2 == True):
-                    pairsSet = generateIsomerPair(element_2, reactiveIndices_1,\
+                    pairsSet = generateIsomerPair_2(element_2, reactiveIndices_1,\
                             numOfSlabAtoms, numOfAds1Atoms, numOfAds2Atoms)
                     for kk in range(0, len(pairsSet)):
                         # check coordination number
@@ -701,7 +719,7 @@ def main():
                             fh.close()
 
                             index = i
-                            createTemplateFiles(file, folder, index, slab, slabType)
+                            createTemplateFiles(file, folder, index, slab, slabType, reactionName)
                             extension = 2
                             submitSE_GSM(file, extension, index, cwd)
 
@@ -760,7 +778,7 @@ def main():
                             fh.close()
 
                             index = i
-                            createTemplateFiles(file, folder, index, slab, slabType)
+                            createTemplateFiles(file, folder, index, slab, slabType, reactionName)
                             extension = 2
                             submitSE_GSM(file, extension, index, cwd)
 
