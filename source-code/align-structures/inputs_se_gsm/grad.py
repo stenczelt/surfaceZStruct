@@ -15,7 +15,7 @@ from ase.calculators.emt import EMT
 from ase.constraints import FixAtoms
 from ase.io import write
 from ase.io import read
-from ase.lattice.surface import fcc111,add_adsorbate,fcc100,fcc110,hcp0001,bcc111
+from ase.lattice.surface import fcc111,add_adsorbate,fcc100,fcc110,hcp0001,bcc111,diamond100,diamond111
 import os
 import sys
 import shutil

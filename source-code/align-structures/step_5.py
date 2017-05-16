@@ -34,7 +34,7 @@ from ase.io import write, read
 import ase.io.vasp
 #from ase.build import surface, add_adsorbate, fcc100, fcc110, fcc111,\
 from ase.lattice.surface import surface, add_adsorbate, fcc100, fcc110, fcc111,\
-        hcp0001, bcc100, bcc110, bcc111
+        hcp0001, bcc100, bcc110, bcc111, diamond100, diamond111
 
 '''
 Open Babel modules
@@ -96,10 +96,12 @@ def readInputFile():
             surfaceReactiveIndices.append( int(inputFile[19].split()[i]) )
     reactionType = int(inputFile[20].split()[1])
 
+    reactionName = inputFile[24].split()[1]
+
     return (findSites, slabFile, numOfAdsorbates, slabIndex1, radius1, adsorbFile1,\
             adsorbIndex1, reactiveIndices_1, slabIndex2, radius2,\
             adsorbFile2, adsorbIndex2, reactiveIndices_2, addMoves, breakMoves,\
-            surfaceReactiveIndices, reactionType)
+            surfaceReactiveIndices, reactionType, reactionName)
 
 # creates a list of lists. Each list has indices of two atoms that wil be added
 # this function is for the case with reactive indices from surface
@@ -192,13 +194,13 @@ def findNearbySites(slab, atomIndex, bindingSiteFile):
 # find two indices from two input lists that are farthest from eachother
 def findFarthestIndices(list1, list2, bindingSiteFile):
     # read as ASE Atoms object
-    list1 = list( set(list1) - set(list2) )
-    list2 = list( set(list2) - set(list1) )
+    list1_2 = list( set(list1) - set(list2) )
+    list2_2 = list( set(list2) - set(list1) )
     binding_sites = read(bindingSiteFile)
     outIndex = []
     distance = 0.0
-    for index_1 in list1:
-        for index_2 in list2:
+    for index_1 in list1_2:
+        for index_2 in list2_2:
             x_1 = float(binding_sites[index_1].x)
             y_1 = float(binding_sites[index_1].y)
             z_1 = float(binding_sites[index_1].z)
@@ -245,7 +247,7 @@ def getAtomicNumber(inputFile, indexIn):
     anAtom = adsorbate.GetAtom(indexIn)
     return anAtom.GetAtomicNum()
 
-def createTemplateFiles(file, folder, index, slab, slabType):
+def createTemplateFiles(file, folder, index, slab, slabType, reactionName):
     slab.write(folder + "initial" + str(index).zfill(4) + ".xyz")
 
     # Read slab type form slab file input (surface.xyz)
@@ -284,7 +286,7 @@ def createTemplateFiles(file, folder, index, slab, slabType):
     fh = open("inputs_se_gsm/scratch/runGSM.qsh")
     templateFile = Template(fh.read())
     fh.close()
-    jobName = file.split(".")[0].split('-', 1)[1] + str(index).zfill(4)
+    jobName = reactionName + file.split(".")[0].split('-', 1)[1] + str(index).zfill(3)
     myDictionary = {'jobName':jobName, 'jobID':index}
     result = templateFile.substitute(myDictionary)
     PBSfile = folder + "/runGSM.qsh"
@@ -362,7 +364,7 @@ def main():
     findSites, slabFile, numOfAdsorbates, slabIndex1, radius1, adsorbFile1,\
     adsorbIndex1, reactiveIndices_1, slabIndex2, radius2,\
     adsorbFile2, adsorbIndex2, reactiveIndices_2, addMoves, breakMoves,\
-    surfaceReactiveIndices, reactionType = readInputFile()
+    surfaceReactiveIndices, reactionType, reactionName = readInputFile()
 
     assert(addMoves < 3)
     assert(addMoves > 0)
@@ -508,34 +510,38 @@ def main():
                     # TODO make sure the site is empty
                     farthestSites = findFarthestIndices(listOfSitesFrag_1,\
                         listOfSitesFrag_2, "bindingSites.xyz")
-                    # TODO add to different binding site types input by the user
-                    # write initial### and ISOMERS file
-                    folder = "se_gsm_cals_1/" + file.split(".")[0] + "/" +\
-                        str(i).zfill(4) + "/scratch/"
-                    if not os.path.exists(folder):
-                        os.makedirs(folder)
-                    fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
-                    fh.write("NEW\n")
-                    firstNum = element[0] + numOfSlabAtoms #+ numOfBSAtoms
-                    secondNum = element[1] + numOfSlabAtoms #+ numOfBSAtoms
-                    fh.write("BREAK " + str(firstNum) + "  " + str(secondNum) + "\n")
-                    fh.write("ADD   " + str(farthestSites[0] + numOfSlabAtoms + numOfAds1Atoms + 1)\
-                            + "  " + str(firstNum) + "\n")
-                    fh.write("ADD   " + str(farthestSites[1] + numOfSlabAtoms + numOfAds1Atoms + 1)\
-                            + "  " + str(secondNum) + "\n")
-                    fh.close()
+                    if (len(farthestSites) > 0):
+                        # TODO add to different binding site types input by the user
+                        # write initial### and ISOMERS file
+                        folder = "se_gsm_cals_1/" + file.split(".")[0] + "/" +\
+                            str(i).zfill(4) + "/scratch/"
+                        if not os.path.exists(folder):
+                            os.makedirs(folder)
+                        fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+                        fh.write("NEW\n")
+                        firstNum = element[0] + numOfSlabAtoms #+ numOfBSAtoms
+                        secondNum = element[1] + numOfSlabAtoms #+ numOfBSAtoms
+                        fh.write("BREAK " + str(firstNum) + "  " + str(secondNum) + "\n")
+                        fh.write("ADD   " + str(farthestSites[0] + numOfSlabAtoms + numOfAds1Atoms + 1)\
+                                + "  " + str(firstNum) + "\n")
+                        fh.write("ADD   " + str(farthestSites[1] + numOfSlabAtoms + numOfAds1Atoms + 1)\
+                                + "  " + str(secondNum) + "\n")
+                        fh.close()
 
-                    index = i
-                    createTemplateFiles(file, folder, index, slab, slabType)
+                        index = i
+                        createTemplateFiles(file, folder, index, slab, slabType, reactionName)
 
-                    # submit SE-GSM
-                    # files needed for SE-GSM calculation: inpfileq, grad.py,
-                    # status, gfstringq.exe, scratch/submit_gsm.qsh, scratch/initial000.xyz,
-                    # and scratch/ISOMERS000
-                    extension = 1
-                    submitSE_GSM(file, extension, index, cwd)
+                        # submit SE-GSM
+                        # files needed for SE-GSM calculation: inpfileq, grad.py,
+                        # status, gfstringq.exe, scratch/submit_gsm.qsh, scratch/initial000.xyz,
+                        # and scratch/ISOMERS000
+                        extension = 1
+                        submitSE_GSM(file, extension, index, cwd)
 
-                    i += 1
+                        i += 1
+                    else:
+                        print ("No binding sites found. Skipping ", file.split(".")[0] + str(i).zfill(4))
+                        i += 1
 
 
 
@@ -544,6 +550,7 @@ def main():
         ###############################################
         #TODO ligand transfer
         elif (numOfAdsorbates == 1 and reactionType == 1):
+            k = 1
             if (addMoves != 2 or breakMoves != 2):
                 print ("ERROR: You need at least 2 add and 2 break moves for this type of reaction.")
                 exit(-1)
@@ -582,10 +589,10 @@ def main():
                         for kk in range(0, len(twoPairsSet)):
                             # write initial### and ISOMERS file
                             folder = "se_gsm_cals_2/" + file.split(".")[0] + "/" +\
-                                    str(i).zfill(4) + "/scratch/"
+                                    str(k).zfill(4) + "/scratch/"
                             if not os.path.exists(folder):
                                 os.makedirs(folder)
-                            fh = open(folder + "ISOMERS"+str(i).zfill(4), 'w')
+                            fh = open(folder + "ISOMERS"+str(k).zfill(4), 'w')
                             fh.write("NEW\n")
                             firstNum_1 = element_1[0] + numOfSlabAtoms
                             secondNum_1 = element_1[1] + numOfSlabAtoms
@@ -597,12 +604,12 @@ def main():
                             fh.write("ADD   " + str(twoPairsSet[kk][1][0]) + "  " + str(twoPairsSet[kk][1][1]) + "\n")
                             fh.close()
 
-                            index = i
-                            createTemplateFiles(file, folder, index, slab, slabType)
+                            index = k
+                            createTemplateFiles(file, folder, index, slab, slabType, reactionName)
                             extension = 2
                             submitSE_GSM(file, extension, index, cwd)
 
-                            i += 1
+                            k += 1
 
 
 
@@ -660,7 +667,7 @@ def main():
                             fh.close()
 
                             index = i
-                            createTemplateFiles(file, folder, index, slab, slabType)
+                            createTemplateFiles(file, folder, index, slab, slabType, reactionName)
                             extension = 2
                             submitSE_GSM(file, extension, index, cwd)
                             

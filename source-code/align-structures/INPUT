@@ -22,4 +22,5 @@ reaction-type           0               #0: dissociation  1: intra-molecular rea
 bindingSite_coordinate1 3.3 2.5 18.0    #x, y, z coordinates of a binding site identified by the user. Set slab type to ANY.
 bindingSite_coordinate2 3.3 2.5 18.0    #x, y, z coordinates of a binding site identified by the user
 bindingSite_coordinate3 3.3 2.5 18.0    #x, y, z coordinates of a binding site identified by the user
+reaction-name           pacid           #what do you want to name your calculations?
 numberOfSlabAtoms       24              #number of atoms in slab, adsorbates not included
