@@ -1709,9 +1709,20 @@ void ICoord::structure_read(string xyzfile){
   cout <<"  natoms: " << natoms << endl;
   
   success=static_cast<bool>(getline(infile, line));
-//  if (success){  
-//    comment=line;
-//  }
+  if (success){  
+      vector<string> temp = StringTools::tokenize(line, " \t");
+      for (int i=0; i<temp.size(); i++)
+      {
+          mAnglesToSample.push_back(atoi(temp[i].c_str()));
+      }
+      std::cout << "YYYYYYYYYYYYYYYYYYYYYYYYYYYY\n";
+      for (int i=0; i<mAnglesToSample.size(); i++)
+      {
+          std::cout << mAnglesToSample[i] << "   ";
+      }
+      std::cout << std::endl;
+
+  }
   
   anumbers = new int[1+natoms];
   amasses = new double[1+natoms];
