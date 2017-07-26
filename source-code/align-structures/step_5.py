@@ -88,7 +88,7 @@ def readInputFile():
     addMoves = int(inputFile[17].split()[1])
     breakMoves = int(inputFile[18].split()[1])
     # reactive slab indices
-    if ( len(inputFile[19].split()) > 5 ):
+    if ( len(inputFile[19].split()) > 9 ):
         print ("ERROR: Maximum of 4 reactive atoms on surface is allowed!")
         sys.exit(-1)
     else:
@@ -168,7 +168,7 @@ def findNearbySites(slab, atomIndex, bindingSiteFile):
 
     listOfSites = []
 
-    MAX_DISTANCE = 5.0 # Angstroms
+    MAX_DISTANCE = 3.0 # Angstroms
 
     atomX = slab[atomIndex - 1].x
     atomY = slab[atomIndex - 1].y
@@ -323,8 +323,8 @@ def submitSE_GSM(file, extension, index, cwd):
         shutil.copy(full_file_name, folder)
 
     os.chdir(folder)
-    call(["qsub", "scratch/runGSM.qsh"])
-    #call(["sbatch", "scratch/runGSM.qsh"])
+    #call(["qsub", "scratch/runGSM.qsh"])
+    call(["sbatch", "scratch/runGSM.qsh"])
     os.chdir(cwd)
 
 # read input files and set slab size--number of atoms in X, Y, Z directions
