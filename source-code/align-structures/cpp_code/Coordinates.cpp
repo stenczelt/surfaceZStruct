@@ -1,5 +1,10 @@
-#include <Coordinates.h>
+#include "Coordinates.h"
 
+
+Coordinates::Coordinates()
+{
+    mX = mY = mZ = 0.0;
+}
 
 Coordinates::Coordinates(
         double x, 

@@ -1,4 +1,4 @@
-#include <Atom.h>
+#include "Atom.h"
 
 Atom::Atom(
         std::string name, 

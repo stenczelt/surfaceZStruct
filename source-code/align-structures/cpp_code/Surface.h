@@ -45,7 +45,7 @@ class Surface
         int mNumOfSurfAtoms = 0; //TODO
         int mNumOfAdsorbateAtoms = 0; //TODO
         // number of atoms in x, y, and z direction in slab
-        int mSlabSize[3] = {0, 0, 0}; // x * y * z
+        int mSlabSize[3]; // x * y * z
         // a vector to store all the binding sites of the surface
         std::vector<BindingSite> mBindingSites; 
         std::vector<Atom> mBindingSitesTemp;
@@ -71,10 +71,10 @@ class Surface
         double mDeltaY = 0.0;
         double mDistance = 0.0;
         // x, y, z of some important atoms used to find binding sites
-        double mNthAtom [3];
-        double mNthMinusOneAtom [3];
-        double mStarAtom [3];
-        double mStarMinusOneAtom [3];
+        double mNthAtom[3];
+        double mNthMinusOneAtom[3];
+        double mStarAtom[3];
+        double mStarMinusOneAtom[3];
         // 2nd and 3rd layer z components
         double mSecondLayerZ = 0.0;
         double mThirdLayerZ = 0.0;
@@ -118,5 +118,5 @@ class Surface
         void addBindingSites(BindingSite BS1, BindingSite BS2, BindingSite BS3);
 };
 
-const SLAB_TYPE stringToSlabType(std::string in);
+SLAB_TYPE stringToSlabType(std::string in);
 #endif

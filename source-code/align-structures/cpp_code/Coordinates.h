@@ -8,12 +8,13 @@ class Coordinates
         double mZ;
 
     public:
+        Coordinates();
         Coordinates(double x, double y, double z);
         ~Coordinates(){}
         //TODO learn about inlining
-        inline const double x() const { return mX; }
-        inline const double y() const { return mY; }
-        inline const double z() const { return mZ; }
+        inline double x() const { return mX; }
+        inline double y() const { return mY; }
+        inline double z() const { return mZ; }
 };
 
 

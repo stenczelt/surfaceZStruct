@@ -1,7 +1,7 @@
 #ifndef MOLECULE_H
 #define MOLECULE_H
 
-#include <Atom.h>
+#include "Atom.h"
 #include <vector>
 
 class Molecule
@@ -14,7 +14,7 @@ class Molecule
     public:
         Molecule(/*Atom centralAtom,*/ std::vector<Atom> atoms, int numOfAtoms);
         ~Molecule(){};
-        inline const int numberOfAtoms() const { return mNumberOfAtoms; }
+        inline int numberOfAtoms() const { return mNumberOfAtoms; }
 };
 
 

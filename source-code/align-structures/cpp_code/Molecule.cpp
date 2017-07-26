@@ -1,11 +1,11 @@
-#include <Molecule.h>
+#include "Molecule.h"
 
 Molecule::Molecule(
         /*Atom centralAtom,*/
         std::vector<Atom> atoms, int numOfAtoms)
 :
     /*mCentralAtom(centralAtom),*/
-    mAtoms{atoms},
+    mAtoms(atoms),
     mNumberOfAtoms(numOfAtoms)
 {
     // Central atom + the number of atoms

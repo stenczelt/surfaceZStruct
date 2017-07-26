@@ -6,8 +6,8 @@
 #ifndef _BINDINGSITE_H_
 #define _BINDINGSITE_H_
 #include <string>
-#include <Coordinates.h>
-#include <Molecule.h>
+#include "Coordinates.h"
+#include "Molecule.h"
 
 //TODO learn about namespaces
 enum BINDING_SITE_TYPE
@@ -35,11 +35,12 @@ class BindingSite
 
     public:
         // Ctors
-        //BindingSite();
+        BindingSite();
         BindingSite(BINDING_SITE_TYPE inType, double inX, double inY, double inZ);
         // getter functions
         BINDING_SITE_TYPE getType() const;
         inline const Coordinates& coordinates() const { return mCoordinates; }
+        void getXYZ(double* carts);
         
         // setter functions
         

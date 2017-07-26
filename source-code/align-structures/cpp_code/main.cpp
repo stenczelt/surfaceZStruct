@@ -75,7 +75,8 @@ int main(int argc, char* argv[])
             {
                 std::cout << "ERROR: Slab type not set for this file. Set slab "
                     "type on the second line of slab file input. Supported types "
-                    "are fcc and bcc 100, 110, 111, and hcp0001.\n Type ANY if coordinates of the binding sites are part of the INPUT file." << std::endl;
+                    "are fcc and bcc 100, 110, 111, and hcp0001.\n Type ANY if "
+                    "coordinates of the binding sites are part of the INPUT file." << std::endl;
                 return -1;
             }
             std::cout << "\n****************************************************************\n";

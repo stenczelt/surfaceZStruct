@@ -2,7 +2,7 @@
 #define ATOM_H
 
 #include <string>
-#include <Coordinates.h>
+#include "Coordinates.h"
 
 class Atom
 {
