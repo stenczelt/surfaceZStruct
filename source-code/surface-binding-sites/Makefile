@@ -1,6 +1,6 @@
-all: main.exe
+all: stage_1.exe
 
-main.exe: SurfaceClass.o BindingSiteClass.o main.o
+stage_1.exe: SurfaceClass.o BindingSiteClass.o main.o
 	g++ -std=c++11 -gdwarf-3 -O3 SurfaceClass.o BindingSiteClass.o main.o -o main.exe
 
 SurfaceClass.o: SurfaceClass.cpp BindingSiteClass.cpp SurfaceClass.h BindingSiteClass.h
