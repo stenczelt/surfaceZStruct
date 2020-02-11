@@ -17,7 +17,7 @@ int main(int argc , char* argv[])
     if (argc != 2)
     {   
         std::cout << "ERROR - wrong number of parameters" << std::endl;
-        std::cout << "Usage: " << argv[0] << " <input file name> " << std::endl;
+        std::cout << "Usage: " << argv[0] << " <xyz input file name> " << std::endl;
         return (1);
     }
     else // reading the input file
@@ -33,7 +33,7 @@ int main(int argc , char* argv[])
     std::string surfaceType = xyzFile[1];
     if (xyzFile[1].empty())
     {
-        std::cout << "ERROR: Set surfaece type in the input file" << std::endl;
+        std::cout << "ERROR: Set surface type in the input file" << std::endl;
     }
 
     int size = 3*numOfAtoms;
