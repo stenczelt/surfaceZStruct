@@ -1,0 +1,9 @@
+
+exit-code               definition
+1000                    input file is not ASE generated
+1200                    unsuppoted hollow site on this surface type
+1210                    unsuppoted HCP site on this surface type
+1220                    unsuppoted FCC site on this surface type
+1230                    unsuppoted ATOP site on this surface type
+1240                    unsuppoted LONG_BRIDGE site on this surface type
+1250                    unsuppoted SHORT_BRIDGE site on this surface type

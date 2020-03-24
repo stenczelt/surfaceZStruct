@@ -1,0 +1,155 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BindingSiteClass	BindingSiteClass.cpp	/^BindingSiteClass::BindingSiteClass(std::string inType, double inX, double inY, double inZ)$/;"	f	class:BindingSiteClass
+BindingSiteClass	BindingSiteClass.h	/^class BindingSiteClass$/;"	c
+SurfaceClass	SurfaceClass.h	/^class SurfaceClass$/;"	c
+Termination100	version-1/Termination100.h	/^class Termination100$/;"	c
+Termination111	version-1/Termination111.h	/^class Termination111$/;"	c
+_BCC110_H_	version-1/bcc110.h	13;"	d
+_BCC111_H_	version-1/bcc111.h	13;"	d
+_BINDINGSITECLASS_H_	BindingSiteClass.h	7;"	d
+_DIAMOND100_H_	version-1/diamond100.h	13;"	d
+_FCC110_H_	version-1/fcc110.h	13;"	d
+_SURFACECLASS_H_	SurfaceClass.h	9;"	d
+_TERMINATION100_H_	version-1/Termination100.h	13;"	d
+_TERMINATION111_H_	version-1/Termination111.h	13;"	d
+bcc110	version-1/bcc110.h	/^class bcc110$/;"	c
+bcc111	version-1/bcc111.h	/^class bcc111:public Termination111$/;"	c
+diamond100	version-1/diamond100.h	/^class diamond100$/;"	c
+fcc110	version-1/fcc110.h	/^class fcc110$/;"	c
+findAtop	SurfaceClass.cpp	/^int SurfaceClass::findAtop()$/;"	f	class:SurfaceClass
+findAtop	version-1/Termination100.cpp	/^void Termination100::findAtop(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:Termination100
+findAtop	version-1/Termination111.cpp	/^void Termination111::findAtop(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:Termination111
+findAtop	version-1/bcc110.cpp	/^void bcc110::findAtop(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:bcc110
+findAtop	version-1/diamond100.cpp	/^void diamond100::findAtop()$/;"	f	class:diamond100
+findAtop	version-1/fcc110.cpp	/^void fcc110::findAtop(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:fcc110
+findBridge	SurfaceClass.cpp	/^int SurfaceClass::findBridge()$/;"	f	class:SurfaceClass
+findBridge	version-1/Termination100.cpp	/^void Termination100::findBridge(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:Termination100
+findBridge	version-1/Termination111.cpp	/^void Termination111::findBridge(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:Termination111
+findBridge	version-1/bcc111.h	/^        void findBridge(const unsigned int offsetX, const unsigned int offsetY) {};$/;"	f	class:bcc111
+findDeepBridge	version-1/bcc111.cpp	/^void bcc111::findDeepBridge(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:bcc111
+findFcc	SurfaceClass.cpp	/^int SurfaceClass::findFcc()$/;"	f	class:SurfaceClass
+findFcc	version-1/Termination111.cpp	/^void Termination111::findFcc(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:Termination111
+findFirstBridge	version-1/diamond100.cpp	/^void diamond100::findFirstBridge()$/;"	f	class:diamond100
+findHcp	SurfaceClass.cpp	/^int SurfaceClass::findHcp()$/;"	f	class:SurfaceClass
+findHcp	version-1/Termination111.cpp	/^void Termination111::findHcp(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:Termination111
+findHollow	SurfaceClass.cpp	/^int SurfaceClass::findHollow()$/;"	f	class:SurfaceClass
+findHollow	version-1/Termination100.cpp	/^void Termination100::findHollow(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:Termination100
+findHollow	version-1/bcc110.cpp	/^void bcc110::findHollow(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:bcc110
+findHollow	version-1/fcc110.cpp	/^void fcc110::findHollow(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:fcc110
+findLongBridge	SurfaceClass.cpp	/^int SurfaceClass::findLongBridge()$/;"	f	class:SurfaceClass
+findLongBridge	version-1/bcc110.cpp	/^void bcc110::findLongBridge(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:bcc110
+findLongBridge	version-1/fcc110.cpp	/^void fcc110::findLongBridge(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:fcc110
+findNearbySites	SurfaceClass.cpp	/^void SurfaceClass::findNearbySites(const int atomIndex, const double radius, $/;"	f	class:SurfaceClass
+findSecondBridge	version-1/diamond100.cpp	/^void diamond100::findSecondBridge()$/;"	f	class:diamond100
+findShallowBridge	version-1/bcc111.cpp	/^void bcc111::findShallowBridge(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:bcc111
+findShortBridge	SurfaceClass.cpp	/^int SurfaceClass::findShortBridge()$/;"	f	class:SurfaceClass
+findShortBridge	version-1/bcc110.cpp	/^void bcc110::findShortBridge(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:bcc110
+findShortBridge	version-1/fcc110.cpp	/^void fcc110::findShortBridge(const unsigned int offsetX, const unsigned int offsetY)$/;"	f	class:fcc110
+findThirdBridge	version-1/diamond100.cpp	/^void diamond100::findThirdBridge()$/;"	f	class:diamond100
+getBindingSite	SurfaceClass.cpp	/^const BindingSiteClass* SurfaceClass::getBindingSite(unsigned int index) const \/\/zero indexed$/;"	f	class:SurfaceClass
+getNumOfAtoms	SurfaceClass.cpp	/^int SurfaceClass::getNumOfAtoms() const$/;"	f	class:SurfaceClass
+getSurfaceHeight	SurfaceClass.cpp	/^int SurfaceClass::getSurfaceHeight() const$/;"	f	class:SurfaceClass
+getSurfaceLength	SurfaceClass.cpp	/^int SurfaceClass::getSurfaceLength() const$/;"	f	class:SurfaceClass
+getSurfaceType	SurfaceClass.cpp	/^std::string SurfaceClass::getSurfaceType() const$/;"	f	class:SurfaceClass
+getSurfaceWidth	SurfaceClass.cpp	/^int SurfaceClass::getSurfaceWidth() const$/;"	f	class:SurfaceClass
+getType	BindingSiteClass.cpp	/^std::string BindingSiteClass::getType() const$/;"	f	class:BindingSiteClass
+getX	BindingSiteClass.cpp	/^double BindingSiteClass::getX() const$/;"	f	class:BindingSiteClass
+getY	BindingSiteClass.cpp	/^double BindingSiteClass::getY() const$/;"	f	class:BindingSiteClass
+getZ	BindingSiteClass.cpp	/^double BindingSiteClass::getZ() const$/;"	f	class:BindingSiteClass
+isFound	SurfaceClass.cpp	/^bool SurfaceClass::isFound(const double &inX, const double &inY, const double &inZ)$/;"	f	class:SurfaceClass
+isFound	version-1/Termination111.cpp	/^bool Termination111::isFound(const double &inX, const double &inY, const double &inZ) \/\/ check if the calculated * atoms exist$/;"	f	class:Termination111
+isFound	version-1/bcc110.cpp	/^bool bcc110::isFound(const double &inX, const double &inY, const double &inZ) \/\/ check if the calculated * atoms exist$/;"	f	class:bcc110
+isFound	version-1/diamond100.cpp	/^bool diamond100::isFound(const double &inX, const double &inY, const double &inZ)$/;"	f	class:diamond100
+isFound	version-1/fcc110.cpp	/^bool fcc110::isFound(const double &inX, const double &inY, const double &inZ) \/\/ check if the calculated (N-1)* exists$/;"	f	class:fcc110
+long_options	version-1/main.cpp	/^static struct option long_options[] =$/;"	v	typeref:struct:option	file:
+mAtomicSymbols	SurfaceClass.h	/^        std::vector<std::string> mAtomicSymbols;$/;"	m	class:SurfaceClass
+mBindingSites	SurfaceClass.h	/^        std::vector<BindingSiteClass> mBindingSites; $/;"	m	class:SurfaceClass
+mCoordinate	BindingSiteClass.h	/^        double mCoordinate[3] = {0.0, 0.0 , 0.0};$/;"	m	class:BindingSiteClass
+mCoordinates	SurfaceClass.h	/^        std::vector< std::vector<double> > mCoordinates;$/;"	m	class:SurfaceClass
+mDeltaX	SurfaceClass.h	/^        double mDeltaX = 0.0;$/;"	m	class:SurfaceClass
+mDeltaX	version-1/Termination100.h	/^        double mDeltaX;$/;"	m	class:Termination100
+mDeltaX	version-1/Termination111.h	/^        double mDeltaX;$/;"	m	class:Termination111
+mDeltaX	version-1/bcc110.h	/^        double mDeltaX;$/;"	m	class:bcc110
+mDeltaX	version-1/diamond100.h	/^        double mDeltaX;$/;"	m	class:diamond100
+mDeltaX	version-1/fcc110.h	/^        double mDeltaX;$/;"	m	class:fcc110
+mDeltaY	SurfaceClass.h	/^        double mDeltaY = 0.0;$/;"	m	class:SurfaceClass
+mDeltaY	version-1/Termination100.h	/^        double mDeltaY;$/;"	m	class:Termination100
+mDeltaY	version-1/Termination111.h	/^        double mDeltaY;$/;"	m	class:Termination111
+mDeltaY	version-1/bcc110.h	/^        double mDeltaY;$/;"	m	class:bcc110
+mDeltaY	version-1/diamond100.h	/^        double mDeltaY;$/;"	m	class:diamond100
+mDeltaY	version-1/fcc110.h	/^        double mDeltaY;$/;"	m	class:fcc110
+mDistance	SurfaceClass.h	/^        double mDistance = 0.0;$/;"	m	class:SurfaceClass
+mDistance	version-1/Termination111.h	/^        double mDistance;$/;"	m	class:Termination111
+mDistance	version-1/bcc110.h	/^        double mDistance;$/;"	m	class:bcc110
+mDistance	version-1/fcc110.h	/^        double mDistance;$/;"	m	class:fcc110
+mNthAtom	SurfaceClass.h	/^        double mNthAtom[3] = {0, 0, 0};$/;"	m	class:SurfaceClass
+mNthAtom	version-1/Termination100.h	/^        double mNthAtom[3];$/;"	m	class:Termination100
+mNthAtom	version-1/Termination111.h	/^        double mNthAtom[3];$/;"	m	class:Termination111
+mNthAtom	version-1/bcc110.h	/^        double mNthAtom[3];$/;"	m	class:bcc110
+mNthAtom	version-1/diamond100.h	/^        double mNthAtom[3];$/;"	m	class:diamond100
+mNthAtom	version-1/fcc110.h	/^        double mNthAtom[3];$/;"	m	class:fcc110
+mNthMinusOneAtom	SurfaceClass.h	/^        double mNthMinusOneAtom [3] = {0, 0, 0};$/;"	m	class:SurfaceClass
+mNthMinusOneAtom	version-1/Termination100.h	/^        double mNthMinusOneAtom [3];$/;"	m	class:Termination100
+mNthMinusOneAtom	version-1/Termination111.h	/^        double mNthMinusOneAtom [3];$/;"	m	class:Termination111
+mNthMinusOneAtom	version-1/bcc110.h	/^        double mNthMinusOneAtom [3];$/;"	m	class:bcc110
+mNthMinusOneAtom	version-1/diamond100.h	/^        double mNthMinusOneAtom [3];$/;"	m	class:diamond100
+mNthMinusOneAtom	version-1/fcc110.h	/^        double mNthMinusOneAtom [3];$/;"	m	class:fcc110
+mNumOfAtoms	SurfaceClass.h	/^        int mNumOfAtoms = 0;$/;"	m	class:SurfaceClass
+mSecLayerZ	version-1/Termination111.h	/^        double mSecLayerZ = 0.0;$/;"	m	class:Termination111
+mSecLayerZ	version-1/diamond100.h	/^        double mSecLayerZ = 0.0;$/;"	m	class:diamond100
+mSecondLayerZ	SurfaceClass.h	/^        double mSecondLayerZ = 0.0;$/;"	m	class:SurfaceClass
+mSelectedBindingSites	SurfaceClass.h	/^        std::vector<BindingSiteClass> mSelectedBindingSites; $/;"	m	class:SurfaceClass
+mSlabSize	SurfaceClass.h	/^        int mSlabSize[3] = {0, 0, 0}; \/\/ x * y * z$/;"	m	class:SurfaceClass
+mStarAtom	SurfaceClass.h	/^        double mStarAtom [3] = {0, 0, 0};$/;"	m	class:SurfaceClass
+mStarAtom	version-1/Termination100.h	/^        double mStarAtom [3];$/;"	m	class:Termination100
+mStarAtom	version-1/Termination111.h	/^        double mStarAtom [3];$/;"	m	class:Termination111
+mStarAtom	version-1/bcc110.h	/^        double mStarAtom [3];$/;"	m	class:bcc110
+mStarAtom	version-1/diamond100.h	/^        double mStarAtom [3];$/;"	m	class:diamond100
+mStarAtom	version-1/fcc110.h	/^        double mStarAtom [3];$/;"	m	class:fcc110
+mStarMinusOneAtom	SurfaceClass.h	/^        double mStarMinusOneAtom [3] = {0, 0, 0};$/;"	m	class:SurfaceClass
+mStarMinusOneAtom	version-1/Termination100.h	/^        double mStarMinusOneAtom [3];$/;"	m	class:Termination100
+mStarMinusOneAtom	version-1/Termination111.h	/^        double mStarMinusOneAtom [3];$/;"	m	class:Termination111
+mStarMinusOneAtom	version-1/bcc110.h	/^        double mStarMinusOneAtom [3];$/;"	m	class:bcc110
+mStarMinusOneAtom	version-1/diamond100.h	/^        double mStarMinusOneAtom [3];$/;"	m	class:diamond100
+mStarMinusOneAtom	version-1/fcc110.h	/^        double mStarMinusOneAtom [3];$/;"	m	class:fcc110
+mSurfaceType	SurfaceClass.h	/^        std::string mSurfaceType = "";$/;"	m	class:SurfaceClass
+mThirLayerZ	version-1/Termination111.h	/^        double mThirLayerZ = 0.0;$/;"	m	class:Termination111
+mThirLayerZ	version-1/diamond100.h	/^        double mThirLayerZ = 0.0;$/;"	m	class:diamond100
+mThirdLayerZ	SurfaceClass.h	/^        double mThirdLayerZ = 0.0;$/;"	m	class:SurfaceClass
+mType	BindingSiteClass.h	/^        std::string mType = "";$/;"	m	class:BindingSiteClass
+mVector	version-1/Termination100.h	/^        std::vector<std::string> mVector;$/;"	m	class:Termination100
+mVector	version-1/Termination111.h	/^        std::vector<std::string> mVector;$/;"	m	class:Termination111
+mVector	version-1/bcc110.h	/^        std::vector<std::string> mVector;$/;"	m	class:bcc110
+mVector	version-1/diamond100.h	/^        std::vector<std::string> mVector;$/;"	m	class:diamond100
+mVector	version-1/fcc110.h	/^        std::vector<std::string> mVector;$/;"	m	class:fcc110
+m_DELTA_Z	SurfaceClass.cpp	/^double SurfaceClass::m_DELTA_Z = 2.5;$/;"	m	class:SurfaceClass	file:
+m_DELTA_Z	SurfaceClass.h	/^        static double m_DELTA_Z;$/;"	m	class:SurfaceClass
+m_DELTA_Z	version-1/Termination100.cpp	/^double Termination100::m_DELTA_Z = 2.5;$/;"	m	class:Termination100	file:
+m_DELTA_Z	version-1/Termination100.h	/^        static double m_DELTA_Z;$/;"	m	class:Termination100
+m_DELTA_Z	version-1/Termination111.cpp	/^double Termination111::m_DELTA_Z = 2.5;$/;"	m	class:Termination111	file:
+m_DELTA_Z	version-1/Termination111.h	/^        static double m_DELTA_Z;$/;"	m	class:Termination111
+m_DELTA_Z	version-1/bcc110.cpp	/^double bcc110::m_DELTA_Z = 2.5;$/;"	m	class:bcc110	file:
+m_DELTA_Z	version-1/bcc110.h	/^        static double m_DELTA_Z;$/;"	m	class:bcc110
+m_DELTA_Z	version-1/diamond100.cpp	/^double diamond100::m_DELTA_Z = 2.5;$/;"	m	class:diamond100	file:
+m_DELTA_Z	version-1/diamond100.h	/^        static double m_DELTA_Z;$/;"	m	class:diamond100
+m_DELTA_Z	version-1/fcc110.cpp	/^double fcc110::m_DELTA_Z = 2.5;$/;"	m	class:fcc110	file:
+m_DELTA_Z	version-1/fcc110.h	/^        static double m_DELTA_Z;$/;"	m	class:fcc110
+main	main.cpp	/^int main(int argc , char* argv[])$/;"	f
+main	version-1/main.cpp	/^int main(int argc, char* argv[])$/;"	f
+parseVector	main.cpp	/^bool parseVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,$/;"	f
+setAtoms	SurfaceClass.cpp	/^bool SurfaceClass::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicSymbols)$/;"	f	class:SurfaceClass
+setAtoms	version-1/Termination100.cpp	/^bool Termination100::setAtoms(const std::vector<std::string> &xyzFile)$/;"	f	class:Termination100
+setAtoms	version-1/Termination111.cpp	/^bool Termination111::setAtoms(const std::vector<std::string> &xyzFile)$/;"	f	class:Termination111
+setAtoms	version-1/bcc110.cpp	/^bool bcc110::setAtoms(const std::vector<std::string> &xyzFile)$/;"	f	class:bcc110
+setAtoms	version-1/diamond100.cpp	/^bool diamond100::setAtoms(const std::vector<std::string> &xyzFile)$/;"	f	class:diamond100
+setAtoms	version-1/fcc110.cpp	/^bool fcc110::setAtoms(const std::vector<std::string> &xyzFile)$/;"	f	class:fcc110
+setCoordinates	BindingSiteClass.cpp	/^void BindingSiteClass::setCoordinates(double inX, double inY, double inZ)$/;"	f	class:BindingSiteClass
+setSlabSize	SurfaceClass.cpp	/^void SurfaceClass::setSlabSize()$/;"	f	class:SurfaceClass
+setSurfaceType	SurfaceClass.cpp	/^bool SurfaceClass::setSurfaceType(std::string inSurface)$/;"	f	class:SurfaceClass
+setType	BindingSiteClass.cpp	/^void BindingSiteClass::setType (std::string inType)$/;"	f	class:BindingSiteClass
+writeToFile	SurfaceClass.cpp	/^bool SurfaceClass::writeToFile(std::string &outFile)$/;"	f	class:SurfaceClass

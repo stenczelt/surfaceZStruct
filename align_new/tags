@@ -1,0 +1,442 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ALIGN_H	align.h	3;"	d
+ALL	BindingSite.h	/^    ALL          = 0,$/;"	e	enum:BINDING_SITE_TYPE
+AMU	constants.h	/^const double AMU=1.66053886e-27; \/\/ mass of proton kg$/;"	v
+ANGtoBOHR	constants.h	/^const double ANGtoBOHR =1.0000000\/BOHRtoANG;$/;"	v
+ATOM_H	Atom.h	2;"	d
+ATOP	BindingSite.h	/^    ATOP         = 4,$/;"	e	enum:BINDING_SITE_TYPE
+Align	align.cpp	/^Align::Align(ICoord slab, std::vector<ICoord> adsorbates)$/;"	f	class:Align
+Align	align.h	/^class Align$/;"	c
+Atom	Atom.cpp	/^Atom::Atom($/;"	f	class:Atom
+Atom	Atom.h	/^class Atom$/;"	c
+BCC100	Surface.h	/^    BCC100  = 3,$/;"	e	enum:SLAB_TYPE
+BCC110	Surface.h	/^    BCC110  = 4,$/;"	e	enum:SLAB_TYPE
+BCC111	Surface.h	/^    BCC111  = 5,$/;"	e	enum:SLAB_TYPE
+BINDING_SITE_TYPE	BindingSite.h	/^enum BINDING_SITE_TYPE$/;"	g
+BOHRtoANG	constants.h	/^const double BOHRtoANG=0.52917720859;$/;"	v
+BRIDGE	BindingSite.h	/^    BRIDGE       = 7,$/;"	e	enum:BINDING_SITE_TYPE
+BindingSite	BindingSite.cpp	/^BindingSite::BindingSite(BINDING_SITE_TYPE inType, double inX, double inY, double inZ):$/;"	f	class:BindingSite
+BindingSite	BindingSite.h	/^class BindingSite$/;"	c
+CALtoJOULE	constants.h	/^const double CALtoJOULE=4.18400;$/;"	v
+CMD	Makefile	/^CMD = align.exe$/;"	m
+CONSTANTS_H	constants.h	2;"	d
+COORDINAETS_H	Coordinates.h	2;"	d
+Coordinates	Coordinates.cpp	/^Coordinates::Coordinates($/;"	f	class:Coordinates
+Coordinates	Coordinates.h	/^class Coordinates$/;"	c
+Cp	icoord.h	/^        double* Cp;$/;"	m	class:ICoord
+DFLAGS	Makefile	/^DFLAGS =  #-Define the cpp flags to be used$/;"	m
+DMAX	icoord.h	/^        double DMAX;$/;"	m	class:ICoord
+DMIN0	icoord.h	/^        double DMIN0;$/;"	m	class:ICoord
+DSYEVX	utils.cpp	364;"	d	file:
+Diagonalize	utils.cpp	/^int Diagonalize(double* A, double* eigen, int size){$/;"	f
+Diagonalize	utils.cpp	/^int Diagonalize(double* A, double* eigenvecs, double* eigen, int size){$/;"	f
+ECHARGE	constants.h	/^const double ECHARGE=1.60217646e-19; \/\/ unit = C$/;"	v
+EMASS	constants.h	/^const double EMASS=9.10938188e-31; \/\/ mass of electron kg$/;"	v
+FC	Makefile	/^FC = g++ -Wall -gdwarf-3 -std=c++11 $(INC)$/;"	m
+FCC	BindingSite.h	/^    FCC          = 3,$/;"	e	enum:BINDING_SITE_TYPE
+FCC100	Surface.h	/^    FCC100  = 0,$/;"	e	enum:SLAB_TYPE
+FCC110	Surface.h	/^    FCC110  = 1,$/;"	e	enum:SLAB_TYPE
+FCC111	Surface.h	/^    FCC111  = 2,$/;"	e	enum:SLAB_TYPE
+FMAG	icoord.h	/^        double FMAG;$/;"	m	class:ICoord
+HARTREEtoEV	constants.h	/^const double HARTREEtoEV=27.2116;$/;"	v
+HARTREEtoKCAL	constants.h	/^const double HARTREEtoKCAL=627.5095;$/;"	v
+HCP	BindingSite.h	/^    HCP          = 2,$/;"	e	enum:BINDING_SITE_TYPE
+HCP0001	Surface.h	/^    HCP0001 = 6$/;"	e	enum:SLAB_TYPE
+HOLLOW	BindingSite.h	/^    HOLLOW       = 1,$/;"	e	enum:BINDING_SITE_TYPE
+HPLANCK	constants.h	/^const double HPLANCK=6.626068e-34; \/\/ h, Joule*sec$/;"	v
+Hint	icoord.h	/^        double* Hint;$/;"	m	class:ICoord
+Hintp	icoord.h	/^        double* Hintp;$/;"	m	class:ICoord
+Hinv	icoord.h	/^        double* Hinv;$/;"	m	class:ICoord
+ICOORD_H	icoord.h	3;"	d
+ICoord	icoord.h	/^class ICoord {$/;"	c
+INC	Makefile	/^INC=-I$(MKLROOT)\/include -I\/export\/zimmerman\/mjafari\/ZStruct-S\/source-code\/align-structures$/;"	m
+Invert	utils.cpp	/^int Invert(double* A, int m){$/;"	f
+KBOLTZ	constants.h	/^const double KBOLTZ=RGAS\/NAVOGAD; \/\/boltzmann J\/K$/;"	v
+LINKERFLAGS	Makefile	/^LINKERFLAGS =  -Wl,--no-as-needed -L${MKLROOT}\/lib\/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm$/;"	m
+LONG_BRIDGE	BindingSite.h	/^    LONG_BRIDGE  = 5,$/;"	e	enum:BINDING_SITE_TYPE
+MAXAD	icoord.h	/^        double MAXAD;$/;"	m	class:ICoord
+MAX_FRAG_DIST	icoord.cpp	10;"	d	file:
+MOLECULE_H	Molecule.h	2;"	d
+Mat_times_vec	utils.cpp	/^void Utils::Mat_times_vec(double** d2S_1, double* dS, double* prod, int LEN){$/;"	f	class:Utils
+Molecule	Molecule.cpp	/^Molecule::Molecule($/;"	f	class:Molecule
+Molecule	Molecule.h	/^class Molecule$/;"	c
+NAVOGAD	constants.h	/^const double NAVOGAD=6.0221415e+23; \/\/ mol^(-1)$/;"	v
+OBJECTS	Makefile	/^OBJECTS = main.o icoord.o pTable.o stringtools.o utils.o  mm_grad.o align.o  Surface.o BindingSite.o Atom.o Molecule.o Coordinates.o$/;"	m
+OFLAGS	Makefile	/^OFLAGS =  # optimization$/;"	m
+OMEGAtoCMINV	constants.h	/^const double OMEGAtoCMINV= 5137.02;$/;"	v
+ONE	constants.h	/^const double ONE  = 1.00000000;$/;"	v
+OPTTHRESH	icoord.h	/^        double OPTTHRESH;$/;"	m	class:ICoord
+PATH_SEPARATOR_CHAR	stringtools.h	35;"	d
+PATH_SEPARATOR_CHAR	stringtools.h	38;"	d
+PATH_SEPARATOR_STR	stringtools.h	36;"	d
+PATH_SEPARATOR_STR	stringtools.h	39;"	d
+PI	constants.h	/^const double PI   = 3.14159265;$/;"	v
+PI	utils.h	/^    static const double PI = {4*atan(1)};$/;"	m	namespace:Utils
+PTABLE_H	pTable.h	18;"	d
+PTable	pTable.h	/^namespace PTable$/;"	n
+RGAS	constants.h	/^const double RGAS=8.314472 ; \/\/ J\/mol\/K$/;"	v
+Rot_around_vec	utils.cpp	/^void Utils::Rot_around_vec(double* vec, double* structure, int natoms) {$/;"	f	class:Utils
+Rotate_structure	utils.cpp	/^void Utils::Rotate_structure(double** RotMat, double* structure, int natoms){$/;"	f	class:Utils
+SCALEQN	icoord.h	/^        double SCALEQN;$/;"	m	class:ICoord
+SCALEQN0	icoord.h	/^        double SCALEQN0;$/;"	m	class:ICoord
+SHADOWFACTOR	mm_grad.cpp	5;"	d	file:
+SHORT_BRIDGE	BindingSite.h	/^    SHORT_BRIDGE = 6,$/;"	e	enum:BINDING_SITE_TYPE
+SLAB_TYPE	Surface.h	/^enum SLAB_TYPE$/;"	g
+SPEEDc	constants.h	/^const double SPEEDc=299792458; \/\/ m\/s light speed$/;"	v
+STRINGTOOLS_H	stringtools.h	19;"	d
+STRUCTURECLASS_H	StructureClass.h	3;"	d
+SVD	utils.cpp	/^int SVD(double* A, double* U, double* eigen, int m, int n){$/;"	f
+S_from_angs	utils.cpp	/^void Utils::S_from_angs(double** angs, double* S, double* masses, int LEN, int natoms){$/;"	f	class:Utils
+S_straight_line_in_angs	utils.cpp	/^void Utils::S_straight_line_in_angs(double** string_angs, double* S, int nstring, int natoms){$/;"	f	class:Utils
+StringTools	stringtools.h	/^namespace StringTools$/;"	n
+StructureClass	StructureClass.cpp	/^StructureClass::StructureClass(int inNumOfAtoms, std::string* inAtomicNames,$/;"	f	class:StructureClass
+StructureClass	StructureClass.h	/^class StructureClass$/;"	c
+Surface	Surface.cpp	/^Surface::Surface()$/;"	f	class:Surface
+Surface	Surface.cpp	/^Surface::Surface(std::vector<Atom> slabAtoms, std::vector<Atom> bindingSites,$/;"	f	class:Surface
+Surface	Surface.h	/^class Surface$/;"	c
+UTILS_H	utils.h	6;"	d
+Ut	icoord.h	/^        double* Ut;$/;"	m	class:ICoord
+Ut0	icoord.h	/^        double* Ut0;$/;"	m	class:ICoord
+Utils	utils.h	/^namespace Utils$/;"	n
+V0	icoord.h	/^        double V0;$/;"	m	class:ICoord
+WS_CHARS	stringtools.h	32;"	d
+ZERO	constants.h	/^const double ZERO = 0.00000000;$/;"	v
+_BINDINGSITE_H_	BindingSite.h	7;"	d
+_SURFACECLASS_H_	Surface.h	22;"	d
+add_align	align.cpp	/^void Align::add_align(int nadd1, int* add1) \/\/, std::vector<BindingSiteClass> allSites) \/*std::string orientaionIn="horiz"*\/$/;"	f	class:Align
+adjoint3x3	utils.cpp	/^void Utils::adjoint3x3(double A[4][4], double Aadj[4][4]){$/;"	f	class:Utils
+align_to_z	align.cpp	/^void Align::align_to_z(int numOfAtoms, int t1, int t2, double* xyz, string* atomicNames)$/;"	f	class:Align
+align_v1	align.cpp	/^void Align::align_v1(int numOfAlignedVecFound, double* v1)$/;"	f	class:Align
+alloc	icoord.cpp	/^int ICoord::alloc(int size){$/;"	f	class:ICoord
+alloc_mem	icoord.cpp	/^void ICoord::alloc_mem(){$/;"	f	class:ICoord
+amasses	icoord.h	/^        double* amasses;              \/\/array of atomic masses$/;"	m	class:ICoord
+anames	icoord.h	/^        string* anames;               \/\/array of atomic symbols $/;"	m	class:ICoord
+ang_to_mwc	utils.cpp	/^void Utils::ang_to_mwc(double* mwc, double* ang, int natoms, double* amasses){$/;"	f	class:Utils
+ang_to_mwc	utils.cpp	/^void Utils::ang_to_mwc(double** mwc, double** ang, int nstring, int natoms, double* amasses){$/;"	f	class:Utils
+anggrad_to_mwcgrad	utils.cpp	/^void Utils::anggrad_to_mwcgrad(double* mwc_grad, double* ang_grad, int natoms, double* amasses){$/;"	f	class:Utils
+anggrad_to_mwcgrad	utils.cpp	/^void Utils::anggrad_to_mwcgrad(double** mwc_grad, double** ang_grad, int nstring, int natoms, double* amasses){$/;"	f	class:Utils
+anggrads_to_mwcgrads	utils.cpp	/^void Utils::anggrads_to_mwcgrads(double** temparray, int nn, int natoms, double* amasses){$/;"	f	class:Utils
+angle_grad_1	mm_grad.cpp	/^void ICoord::angle_grad_1(int i, int j, int k){$/;"	f	class:ICoord
+angle_grad_all	mm_grad.cpp	/^void ICoord::angle_grad_all(){$/;"	f	class:ICoord
+angle_num	icoord.cpp	/^int ICoord::angle_num(int b1, int b2, int b3)$/;"	f	class:ICoord
+angle_val	icoord.cpp	/^double ICoord::angle_val(int i, int j, int k)$/;"	f	class:ICoord
+angles	icoord.h	/^        int** angles;$/;"	m	class:ICoord
+anglev	icoord.h	/^        double* anglev;$/;"	m	class:ICoord
+angs_to_mwcs	utils.cpp	/^void Utils::angs_to_mwcs(double** temparray, int nn, int natoms, double* amasses){$/;"	f	class:Utils
+anumbers	icoord.h	/^        int* anumbers;                \/\/array of atomic indices $/;"	m	class:ICoord
+applyRotationMatrix	align.cpp	/^void Align::applyRotationMatrix(int numOfAtoms, double* xyz, double** rotationMatrix)$/;"	f	class:Align
+aprima	icoord.h	/^        int* aprima;$/;"	m	class:ICoord
+atod	stringtools.cpp	/^double StringTools::atod(const string& s)$/;"	f	class:StringTools
+atom_mass	pTable.cpp	/^double PTable::atom_mass(int anumber){$/;"	f	class:PTable
+atom_masses	pTable.cpp	/^double atom_masses[103]={-1.00,$/;"	v
+atom_name	pTable.cpp	/^string PTable::atom_name(int aNumber){$/;"	f	class:PTable
+atom_names	pTable.cpp	/^char atom_names[103][20]={$/;"	v
+atom_number	pTable.cpp	/^int PTable::atom_number(string &aname){$/;"	f	class:PTable
+atom_symbol	pTable.cpp	/^char atom_symbol[103][3]={"X",$/;"	v
+bmat	icoord.h	/^        double* bmat;$/;"	m	class:ICoord
+bmatp	icoord.h	/^        double* bmatp; \/\/ in primitives$/;"	m	class:ICoord
+bmatti	icoord.h	/^        double* bmatti;$/;"	m	class:ICoord
+bond_exists	icoord.cpp	/^int ICoord::bond_exists(int b1, int b2) {$/;"	f	class:ICoord
+bond_frags	icoord.cpp	/^void ICoord::bond_frags() $/;"	f	class:ICoord
+bond_frags_xyz	icoord.cpp	/^void ICoord::bond_frags_xyz()$/;"	f	class:ICoord
+bond_grad_1	mm_grad.cpp	/^void ICoord::bond_grad_1(int i, int j){$/;"	f	class:ICoord
+bond_grad_all	mm_grad.cpp	/^void ICoord::bond_grad_all(){$/;"	f	class:ICoord
+bond_num	icoord.cpp	/^int ICoord::bond_num(int b1, int b2) {$/;"	f	class:ICoord
+bond_stretch	mm_grad.cpp	/^double ICoord::bond_stretch(int i, int j) {$/;"	f	class:ICoord
+bondd	icoord.h	/^        double* bondd;$/;"	m	class:ICoord
+bonds	icoord.h	/^        int** bonds;$/;"	m	class:ICoord
+check_array	utils.cpp	/^int check_array(int size, double* A)$/;"	f
+check_frag	align.cpp	/^int Align::check_frag(int atom1, int atom2)$/;"	f	class:Align
+cleanstring	stringtools.cpp	/^int StringTools::cleanstring(string& line){$/;"	f	class:StringTools
+close_angle	icoord.cpp	/^double ICoord::close_angle(int i)$/;"	f	class:ICoord
+close_bond	icoord.cpp	/^double ICoord::close_bond(int i)$/;"	f	class:ICoord
+close_tor	icoord.cpp	/^double ICoord::close_tor(int i)$/;"	f	class:ICoord
+close_val	utils.cpp	/^int close_val(double x1, double	x2, double diff)$/;"	f
+connect_1_coord_mg	icoord.cpp	/^void ICoord::connect_1_coord_mg()$/;"	f	class:ICoord
+contains	stringtools.cpp	/^bool StringTools::contains(string s1, string s2){$/;"	f	class:StringTools
+coord_num	icoord.cpp	/^void ICoord::coord_num()$/;"	f	class:ICoord
+coordinates	Atom.h	/^        const Coordinates& coordinates() const { return mCoordinates; }$/;"	f	class:Atom
+coordinates	BindingSite.h	/^        inline const Coordinates& coordinates() const { return mCoordinates; }$/;"	f	class:BindingSite
+coordn	icoord.h	/^        int* coordn;                  \/\/coordination number$/;"	m	class:ICoord
+coords	icoord.h	/^        double* coords;$/;"	m	class:ICoord
+coords0	icoord.h	/^        double* coords0;$/;"	m	class:ICoord
+coordsts	icoord.h	/^        double* coordsts;$/;"	m	class:ICoord
+copy_2D_array	utils.cpp	/^void Utils::copy_2D_array(double** pointer1, double** pointer2, int LEN1, int LEN2){$/;"	f	class:Utils
+copy_structure	utils.cpp	/^void Utils::copy_structure(double* structure1, double* structure2, int natoms){$/;"	f	class:Utils
+create_xyz	icoord.cpp	/^void ICoord::create_xyz()$/;"	f	class:ICoord
+cross	utils.cpp	/^void cross(double* m, double* r1, double* r2){$/;"	f
+dEpre	icoord.h	/^        double dEpre; $/;"	m	class:ICoord
+degreetorad	constants.h	/^const double degreetorad =3.14159\/180.000;$/;"	v
+det2x2	utils.cpp	/^double Utils::det2x2(double A[3][3]){$/;"	f	class:Utils
+det3x3	utils.cpp	/^double Utils::det3x3(double A[1+3][1+3]){$/;"	f	class:Utils
+diagonalize3x3	utils.cpp	/^void Utils::diagonalize3x3(double** hmwc, double** smwc,$/;"	f	class:Utils
+display_structure	utils.cpp	/^void Utils::display_structure(double* a, int natoms, string* anames){$/;"	f	class:Utils
+display_structure_nonames	utils.cpp	/^void Utils::display_structure_nonames(double* a, int natoms){$/;"	f	class:Utils
+distance	icoord.cpp	/^double ICoord::distance(int i, int j)$/;"	f	class:ICoord
+do_bfgs	icoord.h	/^        int do_bfgs;$/;"	m	class:ICoord
+dotProd	utils.cpp	/^double Utils::dotProd(double* v, double* u, int LEN){$/;"	f	class:Utils
+double2str	stringtools.cpp	/^string StringTools::double2str(double val, int precision)$/;"	f	class:StringTools
+dq0	icoord.h	/^        double* dq0;$/;"	m	class:ICoord
+dqm1	icoord.h	/^        double* dqm1;$/;"	m	class:ICoord
+dqprim	icoord.h	/^        double* dqprim;$/;"	m	class:ICoord
+dxm1	icoord.h	/^        double* dxm1;$/;"	m	class:ICoord
+farBond	icoord.h	/^        double farBond;$/;"	m	class:ICoord
+ffR	icoord.h	/^        double* ffR;$/;"	m	class:ICoord
+ffangled	mm_grad.cpp	/^double ICoord::ffangled(int i, int j){$/;"	f	class:ICoord
+ffanglee	mm_grad.cpp	/^double ICoord::ffanglee(int i, int j){$/;"	f	class:ICoord
+ffbondd	mm_grad.cpp	/^double ICoord::ffbondd(int i, int j){$/;"	f	class:ICoord
+ffbonde	mm_grad.cpp	/^double ICoord::ffbonde(int i, int j){$/;"	f	class:ICoord
+ffepsilon	icoord.h	/^        double* ffepsilon;$/;"	m	class:ICoord
+ffimptord	mm_grad.cpp	/^double ICoord::ffimptord(int i, int j, int k, int l){$/;"	f	class:ICoord
+ffimptore	mm_grad.cpp	/^double ICoord::ffimptore(int i, int j, int k, int l){$/;"	f	class:ICoord
+fftord	mm_grad.cpp	/^double ICoord::fftord(int i, int j, int k, int l){$/;"	f	class:ICoord
+fftore	mm_grad.cpp	/^double ICoord::fftore(int i, int j, int k, int l){$/;"	f	class:ICoord
+fftorm	mm_grad.cpp	/^double ICoord::fftorm(int i, int j, int k, int l){$/;"	f	class:ICoord
+findAllSites	Surface.cpp	/^void Surface::findAllSites()$/;"	f	class:Surface
+findAtop	Surface.cpp	/^int Surface::findAtop()$/;"	f	class:Surface
+findBridge	Surface.cpp	/^int Surface::findBridge()$/;"	f	class:Surface
+findFcc	Surface.cpp	/^int Surface::findFcc()$/;"	f	class:Surface
+findHcp	Surface.cpp	/^int Surface::findHcp()$/;"	f	class:Surface
+findHollow	Surface.cpp	/^int Surface::findHollow()$/;"	f	class:Surface
+findLongBridge	Surface.cpp	/^int Surface::findLongBridge()$/;"	f	class:Surface
+findNearbySites	Surface.cpp	/^std::vector<int> Surface::findNearbySites(const unsigned int atomIndex, const double radius, $/;"	f	class:Surface
+findShortBridge	Surface.cpp	/^int Surface::findShortBridge()$/;"	f	class:Surface
+findstr	stringtools.cpp	/^bool StringTools::findstr(ifstream &fstr, string tag){$/;"	f	class:StringTools
+findstr	stringtools.cpp	/^bool StringTools::findstr(ifstream &fstr, string tag, string & outline){$/;"	f	class:StringTools
+frags	icoord.h	/^        int* frags;$/;"	m	class:ICoord
+freemem	icoord.cpp	/^void ICoord::freemem(){$/;"	f	class:ICoord
+frozen	icoord.h	/^        int* frozen;$/;"	m	class:ICoord
+g_inited	icoord.h	/^        int g_inited;$/;"	m	class:ICoord
+genfilename	stringtools.cpp	/^string StringTools::genfilename(const string& pref, const string &suff, $/;"	f	class:StringTools
+getAngleSet	icoord.cpp	/^std::vector<double> ICoord::getAngleSet()$/;"	f	class:ICoord
+getAtomicNames	StructureClass.cpp	/^std::string* StructureClass::getAtomicNames() const$/;"	f	class:StructureClass
+getAtomicNumbers	StructureClass.cpp	/^int* StructureClass::getAtomicNumbers() const$/;"	f	class:StructureClass
+getBindingSite	Surface.cpp	/^const BindingSite* Surface::getBindingSite(unsigned int index) const \/\/zero indexed$/;"	f	class:Surface
+getCoordinates	StructureClass.cpp	/^double* StructureClass::getCoordinates() const$/;"	f	class:StructureClass
+getNextNonWs	stringtools.cpp	/^unsigned char StringTools::getNextNonWs(const string &line, int index)$/;"	f	class:StringTools
+getNextNonWsPos	stringtools.cpp	/^unsigned int StringTools::getNextNonWsPos(const string &line, int index){$/;"	f	class:StringTools
+getNumOfAtoms	StructureClass.cpp	/^int StructureClass::getNumOfAtoms() const$/;"	f	class:StructureClass
+getNumOfAtoms	Surface.cpp	/^int Surface::getNumOfAtoms() const$/;"	f	class:Surface
+getR	icoord.cpp	/^double ICoord::getR(int i){$/;"	f	class:ICoord
+getSurfaceHeight	Surface.cpp	/^int Surface::getSurfaceHeight() const$/;"	f	class:Surface
+getSurfaceLength	Surface.cpp	/^int Surface::getSurfaceLength() const$/;"	f	class:Surface
+getSurfaceType	Surface.cpp	/^SLAB_TYPE Surface::getSurfaceType() const$/;"	f	class:Surface
+getSurfaceWidth	Surface.cpp	/^int Surface::getSurfaceWidth() const$/;"	f	class:Surface
+getType	BindingSite.cpp	/^BINDING_SITE_TYPE BindingSite::getType() const$/;"	f	class:BindingSite
+get_bonds	align.cpp	/^int Align::get_bonds(int atom1, ICoord mSlab, int* bonded)$/;"	f	class:Align
+get_rotation_matrix	utils.cpp	/^void Utils::get_rotation_matrix(double** rotMat, double* thetas)$/;"	f	class:Utils
+get_xyzic	icoord.cpp	/^void ICoord::get_xyzic()$/;"	f	class:ICoord
+grad	icoord.h	/^        double* grad;$/;"	m	class:ICoord
+gradq	icoord.h	/^        double* gradq;$/;"	m	class:ICoord
+gradqprim	icoord.h	/^        double* gradqprim;$/;"	m	class:ICoord
+gradrms	icoord.h	/^        double gradrms;$/;"	m	class:ICoord
+gramschmidt	utils.cpp	/^void Utils::gramschmidt(int LEN, double* v_out, double* u_in, double* v_in){$/;"	f	class:Utils
+h2count	icoord.cpp	/^int ICoord::h2count() {$/;"	f	class:ICoord
+hpair	icoord.cpp	/^int ICoord::hpair(int a1, int a2) {$/;"	f	class:ICoord
+ic_create	icoord.cpp	/^int ICoord::ic_create()$/;"	f	class:ICoord
+ic_create_nobonds	icoord.cpp	/^int ICoord::ic_create_nobonds()$/;"	f	class:ICoord
+id	icoord.h	/^        int id; \/\/for geoms[id] in zstruct$/;"	m	class:ICoord
+imptor	icoord.h	/^        int** imptor;$/;"	m	class:ICoord
+imptor_grad_1	mm_grad.cpp	/^void ICoord::imptor_grad_1(int i, int j, int k, int l){$/;"	f	class:ICoord
+imptor_grad_all	mm_grad.cpp	/^void ICoord::imptor_grad_all(){$/;"	f	class:ICoord
+imptorv	icoord.h	/^        double* imptorv;$/;"	m	class:ICoord
+init	icoord.cpp	/^int ICoord::init(int nat, string* anam, int* anum, double* xyz){$/;"	f	class:ICoord
+init	icoord.cpp	/^int ICoord::init(string xyzfile){$/;"	f	class:ICoord
+inited	align.h	/^        int inited;$/;"	m	class:Align
+int2str	stringtools.cpp	/^string StringTools::int2str(int integer, int size, const string spaceStr)$/;"	f	class:StringTools
+invertNxN	utils.cpp	/^void Utils::invertNxN(double** Mat, double** Inverse, int n) {$/;"	f	class:Utils
+isAlpha	stringtools.cpp	/^ bool StringTools::isAlpha(unsigned char c)$/;"	f	class:StringTools
+isDavid	icoord.h	/^        int isDavid;$/;"	m	class:ICoord
+isFound	Surface.cpp	/^bool Surface::isFound(const double &inX, const double &inY, const double &inZ)$/;"	f	class:Surface
+isOpt	icoord.h	/^        int isOpt;$/;"	m	class:ICoord
+isTM	icoord.cpp	/^int ICoord::isTM(int a) {$/;"	f	class:ICoord
+isTSnode	icoord.h	/^        int isTSnode;$/;"	m	class:ICoord
+iscomment	stringtools.cpp	/^bool StringTools::iscomment(string s){$/;"	f	class:StringTools
+ixflag	icoord.h	/^        int ixflag;$/;"	m	class:ICoord
+lin_grad_1	mm_grad.cpp	/^void ICoord::lin_grad_1(int i, int j, double scale){$/;"	f	class:ICoord
+linear_right	align.cpp	/^void Align::linear_right(double* v1, int atom1, int* bonded, double* xyz, std::string orientationIn="horiz")$/;"	f	class:Align
+linear_ties	icoord.cpp	/^void ICoord::linear_ties() $/;"	f	class:ICoord
+lowerCase	stringtools.cpp	/^string StringTools::lowerCase(const string& s)$/;"	f	class:StringTools
+lubksb	utils.cpp	/^void Utils::lubksb(double **a, int n, int *indx, double b[]){$/;"	f	class:Utils
+ludcmp	utils.cpp	/^void Utils::ludcmp(double **a, int n, int *indx, double *d){$/;"	f	class:Utils
+mAdsorbate	BindingSite.h	/^        Molecule* mAdsorbate;$/;"	m	class:BindingSite
+mAdsorbateNum	align.h	/^        int mAdsorbateNum = 0;$/;"	m	class:Align
+mAdsorbates	Surface.h	/^        std::vector<Molecule> mAdsorbates;$/;"	m	class:Surface
+mAdsorbates	align.h	/^        std::vector<ICoord> mAdsorbates;$/;"	m	class:Align
+mAnglesToSample	icoord.h	/^        std::vector<double> mAnglesToSample;$/;"	m	class:ICoord
+mAtomicNames	StructureClass.h	/^        std::string* mAtomicNames;$/;"	m	class:StructureClass
+mAtomicNamesCombined	align.h	/^        std::string* mAtomicNamesCombined;$/;"	m	class:Align
+mAtomicNumbers	StructureClass.h	/^        int* mAtomicNumbers;$/;"	m	class:StructureClass
+mAtomicNumbersCombined	align.h	/^        int* mAtomicNumbersCombined;$/;"	m	class:Align
+mAtoms	Molecule.h	/^        std::vector<Atom> mAtoms;$/;"	m	class:Molecule
+mBindingSites	Surface.h	/^        std::vector<BindingSite> mBindingSites; $/;"	m	class:Surface
+mBindingSitesTemp	Surface.h	/^        std::vector<Atom> mBindingSitesTemp;$/;"	m	class:Surface
+mCoordinates	Atom.h	/^        Coordinates mCoordinates;$/;"	m	class:Atom
+mCoordinates	BindingSite.h	/^        Coordinates mCoordinates;$/;"	m	class:BindingSite
+mCoordinates	StructureClass.h	/^        double* mCoordinates;$/;"	m	class:StructureClass
+mCoordinatesCombined	align.h	/^        double* mCoordinatesCombined;$/;"	m	class:Align
+mDeltaX	Surface.h	/^        double mDeltaX = 0.0;$/;"	m	class:Surface
+mDeltaY	Surface.h	/^        double mDeltaY = 0.0;$/;"	m	class:Surface
+mDistance	Surface.h	/^        double mDistance = 0.0;$/;"	m	class:Surface
+mName	Atom.h	/^        std::string mName;$/;"	m	class:Atom
+mNthAtom	Surface.h	/^        double mNthAtom [3];$/;"	m	class:Surface
+mNthMinusOneAtom	Surface.h	/^        double mNthMinusOneAtom [3];$/;"	m	class:Surface
+mNumOfAdsorbateAtoms	Surface.h	/^        int mNumOfAdsorbateAtoms = 0; \/\/TODO$/;"	m	class:Surface
+mNumOfAtoms	StructureClass.h	/^        int mNumOfAtoms = 0;$/;"	m	class:StructureClass
+mNumOfAtomsCombined	align.h	/^        int mNumOfAtomsCombined = 0;$/;"	m	class:Align
+mNumOfSurfAtoms	Surface.h	/^        int mNumOfSurfAtoms = 0; \/\/TODO$/;"	m	class:Surface
+mNumberOfAtoms	Molecule.cpp	/^    mNumberOfAtoms(numOfAtoms)$/;"	f
+mNumberOfAtoms	Molecule.h	/^        int mNumberOfAtoms;$/;"	m	class:Molecule
+mSecondLayerZ	Surface.h	/^        double mSecondLayerZ = 0.0;$/;"	m	class:Surface
+mSlab	align.h	/^        ICoord mSlab;$/;"	m	class:Align
+mSlabAtoms	Surface.h	/^        std::vector<Atom> mSlabAtoms;$/;"	m	class:Surface
+mSlabSize	Surface.h	/^        int mSlabSize[3] = {0, 0, 0}; \/\/ x * y * z$/;"	m	class:Surface
+mStarAtom	Surface.h	/^        double mStarAtom [3];$/;"	m	class:Surface
+mStarMinusOneAtom	Surface.h	/^        double mStarMinusOneAtom [3];$/;"	m	class:Surface
+mSurfaceType	Surface.h	/^        SLAB_TYPE mSurfaceType;$/;"	m	class:Surface
+mThirdLayerZ	Surface.h	/^        double mThirdLayerZ = 0.0;$/;"	m	class:Surface
+mType	BindingSite.h	/^        BINDING_SITE_TYPE mType;$/;"	m	class:BindingSite
+mX	Coordinates.h	/^        double mX;$/;"	m	class:Coordinates
+mY	Coordinates.h	/^        double mY;$/;"	m	class:Coordinates
+mZ	Coordinates.h	/^        double mZ;$/;"	m	class:Coordinates
+main	main.cpp	/^int main(int argc, char* argv[])$/;"	f
+make_angles	icoord.cpp	/^void ICoord::make_angles()$/;"	f	class:ICoord
+make_bonds	icoord.cpp	/^void ICoord::make_bonds()$/;"	f	class:ICoord
+make_frags	icoord.cpp	/^void ICoord::make_frags() $/;"	f	class:ICoord
+make_imptor	icoord.cpp	/^void ICoord::make_imptor()$/;"	f	class:ICoord
+make_imptor_nobonds	icoord.cpp	/^void ICoord::make_imptor_nobonds()$/;"	f	class:ICoord
+make_nonbond	icoord.cpp	/^int ICoord::make_nonbond(){$/;"	f	class:ICoord
+make_torsions	icoord.cpp	/^void ICoord::make_torsions()$/;"	f	class:ICoord
+mat_times_mat	utils.cpp	/^int mat_times_mat(double* C, double* A, double* B, int M, int N, int K)$/;"	f
+mat_times_mat	utils.cpp	/^int mat_times_mat(double* C, double* A, double* B, int size)$/;"	f
+mat_times_mat_at_bt	utils.cpp	/^int mat_times_mat_at_bt(double* C, double* A, double* B, int size)$/;"	f
+mat_times_mat_bt	utils.cpp	/^int mat_times_mat_bt(double* C, double* A, double* B, int M, int N, int K)$/;"	f
+mat_times_mat_bt	utils.cpp	/^int mat_times_mat_bt(double* C, double* A, double* B, int size)$/;"	f
+matrix_times_matrix	utils.cpp	/^void Utils::matrix_times_matrix(double** A, double** B, double** C, int LEN){$/;"	f	class:Utils
+max_angles	icoord.h	/^        int max_angles;$/;"	m	class:ICoord
+max_bonds	icoord.h	/^        int max_bonds;$/;"	m	class:ICoord
+max_imptor	icoord.h	/^        int max_imptor;$/;"	m	class:ICoord
+max_nonbond	icoord.h	/^        int max_nonbond;$/;"	m	class:ICoord
+max_torsions	icoord.h	/^        int max_torsions;$/;"	m	class:ICoord
+mdist	icoord.h	/^        double mdist;$/;"	m	class:ICoord
+mm_energy	icoord.cpp	/^double ICoord::mm_energy()$/;"	f	class:ICoord
+mm_grad	mm_grad.cpp	/^int ICoord::mm_grad(){$/;"	f	class:ICoord
+mm_grad	mm_grad.cpp	/^int ICoord::mm_grad(ICoord shadow){$/;"	f	class:ICoord
+mm_init	mm_grad.cpp	/^void ICoord::mm_init(){$/;"	f	class:ICoord
+moveToBindingSite	align.cpp	/^void Align::moveToBindingSite(int atom1, int atom2, int numAdsorbate)$/;"	f	class:Align
+moveToOrigin	align.cpp	/^void Align::moveToOrigin(int atom2)$/;"	f	class:Align
+mwc_to_ang	utils.cpp	/^void Utils::mwc_to_ang(double* angs, double* mwc, int natoms, double* amasses){$/;"	f	class:Utils
+mwc_to_ang	utils.cpp	/^void Utils::mwc_to_ang(double** angs, double** mwc, int nstring, int natoms, double* amasses){$/;"	f	class:Utils
+mwcgrad_to_anggrad	utils.cpp	/^void Utils::mwcgrad_to_anggrad(double* ang_grad, double* mwc_grad, int natoms, double* amasses){$/;"	f	class:Utils
+mwcgrad_to_anggrad	utils.cpp	/^void Utils::mwcgrad_to_anggrad(double** ang_grad, double** mwc_grad, int nstring, int natoms, double* amasses){$/;"	f	class:Utils
+n_nonbond	icoord.h	/^        int n_nonbond;$/;"	m	class:ICoord
+name	Atom.h	/^        inline const std::string name() const { return mName; }$/;"	f	class:Atom
+nangles	icoord.h	/^        int nangles;$/;"	m	class:ICoord
+natoms	icoord.h	/^        int natoms;$/;"	m	class:ICoord
+nbonds	icoord.h	/^        int nbonds;$/;"	m	class:ICoord
+newCleanString	stringtools.cpp	/^string StringTools::newCleanString(string line){$/;"	f	class:StringTools
+newHess	icoord.h	/^        int newHess;$/;"	m	class:ICoord
+nfrags	icoord.h	/^        int nfrags;$/;"	m	class:ICoord
+nicd	icoord.h	/^        int nicd;$/;"	m	class:ICoord
+nicd0	icoord.h	/^        int nicd0; \/\/before constraint applied$/;"	m	class:ICoord
+nimptor	icoord.h	/^        int nimptor;$/;"	m	class:ICoord
+nneg	icoord.h	/^        int nneg;$/;"	m	class:ICoord
+nnodes	icoord.h	/^        int nnodes;$/;"	m	class:ICoord
+nonbond	icoord.h	/^        int** nonbond;$/;"	m	class:ICoord
+nonbondd	icoord.h	/^        double* nonbondd;$/;"	m	class:ICoord
+noptdone	icoord.h	/^        int noptdone;$/;"	m	class:ICoord
+norm	align.cpp	/^double Align::norm(double* x, int size)$/;"	f	class:Align
+norm	utils.cpp	/^double Utils::norm(double* x, int size)$/;"	f	class:Utils
+normalize	utils.cpp	/^void Utils::normalize(double* u, int LEN){$/;"	f	class:Utils
+ntor	icoord.h	/^        int ntor;$/;"	m	class:ICoord
+numberOfAtoms	Molecule.h	/^        inline const int numberOfAtoms() const { return mNumberOfAtoms; }$/;"	f	class:Molecule
+nxyzic	icoord.h	/^        int nxyzic;$/;"	m	class:ICoord
+optCG	icoord.h	/^        int optCG;$/;"	m	class:ICoord
+path_overlap	icoord.h	/^        double path_overlap;$/;"	m	class:ICoord
+path_overlap_e_g	icoord.h	/^        double path_overlap_e_g;$/;"	m	class:ICoord
+path_overlap_n	icoord.h	/^        int path_overlap_n;$/;"	m	class:ICoord
+pgradq	icoord.h	/^        double* pgradq;$/;"	m	class:ICoord
+pgradqprim	icoord.h	/^        double* pgradqprim;$/;"	m	class:ICoord
+pgradrms	icoord.h	/^        double pgradrms;$/;"	m	class:ICoord
+pid	icoord.h	/^        int pid; \/\/ previous structure id$/;"	m	class:ICoord
+planar_cross	align.cpp	/^void Align::planar_cross(double* v1, int atom1, int* bonded, double* xyz)$/;"	f	class:Align
+populateArrayFromVector	main.cpp	/^bool populateArrayFromVector(std::vector<std::string> inVec, double* inArr, int numOfAtoms,$/;"	f
+prima	icoord.h	/^        double* prima;$/;"	m	class:ICoord
+print_grad	mm_grad.cpp	/^void ICoord::print_grad(){$/;"	f	class:ICoord
+print_xyz	align.cpp	/^void Align::print_xyz()$/;"	f	class:Align
+print_xyz_gen	align.cpp	/^void Align::print_xyz_gen(int natoms, string* anames, double* coords)$/;"	f	class:Align
+printout	icoord.h	/^        string printout;$/;"	m	class:ICoord
+projectfrommatrix3x3	utils.cpp	/^void Utils::projectfrommatrix3x3(double* vector, double** hmwc){$/;"	f	class:Utils
+q	icoord.h	/^        double* q;$/;"	m	class:ICoord
+radToDegree	constants.h	/^const double radToDegree =180.000\/3.14159265;$/;"	v
+randomf	utils.cpp	/^double Utils::randomf(double a, double b){$/;"	f	class:Utils
+readFromFile	main.cpp	/^int readFromFile(std::string inFileName, int &numOfAdsorbates, int* slabIndices, double* radius,$/;"	f
+readSlabFile	main.cpp	/^bool readSlabFile(std::string &slabFileName, Surface &aSurface)$/;"	f
+readSlabFileAndWrite	main.cpp	/^bool readSlabFileAndWrite(std::string &slabFileName)$/;"	f
+readXYZfile_createObject	main.cpp	/^Surface readXYZfile_createObject(std::string &slabFileName, int numOfAdsorbates,$/;"	f
+read_ics	icoord.cpp	/^int ICoord::read_ics(string filename)$/;"	f	class:ICoord
+reset	icoord.cpp	/^int ICoord::reset(double* xyz){$/;"	f	class:ICoord
+reset	icoord.cpp	/^int ICoord::reset(int nat, string* anam, int* anum, double* xyz){$/;"	f	class:ICoord
+resetGeometry	Surface.cpp	/^void Surface::resetGeometry()$/;"	f	class:Surface
+ridge	icoord.h	/^        int ridge;$/;"	m	class:ICoord
+rotate_around_z	align.cpp	/^void Align::rotate_around_z(int numOfAtoms2, double torv, double* xyz, int numAdsorbate)$/;"	f	class:Align
+runend2	icoord.h	/^        string runend2;$/;"	m	class:ICoord
+runends	icoord.h	/^        string runends;$/;"	m	class:ICoord
+sbuff	icoord.h	/^        char* sbuff;$/;"	m	class:ICoord
+setAtoms	Surface.cpp	/^bool Surface::setAtoms(int numOfAtoms, double* coordinates, std::string* atomicSymbols)$/;"	f	class:Surface
+setSlabSize	Surface.cpp	/^bool Surface::setSlabSize()$/;"	f	class:Surface
+setSurfaceType	Surface.cpp	/^void Surface::setSurfaceType(SLAB_TYPE inSurface)$/;"	f	class:Surface
+sign	utils.cpp	/^int sign(double x){$/;"	f
+smag	icoord.h	/^        double smag; $/;"	m	class:ICoord
+splineTangents	utils.cpp	/^void Utils::splineTangents(int LEN, double* x, double* y, double* y2, double* y1){$/;"	f	class:Utils
+stage1opt	icoord.h	/^        int stage1opt;$/;"	m	class:ICoord
+str2int	stringtools.cpp	/^int StringTools::str2int(string &s)$/;"	f	class:StringTools
+str2int	stringtools.cpp	/^int StringTools::str2int(unsigned char *s)$/;"	f	class:StringTools
+stringToSlabType	Surface.cpp	/^const SLAB_TYPE stringToSlabType(std::string in)$/;"	f
+structure_read	icoord.cpp	/^void ICoord::structure_read(string xyzfile){ $/;"	f	class:ICoord
+subtract_arrays	utils.cpp	/^void Utils::subtract_arrays(double* a, double* b, double* diff, int LEN){$/;"	f	class:Utils
+tm_ties	icoord.cpp	/^void ICoord::tm_ties()$/;"	f	class:ICoord
+tokenize	stringtools.cpp	/^vector<string> StringTools::tokenize(string str, string delims)$/;"	f	class:StringTools
+tor_num	icoord.cpp	/^int ICoord::tor_num(int b1, int b2, int b3, int b4)$/;"	f	class:ICoord
+torfix	icoord.h	/^        double* torfix;$/;"	m	class:ICoord
+torsion_grad_1	mm_grad.cpp	/^void ICoord::torsion_grad_1(int i, int j, int k, int l){$/;"	f	class:ICoord
+torsion_grad_all	mm_grad.cpp	/^void ICoord::torsion_grad_all(){$/;"	f	class:ICoord
+torsion_val	icoord.cpp	/^double ICoord::torsion_val(int i, int j, int k, int l)$/;"	f	class:ICoord
+torsions	icoord.h	/^        int** torsions;$/;"	m	class:ICoord
+torv	icoord.h	/^        double* torv;$/;"	m	class:ICoord
+torv0	icoord.h	/^        double* torv0;$/;"	m	class:ICoord
+trans	utils.cpp	/^void trans(double* Bt, double* B, int m, int n) {$/;"	f
+trimRight	stringtools.cpp	/^string StringTools::trimRight(const string &value)$/;"	f	class:StringTools
+unifyStructures	align.cpp	/^void Align::unifyStructures()$/;"	f	class:Align
+update_angles	icoord.cpp	/^void ICoord::update_angles(){$/;"	f	class:ICoord
+update_bonds	icoord.cpp	/^void ICoord::update_bonds(){  $/;"	f	class:ICoord
+update_ic	icoord.cpp	/^void ICoord::update_ic(){$/;"	f	class:ICoord
+update_imptor	icoord.cpp	/^void ICoord::update_imptor(){$/;"	f	class:ICoord
+update_nonbond	icoord.cpp	/^void ICoord::update_nonbond(){$/;"	f	class:ICoord
+update_torsion	icoord.cpp	/^void ICoord::update_torsion(){$/;"	f	class:ICoord
+use_constraint	icoord.h	/^        int use_constraint;$/;"	m	class:ICoord
+use_xyz	icoord.h	/^        int use_xyz;$/;"	m	class:ICoord
+validateDirPath	stringtools.cpp	/^string StringTools::validateDirPath(const string & path){$/;"	f	class:StringTools
+vdw_energy_1	icoord.cpp	/^double ICoord::vdw_energy_1(int i, int j)$/;"	f	class:ICoord
+vdw_energy_all	icoord.cpp	/^double ICoord::vdw_energy_all()$/;"	f	class:ICoord
+vdw_grad_1	mm_grad.cpp	/^void ICoord::vdw_grad_1(int i, int j, double scale){$/;"	f	class:ICoord
+vdw_grad_all	mm_grad.cpp	/^void ICoord::vdw_grad_all(){$/;"	f	class:ICoord
+vdw_vector_opt	align.cpp	/^void Align::vdw_vector_opt(double* v1, ICoord icp)$/;"	f	class:Align
+vecMag	utils.cpp	/^double Utils::vecMag(double* u, int LEN){$/;"	f	class:Utils
+vector_outer_prod	utils.cpp	/^void Utils::vector_outer_prod(double* vec1, double* vec2, int LEN, double** output){$/;"	f	class:Utils
+writeBSToFile	Surface.cpp	/^bool Surface::writeBSToFile(std::string &outFile)$/;"	f	class:Surface
+writeToFile	Surface.cpp	/^bool Surface::writeToFile(std::string &outFile)$/;"	f	class:Surface
+writeToFile	align.cpp	/^bool Align::writeToFile(std::string &outFile)$/;"	f	class:Align
+write_ic	icoord.cpp	/^void ICoord::write_ic(string filename)$/;"	f	class:ICoord
+x	Coordinates.h	/^        inline const double x() const { return mX; }$/;"	f	class:Coordinates
+xyzic	icoord.h	/^        int* xyzic;$/;"	m	class:ICoord
+y	Coordinates.h	/^        inline const double y() const { return mY; }$/;"	f	class:Coordinates
+z	Coordinates.h	/^        inline const double z() const { return mZ; }$/;"	f	class:Coordinates
+~Atom	Atom.h	/^        ~Atom() {}$/;"	f	class:Atom
+~Coordinates	Coordinates.h	/^        ~Coordinates(){}$/;"	f	class:Coordinates
+~Molecule	Molecule.h	/^        ~Molecule(){};$/;"	f	class:Molecule
