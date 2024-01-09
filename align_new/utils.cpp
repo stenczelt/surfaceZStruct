@@ -2,8 +2,9 @@
 #include "utils.h"
 #include "omp.h"
 //#include <Accelerate/Accelerate.h>
-//#include <vecLib/clapack.h>
-#include "/export/apps/Intel/Compiler/11.1/075/mkl/include/mkl.h"
+#include <vecLib/clapack.h>
+#include <vecLib/cblas.h>
+//#include "/export/apps/Intel/Compiler/11.1/075/mkl/include/mkl.h"
 //#include "/export/apps/Intel/Compiler/11.1/075/mkl/include/mkl_lapack.h"
 
 using namespace std;

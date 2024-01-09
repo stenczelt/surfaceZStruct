@@ -2,7 +2,8 @@
 
 # Executable name
 CMD = stage_1.exe
-INC=-I$(MKLROOT)/include -I/export/zimmerman/mjafari/ZStruct-S/source-code/align-structures -I.
+INC=
+#INC=-I$(MKLROOT)/include -I/export/zimmerman/mjafari/ZStruct-S/source-code/align-structures -I.
 #INC=-I$(MKLROOT)/include
 
 # -------- description of DFLAGS ---------------
@@ -23,7 +24,7 @@ OFLAGS =  # optimization
 #Intel parallel openmp (only w/icpc compiler)
 #LINKERFLAGS =  -L$(MKLROOT)/lib/em64t -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lm
 #LINKERFLAGS =  -L$(MKLROOT)/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread 
-LINKERFLAGS =  -Wl,--no-as-needed -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
+LINKERFLAGS = -llapack -lblas
 # MAC OS linkers
 #LINKERFLAGS = -lm -framework Accelerate
 
